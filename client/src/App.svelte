@@ -1,63 +1,55 @@
 <script>
   import { onMount } from 'svelte'
-  
-  import svelteLogo from './assets/svelte.svg'
-  import Emojis from './lib/Emojis.svelte'
+  import { io } from "socket.io-client";
+
+  import Menu from "./Menu.svelte"
+    import LobbyClient from './lobby/LobbyClient.svelte';
+
+	let showModal = false;
 
   let emojisList;
 
-  onMount(async () => {
-    const response = await fetch('http://localhost:5678/api/v1/emojis');
-    const { emojis } = await response.json();
+  let socket;
 
-    emojisList = emojis;
+	async function doPost () {
+		// const res = await fetch('http://localhost:5678/api/v1/game/create', {
+		// 	method: 'POST',credentials: "include",	})
+    // const jsonRes = await res.json();
+		// console.log(JSON.stringify(jsonRes))
+		// const json = await res.json()
+		// result = JSON.stringify(json)
 
-    console.log(emojisList)
+    socket.emit("message", "HAHAHAHAH");
+	}
+  let gameView
+  let gameId
 
-  });
+  function joinGame(e){
+    console.log(e.detail.gameId)
+    
+    gameId = e.detail.gameId
+    gameView = import('./lobby/LobbyClient.svelte')
+  }
+
+  function hostGame(e){
+    gameView = import('./lobby/LobbyHost.svelte')
+  }
+  function leaveGame(){
+    gameView = undefined
+    gameId = null
+  }
+
 
 
 </script>
 
 <main>
-  <div>
-    <a href="https://vitejs.dev" target="_blank" rel="noreferrer"> 
-      <img src="/vite.svg" class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer"> 
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
-  <h1>Vite + Svelte</h1>
-
-  {#if emojisList}
-    <div class="card">
-      <Emojis emojis={emojisList} />
-    </div>
-  {/if}
-
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
+{#if gameView}
+  {#await gameView then { default: LobbyView }}
+  <LobbyView {gameId} on:leave={leaveGame} />
+  {/await}
+{:else}
+  <Menu on:joinGame={joinGame} on:createGame={hostGame}/>
+{/if}
 </main>
 
-<style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-  }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
-  }
-</style>

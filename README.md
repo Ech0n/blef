@@ -2,7 +2,16 @@
 
 > Boilerplate for developing full stack apps with Express and Svelte.js
 
-## Getting Started
+1. Widok pokazuje dwie opcje: "Dołącz do gry", "Stwórz grę"
+2A. Po wybraniu opcji "Dołącz do gry" użytkownik proszony jest o podanie kodu sesji
+2B. Po wybraniu opcji "Stwórz grę" użytkownik widzi kod sesji, liczbę graczy, którzy dołączyli do sesji oraz przycisk "Start gry" (Problem: Stan gry powinien być optymalnie przechowywany w pamięci podręcznej nie w bazie danych, Rozwiązanie?: Redis)
+3. Gra została wystartowana przyciskiem "Start gry". (Problem: nalezy powiadomić uzytkowników o starcie gry bez wcześniejszego requestu od użytkownika(Sockety?). PlanB: Użytkownik regularnie requestuje informacje o stanie gry)
+4. Losowany jest gracz startujący rozgrywke (przez serwer)
+5. Każdy gracz dostaje od serwera karty (Ilość kart które powinien mieć każdy użytkownik przechowywana w stanie gry)
+6. Obecny gracz dostaję opcje Zaproponować ułożenie albo Sprawdzić poprzedniego gracza (Wykluczone dla pierwszego ruchu w turze)
+7. Kroki 5-6 powtarzają się do momentu pierwszego sprawdzenia
+
+Alternatywne rozwiązanie: Logika rozgrywki zarządzana jest lokalnie na komputerze hosta, do którego dochodzą zapytania przez serwer od użytkowników. (Plusem tego rozwiązania jest odciążenie serwera, minusem obciążenie urządzenia użytkownika)
 
 ### Prerequisites  
 
