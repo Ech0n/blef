@@ -48,14 +48,14 @@ class GameServer {
   }
 
   check(): void {
-    // Implement check logic
+    //TODO: Implement check logic
   }
 
   hit(): void {
-    // Implement hit logic
+    //TODO: Implement hit logic
   }
 
   getGameState(): void {
-    // Implement getGameState logic
+    //TODO: Implement getGameState logic
   }
 }

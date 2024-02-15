@@ -1,6 +1,4 @@
 import express, { Request, Response } from 'express';
-import emojis from './emojis/emojis.route';
-import game from './game/game.route';
 
 const router = express.Router();
 
@@ -15,9 +13,5 @@ router.post('/', (req: Request, res: Response) => {
     message: '🍕 Api route 🍕',
   });
 });
-
-// routes registration
-router.use('/emojis', emojis);
-router.use('/game', game);
 
 export default router;
