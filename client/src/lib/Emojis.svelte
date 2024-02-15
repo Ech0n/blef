@@ -1,5 +1,5 @@
-<script>
-  export let emojis;
+<script lang="ts">
+  export let emojis: string[];
 </script>
 
 <section>

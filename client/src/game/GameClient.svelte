@@ -1,31 +1,31 @@
-<script>
-    export let gameId
-    export let socket
-    import { onMount } from 'svelte'
+<script lang="ts">
+    import { onMount } from 'svelte';
     import { io } from "socket.io-client";
-    import { createEventDispatcher } from 'svelte'
+    import type { Socket } from 'socket.io-client';
 
-    const dispatch = createEventDispatcher()
+    export let gameId: string | undefined;
+    export let socket: Socket;
 
-    onMount(async () => {
+    const serverUrl: string = "http://localhost:5678";
 
-        // const url = "http://localhost:5678"
-        // socket = io(url);
-        //     // Listen for messages from the server
-        // socket.on("join", (data) => {
-        //     if(!data){
-        //         dispatch('leave')
-        //     }
-            
-        // });
+    onMount(() => {
 
-        // socket.emit("join",gameId);
-        
-    })
+        if (!socket) {
+            socket = io(serverUrl);
+        }
 
+        if (gameId) {
+            socket.on('playerHit', (data) => {
+                // handle player hit event
+            });
+
+            socket.on('gameUpdate', (data) => {
+                // handle game updates
+            });
+
+            socket.emit('joinGame', { gameId });
+        }
+    });
 </script>
 
-<h1>
-    
-GRA  id:{gameId}  
-</h1>
+<h1>{#if gameId}Game ID: {gameId}{/if}</h1>
