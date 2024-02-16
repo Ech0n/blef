@@ -9,16 +9,16 @@ cards.forEach((card: string) => {
   });  
 });
 
-const deck: [string, string][] = deckInitialization;
+export const deck: [string, string][] = deckInitialization;
 
-class GameServer {
+export class GameServer {
   playerCount: number;
   players: { socketId: string; loses: number }[];
   cards: { [socketId: string]: [string, string][] };
   currentPlayer: number;
   deck: [string, string][];
 
-  constructor(players: { socketId: string; loses: number }[]) {
+  constructor(players: { socketId: string ; loses: number }[]) {
     this.playerCount = players.length;
     this.players = players.map((el: { socketId: string; loses: number }) => {
       el.loses = 0;
@@ -31,6 +31,10 @@ class GameServer {
   }
 
   drawCards(numberOfCards: number): [string, string][] {
+    if(numberOfCards > 5)
+    {
+      throw "Drawing more than 5 cards is not a possibility"
+    }
     //TODO: suffle deck if not enough cards for draw
     let drawnCards: [string, string][] = [];
     while (drawnCards.length < numberOfCards) {
