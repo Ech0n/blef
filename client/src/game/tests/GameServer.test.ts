@@ -55,7 +55,6 @@ test('draw more than full deck in multiple draws while all cards are in use', ()
   expect(drawnCards.length).toBe(2)
   expect(gs.deck.length).toBe(0)
 
-  
 
   expect(() => gs.drawCards(2)).toThrow("Too much cards on players hands")
 });
