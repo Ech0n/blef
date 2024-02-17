@@ -5,15 +5,15 @@ import http from 'http';
 const port = process.env.PORT || 5678;
 
 // This will also require a refactor
-interface Hosts {
+interface Hosts { // Client Socket -> Host Socket
     [key: string]: string;
 }
 
-interface Clients {
+interface Clients { // Host Socket -> [N] Client Socket
     [key: string]: string[];
 }
 
-interface GameIds {
+interface GameIds { // Host Socket -> GameID
     [key: string]: string;
 }
 
@@ -38,45 +38,44 @@ const io = new SocketIOServer(server, {
 io.on('connection', (socket) => {
     console.log('A user connected');
 
-    socket.on('create', () => {
+    socket.on('createGameToServer', () => {
         const gameId: string = `${Math.floor(Math.random() * 2137) + 1}`;
 
         gameIds[gameId] = socket.id;
         clients[socket.id] = [];
         console.log("User created a game; id: ", gameId);
-        socket.emit('create', gameId);
+        socket.emit('createGameToHost', gameId);
     });
 
-    socket.on('join', (data: string) => {
+    socket.on('joinGameToServer', (data: string) => {
         console.log('Received message from client:', data);
 
         if (!(data in gameIds)) {
-            socket.emit('join', false);
+            socket.emit('joinGameToClient', false);
             socket.disconnect(true);
             return;
         }
 
         const hostSocketId: string = gameIds[data];
         clients[hostSocketId].forEach(clientId => {
-            console.log("FAILED FOR ", clientId);
             const clientSocket = io.sockets.sockets.get(clientId);
             if (clientSocket) {
-                clientSocket.emit('join', { newPlayer: 'user' });
+                clientSocket.emit('joinGameToClient', { newPlayer: 'user' });
             }
         });
 
         let hostSocket = io.sockets.sockets.get(hostSocketId);
         if (hostSocket) {
-            hostSocket.emit('join', { newPlayer: 'user' });
+            hostSocket.emit('playerJoinedGameToHost', { newPlayer: 'user' });
             clients[hostSocketId].push(socket.id);
-            socket.emit("join", { 
+            socket.emit("joinGameToClient", { 
                 players: clients[hostSocketId].map(() => "user").concat("host") 
             });
         }
     });
 
-    socket.on('disconnect', () => {
-        console.log('A user disconnected');
+    socket.on('playerLeftGameToServer', (data: string) => {
+        console.log('A user disconnected, player.id:' + data); // This is player.id
 
         if (socket.id in hosts) {
             let hostSock = hosts[socket.id];
@@ -91,6 +90,8 @@ io.on('connection', (socket) => {
             delete clients[socket.id]; 
         }
 
-        //TODO: Implement playerLeave emit
+        socket.emit("playerLeftGameToPlayers");
     });
+
+
 });

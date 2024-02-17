@@ -1,39 +1,49 @@
 <!-- Modal.svelte -->
 <script lang="ts">
-    import { createEventDispatcher } from 'svelte';
-  
-    const dispatch = createEventDispatcher();
-  
-    export let showModal: boolean = false;
-    let gameId: string = '';
-  
-    function closeModal() {
+  import { createEventDispatcher } from 'svelte';
+
+  const dispatch = createEventDispatcher();
+
+  export let showModal: boolean = false;
+  export let mode: 'join' | 'create' = 'join'; // Add a mode prop to determine which form to show
+  let gameId: string = '';
+  let username: string = '';
+
+  function closeModal() {
       showModal = false;
-      dispatch('close'); // Notify parent component that modal is closed
-    }
-  
-    function joinGame() {
-      dispatch('joinGame', { gameId }); // Send gameId back to parent
-      closeModal(); // Close the modal after joining the game
-    }
-  </script>
-  
-  {#if showModal}
+      dispatch('close');
+  }
+
+  function action() {
+      if (mode === 'join') {
+          dispatch('joinGame', { username, gameId });
+      } else {
+          dispatch('createGame', { username });
+      }
+      closeModal();
+  }
+</script>
+
+{#if showModal}
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div class="modal-backdrop" on:click={closeModal}>
   <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <div class="modal-backdrop" on:click={closeModal}>
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div class="modal" on:click|stopPropagation>
+  <div class="modal" on:click|stopPropagation>
       <div class="modal-header">
-        <h2>Provide game ID:</h2>
+          <h2>{mode === 'join' ? 'Provide game ID:' : 'Enter Your Name:'}</h2>
       </div>
       <div class="modal-body">
-        <input type="text" placeholder="Enter Game ID" bind:value={gameId} />
-        <button on:click={joinGame}>Join Game</button>
-        <button on:click={closeModal}>Close</button>
+          {#if mode === 'join'}
+              <input type="text" placeholder="Enter Game ID" bind:value={gameId} />
+          {/if}
+          <input type="text" placeholder="Enter Your Name" bind:value={username} />
+          <button on:click={action}>{mode === 'join' ? 'Join Game' : 'Create Game'}</button>
+          <button on:click={closeModal}>Close</button>
       </div>
-    </div>
   </div>
-  {/if}
+</div>
+{/if}
+
   
   <style>
     .modal-backdrop {

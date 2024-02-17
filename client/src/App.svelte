@@ -1,34 +1,42 @@
 <script lang="ts">
-  import type { Socket } from "socket.io-client";
-  import Menu from "./Menu.svelte"
-  // No need to import LobbyClient or LobbyHost here since we're dynamically importing them
-
-  let showModal: boolean = false;
-  let emojisList: Array<string>;
-  let socket: Socket;
+  import Menu from "./Menu.svelte";
+  import { Player } from "./model/Player";
+  import { playerStore } from './game/stores';
 
   let gameView: Promise<any> | undefined;
   let gameId: string | null = null;
-
-  async function doPost(): Promise<void> {
-    socket.emit("message", "HAHAHAHAH");
-  }
+  let player: Player | null = null;
 
   function joinGame(event: CustomEvent): void {
-    console.log(event.detail.gameId);
     gameId = event.detail.gameId;
+    if (!player) {
+      const newId = Date.now().toString(); // Placeholder ID generation TODO
+      player = new Player(newId, event.detail.username);
+      player.isOnline = true; // Set the player as online upon joining
+    }
+    playerStore.set(player!);
     gameView = import('./lobby/LobbyClient.svelte');
   }
 
-  function hostGame(): void {
+  function hostGame(event: CustomEvent): void {
+    console.log(event.detail.username);
+    if (!player) {
+      const newId = Date.now().toString(); // Placeholder ID generation TODO
+      player = new Player(newId, event.detail.username);
+      player.isOnline = true; // Set the player as online upon game creation
+    }
+    playerStore.set(player!);
     gameView = import('./lobby/LobbyHost.svelte');
   }
 
   function leaveGame(): void {
     gameView = undefined;
     gameId = null;
+    player = null; // Reset player status or keep for reconnection purposes
+    playerStore.set(null);
   }
 </script>
+
 
 <main>
   {#if gameView}

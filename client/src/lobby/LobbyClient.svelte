@@ -1,8 +1,9 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import { io, type Socket } from "socket.io-client";
     import { createEventDispatcher } from 'svelte';
     import type { Player } from '../model/Player';
+    import { playerStore } from '../game/stores';
 
     export let gameId: string;
     const dispatch = createEventDispatcher();
@@ -10,15 +11,28 @@
 
     let gameView: Promise<typeof import('../game/GameClient.svelte')> | undefined;
     let players: Player[] = [];
+    let player: Player;
+
+
+    const unsubscribe = playerStore.subscribe(value => {
+        player = value!;
+    });
+
+    onDestroy(() => {
+        unsubscribe();
+    });
+
 
     onMount(() => {
         const serverUrl: string = "http://localhost:5678";
         socket = io(serverUrl);
 
+        socket.emit("joinGameToServer", gameId);
+
         // Listen for messages from the server
-        socket.on("join", (data: { players?: Player[]; newPlayer?: Player }) => {
+        socket.on("joinGameToClient", (data: { players?: Player[]; newPlayer?: Player }) => {
             if (!data) {
-                dispatch('leave');
+                dispatch('leave'); // Very scuffed way to force quit after joining wrong lobby by gameID
             }
             if (data.players) {
                 players = data.players;
@@ -28,18 +42,37 @@
             }
         });
 
-        socket.on("start", (data: { start: boolean }) => {
+        socket.on("startGameToClient", (data: { start: boolean }) => {
             if (data && data.start) {
                 gameView = import('../game/GameClient.svelte');
             }
         });
 
-        socket.emit("join", gameId);
+        socket.on("playerLeftGameToPlayers", (data: { playerId: string }) => { // Players = Host and Clients
+            console.log("Player disconnected", data);
+            if (!data) {
+                return;
+            }
+
+            // Tag the disconnected player as not connected
+            players = players.map(player => {
+                if (player.id === data.playerId) {
+                    return { ...player, isOnline: false };
+                }
+                return player;
+            });
+        });
+
     });
 
     function leaveGame(): void {
-        // Implement the leave game logic here
+        socket.emit("playerLeftGameToServer", player.id); 
+        players = [];
+
+        dispatch("leave"); // To parent
+        console.log("Left the game and returned to the main menu");
     }
+
 </script>
 
 <h1>
@@ -51,9 +84,9 @@
         Game ID: {#if gameId}{gameId}{/if}
         <br>
         <ul>
-            {#each players as {id, name}}
+            {#each players as {id, name, isOnline}}
                 <li>
-                    ID: {id}  NAME: {name}
+                    ID: {id}  NAME: {name} ONLINE: {isOnline}
                 </li>
             {/each}
             <button on:click={leaveGame}>Leave</button>

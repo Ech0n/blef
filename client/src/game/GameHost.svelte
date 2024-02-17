@@ -16,7 +16,7 @@
             socket = io(serverUrl);
         }
 
-        socket.emit('joinGame', { gameId }); // Send a join game event to the server
+        // socket.emit('joinGame', { gameId }); // Send a join game event to the server
 
         socket.on('gameState', (data) => {
             dispatch('update', data);

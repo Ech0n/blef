@@ -1,29 +1,26 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import Modal from './Modal.svelte';
   import { createEventDispatcher } from 'svelte';
 
   const dispatch = createEventDispatcher();
 
-  let gameId: string = '';
-
-  let showModal = false;
+  let showModal: boolean = false;
+  let mode: 'join' | 'create' = 'join'; // Default mode
 
   function joinGame(event: any): void {
-    gameId = event.detail.gameId; // Update gameId with the one from the modal
-    console.log(`Joining game with ID: ${gameId}`);
-    dispatch('joinGame', { gameId });
+    console.log('Joining game with ID:', event.detail.gameId);
+    dispatch('joinGame', { gameId: event.detail.gameId });
     showModal = false; // Close the modal in the parent component
   }
   
-  function createGame(): void {
-    console.log('Creating a new game');
-    dispatch('createGame');
+  function createGame(event: any): void {
+    console.log('Creating game with user name:', event.detail.username);
+    dispatch('createGame', { username: event.detail.username });
   }
 </script>
 
 <div>
-  <button on:click={() => (showModal = true)}>Join game </button>
-  <button on:click={createGame}>Create a game</button>
-  <Modal showModal={showModal} on:close={() => showModal = false} on:joinGame={joinGame}/>
+  <button on:click={() => { showModal = true; mode = 'join'; }}>Join Game</button>
+  <button on:click={() => { showModal = true; mode = 'create'; }}>Create Game</button>
+  <Modal {showModal} {mode} on:close={() => showModal = false} on:joinGame={joinGame} on:createGame={createGame}/>
 </div>
