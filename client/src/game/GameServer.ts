@@ -1,66 +1,34 @@
-import type { CardList, IChecker } from './HandRankings';
+import type { CardDict, IChecker } from './HandRankings';
 const { bets } = require('./HandRankings');
 import type * as Types from './HandRankings';
+import { Game } from './Game';
+import { Player } from '../model/Player';
+import { CardColor, type Card, Rank } from '../model/Card';
 
-const colors: string[] = ['spade', 'hearts', 'diamonds', 'clubs'];
-const cards: string[] = [
-    'A',
-    'K',
-    'Q',
-    'J',
-    '10',
-    '9',
-    '8',
-    '7',
-    '6',
-    '5',
-    '4',
-    '3',
-    '2',
-];
-let deckInitialization: [string, string][] = [];
+let deckInitialization: Card[] = [];
 
-cards.forEach((card: string) => {
-    colors.forEach((color: string) => {
-        deckInitialization.push([color, card]);
-    });
-});
+for (let card in Rank) {
+    if (isNaN(Number(card))) {
+        for (let color in CardColor) {
+            if (isNaN(Number(color))) {
+                deckInitialization.push([card, color]);
+            }
+        }
+    }
+}
+export const deck: Card[] = deckInitialization;
 
-export const deck: [string, string][] = deckInitialization;
-
-export class GameServer {
-    playerCount: number;
-    players: { socketId: string; loses: number; hands: [string, string][] }[];
-    lostPlayers: { socketId: string; loses: number }[] = [];
-    cards: { [socketId: string]: [string, string][] };
-    currentPlayer: number;
-    deck: [string, string][];
-    rejectedCards: [string, string][];
+export class GameServer extends Game {
+    hands: { [playerId: string]: Card[] };
+    deck: Card[];
+    rejectedCards: Card[];
     previousBet!: IChecker;
     isFinished: boolean = false;
 
-    constructor(
-        players: {
-            socketId: string;
-            loses: number;
-            hands: [string, string][];
-        }[]
-    ) {
-        this.playerCount = players.length;
-        this.players = players.map(
-            (el: {
-                socketId: string;
-                loses: number;
-                hands: [string, string][];
-            }) => {
-                el.loses = 0;
-                el.hands = [];
-                return el;
-            }
-        );
-        this.cards = {};
+    constructor(players: Player[]) {
+        super(players);
+        this.hands = {};
         //TODO: Randomize starting player?
-        this.currentPlayer = 0;
         this.deck = deck.slice();
         this.rejectedCards = [];
     }
@@ -78,14 +46,14 @@ export class GameServer {
     nextPlayer(): void {
         this.currentPlayer = (this.currentPlayer + 1) % this.playerCount;
     }
-    drawCards(numberOfCards: number): [string, string][] {
+    drawCards(numberOfCards: number): Card[] {
         if (numberOfCards > 5) {
             throw 'Drawing more than 5 cards is not a possibility';
         }
         if (numberOfCards > this.deck.length) {
             throw 'Not enough cards in deck to draw cards';
         }
-        let drawnCards: [string, string][] = [];
+        let drawnCards: Card[] = [];
         while (drawnCards.length < numberOfCards) {
             let randomIndex: number = Math.floor(
                 Math.random() * this.deck.length
@@ -98,13 +66,12 @@ export class GameServer {
         if (this.rejectedCards.length == 0) {
             throw 'Too much cards on players hands';
         }
-        this.deck = this.rejectedCards;
+        this.deck = deck.slice();
         this.rejectedCards = [];
     }
     dealCards(): void {
         let totalCardsToDraw = this.players.reduce(
-            (prev: number, player: { socketId: string; loses: number }) =>
-                player.loses + 1 + prev,
+            (prev: number, player: Player) => player.loses + 1 + prev,
             0
         );
         if (totalCardsToDraw > this.deck.length) {
@@ -113,9 +80,9 @@ export class GameServer {
             }
             this.shuffleDeck();
         }
-        this.cards = {};
-        this.players.forEach((player: { socketId: string; loses: number }) => {
-            this.cards[player.socketId] = this.drawCards(1 + player.loses);
+        this.hands = {};
+        this.players.forEach((player: Player) => {
+            this.hands[player.id] = this.drawCards(1 + player.loses);
         });
     }
 
@@ -124,25 +91,23 @@ export class GameServer {
             throw 'There is no bet';
         }
         //card counting
-        let countedCards: CardList = {};
+        let countedCards: CardDict = {};
 
         //TODO: Extract card list initalization to function and use it to initalize this.betDetails
-        for (const card of cards) {
+        for (const card in Rank) {
             countedCards[card] = {};
             countedCards[card]['total'] = 0;
-            for (const color of colors) {
+            for (const color in CardColor) {
                 countedCards[card][color] = 0;
             }
         }
 
-        this.players.forEach(
-            (player: { socketId: string; loses: number; hands: any }) => {
-                player.hands.forEach((card: any) => {
-                    countedCards[card[1][0]++];
-                    countedCards[card[1]['total']++];
-                });
-            }
-        );
+        for (const player in this.hands) {
+            this.hands[player].forEach((card: Card) => {
+                countedCards[card[0]][card[1]]++;
+                countedCards[card[0]]['total']++;
+            });
+        }
 
         let wasBetFound = this.previousBet.check(countedCards);
         if (wasBetFound) {
@@ -160,17 +125,10 @@ export class GameServer {
     }
 
     collectCards(): void {
-        this.players = this.players.map(
-            (player: {
-                socketId: string;
-                loses: number;
-                hands: [string, string][];
-            }) => {
-                this.rejectedCards = [...this.rejectedCards, ...player.hands];
-                player.hands = [];
-                return player;
-            }
-        );
+        for (const player in this.hands) {
+            this.rejectedCards = [...this.rejectedCards, ...this.hands[player]];
+            this.hands[player] = [];
+        }
     }
 
     getGameState(): void {

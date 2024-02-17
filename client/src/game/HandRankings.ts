@@ -1,88 +1,135 @@
-export type CardList = { [key: string]: { [key: string]: number } };
+import type { Card, CardColor, Rank } from '../model/Card';
 
-//TODO: Change interface to also accept a cards that are supposed to appear
+export type CardDict = { [key: string]: { [key: string]: number } };
+
 //TODO: Implement Checkers
 
 export interface IChecker {
-    check(cards: CardList): boolean;
+    check(cards: CardDict): boolean;
 }
 
 export class RoyalFlushChecker implements IChecker {
-    check(cards: CardList) {
+    check(cards: CardDict) {
         return true;
     }
 }
 
 export class FlushChecker implements IChecker {
-    check(cards: CardList): boolean {
-        return false;
+    color: CardColor;
+    constructor(_: Rank, __: Rank, color: CardColor) {
+        this.color = color;
     }
-}
-
-export class CarrotChecker implements IChecker {
-    check(cards: CardList): boolean {
-        for (let key in cards) {
-            if (cards[key]['total'] >= 4) {
-                return true;
-            }
-        }
-        return false;
-    }
-}
-
-export class FullChecker implements IChecker {
-    check(cards: CardList): boolean {
-        return false;
-    }
-}
-
-export class StritChecker implements IChecker {
-    check(cards: CardList): boolean {
-        return false;
-    }
-}
-
-export class TripleChecker implements IChecker {
-    check(cards: CardList): boolean {
-        return false;
-    }
-}
-
-export class DoubleChecker implements IChecker {
-    check(cards: CardList): boolean {
-        for (let key in cards) {
-            if (cards[key]['total'] >= 2) {
-                return true;
-            }
-        }
-        return false;
-    }
-}
-
-export class PairChecker implements IChecker {
-    check(cards: CardList): boolean {
-        for (let key in cards) {
-            if (cards[key]['total'] >= 2) {
-                return true;
-            }
-        }
-        return false;
-    }
-}
-
-export class OneChecker implements IChecker {
-    constructor(cards: CardList) {}
-    check(cards: CardList): boolean {
+    check(cards: CardDict): boolean {
+        // return cards[this.color]['total'] >= 2;
         return true;
     }
 }
 
-export const bets: Record<string, new (cards: CardList) => IChecker> = {
+export class ColorChecker implements IChecker {
+    color: CardColor;
+    constructor(_: Rank, __: Rank, color: CardColor) {
+        this.color = color;
+    }
+    check(cards: CardDict): boolean {
+        // return cards[this.color]['total'] >= 2;
+        return true;
+    }
+}
+
+export class CarrotChecker implements IChecker {
+    card: Rank;
+    constructor(card: Rank) {
+        this.card = card;
+    }
+    check(cards: CardDict): boolean {
+        return cards[this.card]['total'] >= 4;
+    }
+}
+
+export class FullChecker implements IChecker {
+    threeCard: Rank;
+    twoCard: Rank;
+    constructor(threeCard: Rank, twoCard: Rank) {
+        this.threeCard = threeCard;
+        this.twoCard = twoCard;
+    }
+    check(cards: CardDict): boolean {
+        return (
+            cards[this.threeCard]['total'] >= 3 &&
+            cards[this.twoCard]['total'] >= 2
+        );
+    }
+}
+
+export class StritChecker implements IChecker {
+    lowestStritCard: Rank;
+    constructor(lowestStritCard: Rank) {
+        this.lowestStritCard = lowestStritCard;
+    }
+    check(cards: CardDict): boolean {
+        for (let i = 0; i < 5; i++) {
+            if (cards[this.lowestStritCard + i]['total'] == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+export class TripleChecker implements IChecker {
+    card: Rank;
+    constructor(card: Rank) {
+        this.card = card;
+    }
+    check(cards: CardDict): boolean {
+        return cards[this.card]['total'] >= 3;
+    }
+}
+
+export class DoubleChecker implements IChecker {
+    cardA: Rank;
+    cardB: Rank;
+    constructor(cardA: Rank, cardB: Rank) {
+        this.cardA = cardA;
+        this.cardB = cardB;
+    }
+    check(cards: CardDict): boolean {
+        return (
+            cards[this.cardA]['total'] >= 2 && cards[this.cardB]['total'] >= 2
+        );
+    }
+}
+
+export class PairChecker implements IChecker {
+    card: Rank;
+    constructor(card: Rank) {
+        this.card = card;
+    }
+    check(cards: CardDict): boolean {
+        return cards[this.card]['total'] >= 2;
+    }
+}
+
+export class OneChecker implements IChecker {
+    high: Rank;
+    constructor(card: Rank) {
+        this.high = card;
+    }
+    check(cards: CardDict): boolean {
+        return cards[this.high]['total'] >= 1;
+    }
+}
+
+export const bets: Record<
+    string,
+    new (carda: Rank, cardB: Rank, color: CardColor) => IChecker
+> = {
     'royal': RoyalFlushChecker,
     'flush': FlushChecker,
     'carrot': CarrotChecker,
     'full': FullChecker,
     'strit': StritChecker,
+    'color': ColorChecker,
     'triple': TripleChecker,
     'double': DoubleChecker,
     'pair': PairChecker,
