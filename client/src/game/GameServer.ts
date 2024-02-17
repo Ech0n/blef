@@ -1,5 +1,6 @@
-import type { CardList } from './Checkers';
-const { bets } = require('./Checkers');
+import type { CardList, IChecker } from './HandRankings';
+const { bets } = require('./HandRankings');
+import type * as Types from './HandRankings';
 
 const colors: string[] = ['spade', 'hearts', 'diamonds', 'clubs'];
 const cards: string[] = [
@@ -17,7 +18,6 @@ const cards: string[] = [
     '3',
     '2',
 ];
-
 let deckInitialization: [string, string][] = [];
 
 cards.forEach((card: string) => {
@@ -35,9 +35,7 @@ export class GameServer {
     currentPlayer: number;
     deck: [string, string][];
     rejectedCards: [string, string][];
-    previousCards: string[];
-    previousBet: string;
-    betDetails: CardList;
+    previousBet!: IChecker;
 
     constructor(
         players: {
@@ -63,20 +61,21 @@ export class GameServer {
         this.currentPlayer = 0;
         this.deck = deck.slice();
         this.rejectedCards = [];
-        this.previousCards = [];
-        this.previousBet = '';
-        this.betDetails = {};
     }
     checkAndDeal(): void {
         this.check();
         this.collectCards();
         this.dealCards();
+        this.nextPlayer();
+    }
+    hit(bet: IChecker): void {
+        //TODO: consider validation if bet is possible?
+        this.previousBet = bet;
+        this.nextPlayer();
+    }
+    nextPlayer(): void {
         this.currentPlayer = (this.currentPlayer + 1) % this.playerCount;
     }
-    hit(): void {
-        //TODO: Implement hit logic
-    }
-
     drawCards(numberOfCards: number): [string, string][] {
         if (numberOfCards > 5) {
             throw 'Drawing more than 5 cards is not a possibility';
@@ -106,7 +105,7 @@ export class GameServer {
                 player.loses + 1 + prev,
             0
         );
-        if (totalCardsToDraw == this.deck.length) {
+        if (totalCardsToDraw > this.deck.length) {
             if (this.rejectedCards.length < totalCardsToDraw) {
                 throw 'Now enough cards to draw from';
             }
@@ -143,12 +142,12 @@ export class GameServer {
             }
         );
 
-        let wasBetFound = bets[this.previousBet](countedCards, this.betDetails);
-        console.log(bets[this.previousBet]);
+        let wasBetFound = this.previousBet.check(countedCards);
         if (wasBetFound) {
             this.players[this.currentPlayer].loses += 1;
         } else {
-            const prevPlayer = (this.currentPlayer - 1) % this.playerCount;
+            const prevPlayer =
+                (this.currentPlayer - 1 + this.playerCount) % this.playerCount;
             this.players[prevPlayer].loses += 1;
         }
     }
