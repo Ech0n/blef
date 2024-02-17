@@ -1,23 +1,24 @@
 const { GameServer } = require('../GameServer');
-import type { CardList, IChecker } from '../HandRankings';
+import { Player } from '../../model/Player';
+import type { CardDict, IChecker } from '../HandRankings';
 const { bets } = require('../HandRankings');
 import type * as Types from '../HandRankings';
 
 let gs: typeof GameServer;
 
-let playerList = [
-    { socketId: 'user1' },
-    { socketId: 'user2' },
-    { socketId: 'user3' },
+let playerList: Player[] = [
+    new Player('0', 'user1'),
+    new Player('1', 'user2'),
+    new Player('2', 'user3'),
 ];
 
 class MockBetTrue implements IChecker {
-    check(cards: CardList): boolean {
+    check(cards: CardDict): boolean {
         return true;
     }
 }
 class MockBetFalse implements IChecker {
-    check(cards: CardList): boolean {
+    check(cards: CardDict): boolean {
         return false;
     }
 }
@@ -54,6 +55,18 @@ test('draw six cards (which is not allowed)', () => {
     expect(() => gs.drawCards(6)).toThrow(
         'Drawing more than 5 cards is not a possibility'
     );
+});
+
+test('check', () => {
+    gs.dealCards();
+    gs.hit(new MockBetTrue()); //p1
+    gs.check(); //p2
+    expect(gs.players[1].loses).toBe(1);
+    gs.hit(new MockBetFalse());
+    gs.check();
+
+    //TODO: Verify if this is actually correct (i guessed)
+    expect(gs.players[1].loses).toBe(2);
 });
 
 test('does deck shuffle', () => {
@@ -105,6 +118,10 @@ test('Player 1 loses whole game', () => {
     gs.hit(new MockBetTrue()); //p2
     gs.hit(new MockBetTrue()); //p3
     gs.checkAndDeal(); //p1
-
-    expect(gs.lostPlayers).toContain(playerList[0]);
+    expect(gs.lostPlayers.length).toEqual(1);
+    expect(gs.lostPlayers[0]).toEqual(
+        expect.objectContaining({
+            name: 'user1',
+        })
+    );
 });
