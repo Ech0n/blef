@@ -1,3 +1,5 @@
+import type { Card } from '../model/Card';
+
 export type CardDict = { [key: string]: { [key: string]: number } };
 
 //TODO: Implement Checkers
@@ -70,7 +72,6 @@ export class PairChecker implements IChecker {
 }
 
 export class OneChecker implements IChecker {
-    constructor(cards: CardDict) {}
     check(cards: CardDict): boolean {
         return true;
     }

@@ -3,32 +3,19 @@ const { bets } = require('./HandRankings');
 import type * as Types from './HandRankings';
 import { Game } from './Game';
 import { Player } from '../model/Player';
-import type { Card } from '../model/Card';
+import { CardColor, type Card, Rank } from '../model/Card';
 
-const colors: string[] = ['spade', 'hearts', 'diamonds', 'clubs'];
-const cards: string[] = [
-    'A',
-    'K',
-    'Q',
-    'J',
-    '10',
-    '9',
-    '8',
-    '7',
-    '6',
-    '5',
-    '4',
-    '3',
-    '2',
-];
 let deckInitialization: Card[] = [];
 
-cards.forEach((card: string) => {
-    colors.forEach((color: string) => {
-        deckInitialization.push([card, color]);
-    });
-});
-
+for (let card in Rank) {
+    if (isNaN(Number(card))) {
+        for (let color in CardColor) {
+            if (isNaN(Number(color))) {
+                deckInitialization.push([card, color]);
+            }
+        }
+    }
+}
 export const deck: Card[] = deckInitialization;
 
 export class GameServer extends Game {
@@ -107,10 +94,10 @@ export class GameServer extends Game {
         let countedCards: CardDict = {};
 
         //TODO: Extract card list initalization to function and use it to initalize this.betDetails
-        for (const card of cards) {
+        for (const card in Rank) {
             countedCards[card] = {};
             countedCards[card]['total'] = 0;
-            for (const color of colors) {
+            for (const color in CardColor) {
                 countedCards[card][color] = 0;
             }
         }
