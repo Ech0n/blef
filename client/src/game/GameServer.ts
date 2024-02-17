@@ -31,11 +31,13 @@ export const deck: [string, string][] = deckInitialization;
 export class GameServer {
     playerCount: number;
     players: { socketId: string; loses: number; hands: [string, string][] }[];
+    lostPlayers: { socketId: string; loses: number }[] = [];
     cards: { [socketId: string]: [string, string][] };
     currentPlayer: number;
     deck: [string, string][];
     rejectedCards: [string, string][];
     previousBet!: IChecker;
+    isFinished: boolean = false;
 
     constructor(
         players: {
@@ -145,6 +147,11 @@ export class GameServer {
         let wasBetFound = this.previousBet.check(countedCards);
         if (wasBetFound) {
             this.players[this.currentPlayer].loses += 1;
+            if (this.players[this.currentPlayer].loses == 4) {
+                this.lostPlayers.push(this.players[this.currentPlayer]);
+                this.players.slice(this.currentPlayer, 1);
+                this.playerCount -= 1;
+            }
         } else {
             const prevPlayer =
                 (this.currentPlayer - 1 + this.playerCount) % this.playerCount;

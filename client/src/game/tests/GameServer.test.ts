@@ -74,7 +74,7 @@ test('does deck shuffle', () => {
     expect(gs.deck.length).toBe(48);
 });
 
-test('Player checks and wins', () => {
+test('Player checks and loses', () => {
     gs.dealCards();
     gs.hit(new MockBetTrue()); //p1
     gs.hit(new MockBetTrue()); //p2
@@ -85,4 +85,26 @@ test('Player checks and wins', () => {
     gs.check(); //p1
 
     expect(gs.players[0].loses).toBe(1);
+});
+
+test('Player 1 loses whole game', () => {
+    gs.dealCards();
+    gs.hit(new MockBetTrue()); //p1
+    gs.hit(new MockBetTrue()); //p2
+    gs.hit(new MockBetTrue()); //p3
+    gs.checkAndDeal(); //p1
+    gs.hit(new MockBetTrue()); //p2
+    gs.hit(new MockBetTrue()); //p3
+    gs.checkAndDeal(); //p1
+    gs.hit(new MockBetTrue()); //p2
+    gs.hit(new MockBetTrue()); //p3
+    gs.checkAndDeal(); //p1
+    gs.hit(new MockBetTrue()); //p2
+    gs.hit(new MockBetTrue()); //p3
+    gs.checkAndDeal(); //p1
+    gs.hit(new MockBetTrue()); //p2
+    gs.hit(new MockBetTrue()); //p3
+    gs.checkAndDeal(); //p1
+
+    expect(gs.lostPlayers).toContain(playerList[0]);
 });
