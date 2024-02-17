@@ -1,3 +1,6 @@
+import type { CardList } from './Checkers';
+const { bets } = require('./Checkers');
+
 const colors: string[] = ['spade', 'hearts', 'diamonds', 'clubs'];
 const cards: string[] = [
     'A',
@@ -13,17 +16,6 @@ const cards: string[] = [
     '4',
     '3',
     '2',
-];
-const bets: any = [
-    'royal',
-    'flush',
-    'carrot',
-    'full',
-    'strit',
-    'triple',
-    'double',
-    'pair',
-    'one',
 ];
 
 let deckInitialization: [string, string][] = [];
@@ -45,6 +37,7 @@ export class GameServer {
     rejectedCards: [string, string][];
     previousCards: string[];
     previousBet: string;
+    betDetails: CardList;
 
     constructor(
         players: {
@@ -72,8 +65,14 @@ export class GameServer {
         this.rejectedCards = [];
         this.previousCards = [];
         this.previousBet = '';
+        this.betDetails = {};
     }
-    checkAndDeal(): void {}
+    checkAndDeal(): void {
+        this.check();
+        this.collectCards();
+        this.dealCards();
+        this.currentPlayer = (this.currentPlayer + 1) % this.playerCount;
+    }
     hit(): void {
         //TODO: Implement hit logic
     }
@@ -120,11 +119,38 @@ export class GameServer {
     }
 
     check(): void {
-        this.players.forEach((player: { socketId: string; loses: number }) => {
-            this.cards[player.socketId] = this.drawCards(1 + player.loses);
-        });
+        if (!this.previousBet) {
+            throw 'There is no bet';
+        }
+        //card counting
+        let countedCards: CardList = {};
 
-        this.collectCards();
+        //TODO: Extract card list initalization to function and use it to initalize this.betDetails
+        for (const card of cards) {
+            countedCards[card] = {};
+            countedCards[card]['total'] = 0;
+            for (const color of colors) {
+                countedCards[card][color] = 0;
+            }
+        }
+
+        this.players.forEach(
+            (player: { socketId: string; loses: number; hands: any }) => {
+                player.hands.forEach((card: any) => {
+                    countedCards[card[1][0]++];
+                    countedCards[card[1]['total']++];
+                });
+            }
+        );
+
+        let wasBetFound = bets[this.previousBet](countedCards, this.betDetails);
+        console.log(bets[this.previousBet]);
+        if (wasBetFound) {
+            this.players[this.currentPlayer].loses += 1;
+        } else {
+            const prevPlayer = (this.currentPlayer - 1) % this.playerCount;
+            this.players[prevPlayer].loses += 1;
+        }
     }
 
     collectCards(): void {
