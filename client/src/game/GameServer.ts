@@ -10,7 +10,10 @@ let deckInitialization: Card[] = [];
 for (let card in Rank) {
     if (isNaN(Number(card))) {
         for (let color in CardColor) {
-            if (isNaN(Number(color))) {
+            if (
+                isNaN(Number(color)) &&
+                color != CardColor[CardColor.colorless]
+            ) {
                 deckInitialization.push([card, color]);
             }
         }
@@ -91,12 +94,12 @@ export class GameServer extends Game {
             throw 'There is no bet';
         }
         //card counting
-        let countedCards: CardDict = {};
+        let countedCards: any = {};
 
         //TODO: Extract card list initalization to function and use it to initalize this.betDetails
         for (const card in Rank) {
             countedCards[card] = {};
-            countedCards[card]['total'] = 0;
+            countedCards[card][CardColor.colorless] = 0;
             for (const color in CardColor) {
                 countedCards[card][color] = 0;
             }
@@ -105,7 +108,7 @@ export class GameServer extends Game {
         for (const player in this.hands) {
             this.hands[player].forEach((card: Card) => {
                 countedCards[card[0]][card[1]]++;
-                countedCards[card[0]]['total']++;
+                countedCards[card[0]][CardColor.colorless]++;
             });
         }
 

@@ -1,6 +1,8 @@
-import type { Card, CardColor, Rank } from '../model/Card';
+import { CardColor, Rank } from '../model/Card';
 
-export type CardDict = { [key: string]: { [key: string]: number } };
+//TODO: Change this into somekind of predefined structure that can be easily initalized. Reconsider if this is even a correct way to count of carts
+type ColorDict = any;
+export type CardDict = any;
 
 //TODO: Implement Checkers
 
@@ -42,7 +44,7 @@ export class CarrotChecker implements IChecker {
         this.card = card;
     }
     check(cards: CardDict): boolean {
-        return cards[this.card]['total'] >= 4;
+        return cards[this.card][CardColor.colorless] >= 4;
     }
 }
 
@@ -55,8 +57,8 @@ export class FullChecker implements IChecker {
     }
     check(cards: CardDict): boolean {
         return (
-            cards[this.threeCard]['total'] >= 3 &&
-            cards[this.twoCard]['total'] >= 2
+            cards[this.threeCard][CardColor.colorless] >= 3 &&
+            cards[this.twoCard][CardColor.colorless] >= 2
         );
     }
 }

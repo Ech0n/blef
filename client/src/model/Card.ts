@@ -5,6 +5,7 @@ export enum CardColor {
     hearts,
     diamonds,
     clubs,
+    colorless,
 }
 export enum Rank {
     Ace,
