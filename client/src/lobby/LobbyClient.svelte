@@ -2,9 +2,10 @@
     import { onMount, onDestroy } from 'svelte';
     import { io, type Socket } from "socket.io-client";
     import { createEventDispatcher } from 'svelte';
-    import type { Player } from '../model/Player';
+    import { Player } from '../model/Player';
     import { playerStore } from '../game/stores';
 
+    export let usernameInput:string;
     export let gameId: string;
     const dispatch = createEventDispatcher();
     let socket: Socket;
@@ -27,20 +28,26 @@
         const serverUrl: string = "http://localhost:5678";
         socket = io(serverUrl);
 
-        socket.emit("joinGameToServer", gameId);
+        socket.emit("joinGameToServer", {gameId:gameId,username:usernameInput});
 
         // Listen for messages from the server
-        socket.on("joinGameToClient", (data: { players?: Player[]; newPlayer?: Player }) => {
+        socket.on("joinGameToClient", (data: { players?: {uid:string,username:string}[]; thisPlayerId:string;thisPlayerName:string; }) => {
+            console.log(data)
             if (!data) {
                 dispatch('leave'); // Very scuffed way to force quit after joining wrong lobby by gameID
             }
             if (data.players) {
-                players = data.players;
+                players = data.players.map((el)=> new Player(el.uid,el.username) );
             }
-            if (data.newPlayer) {
-                players = [...players, data.newPlayer];
+            if (data.thisPlayerId && data.thisPlayerName) { //This if is wrong. If data does not exist error should be thrown
+                players = [...players, new Player(data.thisPlayerId,data.thisPlayerName)];
             }
         });
+
+        socket.on("newPlayerJoinedGameToClient",(data:{username:string;uid:string})=>{
+            console.log("new player in lobby name:",data.username)
+            players = [...players, new Player(data.uid,data.username)];
+        })
 
         socket.on("startGameToClient", (data: { start: boolean }) => {
             if (data && data.start) {

@@ -133,8 +133,4 @@ export class GameServer extends Game {
             this.hands[player] = [];
         }
     }
-
-    getGameState(): void {
-        //TODO: Implement getGameState logic
-    }
 }

@@ -9,7 +9,7 @@
 
   function joinGame(event: any): void {
     console.log('Joining game with ID:', event.detail.gameId);
-    dispatch('joinGame', { gameId: event.detail.gameId });
+    dispatch('joinGame', { gameId: event.detail.gameId , username: event.detail.username});
     showModal = false; // Close the modal in the parent component
   }
   

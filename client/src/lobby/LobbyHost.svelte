@@ -1,15 +1,19 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
     import { io, type Socket } from "socket.io-client";
-    import type { Player } from '../model/Player';
+    import { Player } from '../model/Player';
     import { playerStore } from '../game/stores';
 
+    export let usernameInput:string;
+    
     let socket: Socket;
     let gameId: string;
     let player: Player | null;
 
+    let host:Player
+
     let gameView: Promise<typeof import('../game/GameHost.svelte')> | undefined;
-    let players: Player[] = [{ id: 'host', name: 'Host', isOnline: true, loses: 0 }];
+    let players: Player[] = [];
 
 
     const unsubscribe = playerStore.subscribe(value => {
@@ -25,23 +29,22 @@
         const serverUrl: string = "http://localhost:5678";
         socket = io(serverUrl);
 
-        socket.emit("createGameToServer");
+        socket.emit("createGameToServer",{username:usernameInput});
 
-        socket.on("createGameToHost", (data: string) => {
+        socket.on("createGameToHost", (data: {gameId:string,hostId:string}) => {
             console.log("User created a game, its id is:", data);
-            gameId = data;
+            gameId = data.gameId;
+            host = new Player(data.hostId,usernameInput)
+            players = [...players,host]
         });
 
-        socket.on("playerJoinedGameToHost", (data: { newPlayer?: Player }) => {
+        socket.on("newPlayerJoinedGameToHost", (data: { username: string,uid:string }) => {
             console.log("join event", data);
             if (!data) {
-                return;
+                throw "No data from server"
             }
+            players = [...players, new Player(data.uid,data.username)];
 
-            if (data.newPlayer) {
-                console.log("New player is here", data.newPlayer);
-                players = [...players, data.newPlayer];
-            }
         });
 
         socket.on("playerLeftGameToPlayers", (data: { playerId: string }) => {

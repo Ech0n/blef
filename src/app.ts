@@ -2,7 +2,6 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import session from 'express-session';
 
 import api from './api'; // Ensure this is exported correctly in the respective file
 import { notFound, errorHandler } from './middlewares/errors.middleware'; // Ensure these are exported correctly
@@ -16,22 +15,23 @@ if (process.env.NODE_ENV === 'production') {
     });
 }
 
-app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5678', 'http://localhost:5678/socket.io', 'http://localhost:5678/socket.i'],
-    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],  // Specify the allowed HTTP methods
-    credentials: false, 
-}));
+app.use(
+    cors({
+        origin: [
+            'http://localhost:5173',
+            'http://localhost:5174',
+            'http://localhost:5175',
+            'http://localhost:5678',
+            'http://localhost:5678/socket.io',
+            'http://localhost:5678/socket.i',
+        ],
+        methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'], // Specify the allowed HTTP methods
+        credentials: false,
+    })
+);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-app.set('trust proxy', 1); // trust first proxy
-app.use(session({
-    resave: true,
-    saveUninitialized: true,
-    secret: "pizda", // :O
-    rolling: false,
-}));
 
 app.get('/', (req: Request, res: Response) => {
     res.status(200).json({

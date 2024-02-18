@@ -6,10 +6,12 @@
   let gameView: Promise<any> | undefined;
   let gameId: string | null = null;
   let player: Player | null = null;
+  let username = ""
 
   function joinGame(event: CustomEvent): void {
     gameId = event.detail.gameId;
     if (!player) {
+      username = event.detail.username
       const newId = Date.now().toString(); // Placeholder ID generation TODO
       player = new Player(newId, event.detail.username);
       player.isOnline = true; // Set the player as online upon joining
@@ -22,6 +24,7 @@
     console.log(event.detail.username);
     if (!player) {
       const newId = Date.now().toString(); // Placeholder ID generation TODO
+      username = event.detail.username
       player = new Player(newId, event.detail.username);
       player.isOnline = true; // Set the player as online upon game creation
     }
@@ -41,7 +44,7 @@
 <main>
   {#if gameView}
     {#await gameView then { default: LobbyView }}
-      <LobbyView {gameId} on:leave={leaveGame} />
+      <LobbyView {gameId} on:leave={leaveGame} usernameInput={username}/>
     {/await}
   {:else}
     <Menu on:joinGame={joinGame} on:createGame={hostGame}/>
