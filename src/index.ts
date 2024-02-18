@@ -2,6 +2,8 @@ import app from './app';
 import { Server as SocketIOServer } from 'socket.io';
 import http from 'http';
 import session from 'express-session';
+import { SocketEvents } from './types/socketEvents';
+
 const { v4: uuidv4 } = require('uuid');
 
 declare module 'express-session' {
@@ -79,7 +81,7 @@ io.on('connection', (socket) => {
     session.uid = uuidv4();
     sockets[session.uid] = socket.id;
 
-    socket.on('createGameToServer', (data) => {
+    socket.on(SocketEvents.createGameToServer, (data) => {
         if (!data && !session.username) {
             console.log('No user name provided!', data);
             throw 'No user name';
@@ -93,20 +95,20 @@ io.on('connection', (socket) => {
         clients[session.uid] = [];
         usernames[session.uid] = session.username;
         console.log('User ', session.username, ' created a game; id: ', gameId);
-        socket.emit('createGameToHost', {
+        socket.emit(SocketEvents.createGameToHost, {
             gameId: gameId,
             hostId: session.uid,
         });
     });
 
-    socket.on('joinGameToServer', (data) => {
+    socket.on(SocketEvents.joinGameToServer, (data) => {
         console.log('Received message from client:', data);
         let gameId = data.gameId;
         session.username = data.username;
         usernames[session.uid] = session.username;
 
         if (!(gameId in gameIds)) {
-            socket.emit('joinGameToClient', false);
+            socket.emit(SocketEvents.joinGameToClient, false);
             socket.disconnect(true);
             return;
         }
@@ -114,7 +116,7 @@ io.on('connection', (socket) => {
 
         let hostSocket = io.sockets.sockets.get(sockets[hostUid]);
         if (hostSocket) {
-            hostSocket.emit('newPlayerJoinedGameToHost', {
+            hostSocket.emit(SocketEvents.newPlayerJoinedGameToHost, {
                 username: session.username,
                 uid: session.uid,
             });
@@ -127,7 +129,7 @@ io.on('connection', (socket) => {
                 uid: hostUid,
                 username: usernames[hostUid],
             });
-            socket.emit('joinGameToClient', {
+            socket.emit(SocketEvents.joinGameToClient, {
                 players: joinedPlayerList,
                 thisPlayerId: session.uid,
                 thisPlayerName: session.username,
@@ -136,7 +138,7 @@ io.on('connection', (socket) => {
         clients[hostUid].forEach((clientId) => {
             const clientSocket = io.sockets.sockets.get(sockets[clientId]);
             if (clientSocket) {
-                clientSocket.emit('newPlayerJoinedGameToClient', {
+                clientSocket.emit(SocketEvents.newPlayerJoinedGameToClient, {
                     username: session.username,
                     uid: session.uid,
                 });
@@ -145,7 +147,7 @@ io.on('connection', (socket) => {
         clients[hostUid].push(session.uid);
     });
 
-    socket.on('playerLeftGameToServer', (data: string) => {
+    socket.on(SocketEvents.playerLeftGameToServer, (data: string) => {
         console.log('A user disconnected, player.id:' + data); // This is player.id
         if (session.id in hosts) {
             let hostUid = hosts[session.uid];
@@ -168,7 +170,7 @@ io.on('connection', (socket) => {
             delete sockets[session.uid];
         }
 
-        socket.emit('playerLeftGameToPlayers', { uid: session.uid });
+        socket.emit(SocketEvents.playerLeftGameToPlayers, { uid: session.uid });
     });
 
     // socket.on('gameStartedToClient', (data: string) => {
@@ -187,4 +189,13 @@ io.on('connection', (socket) => {
 
     //     socket.emit('playerLeftGameToPlayers');
     // });
+
+    socket.on(SocketEvents.hitToHost, (data: string) => {});
+    socket.on(SocketEvents.checkToHost, (data: string) => {});
+
+    socket.on(SocketEvents.gameUpdateNextPlayerToClient, (data: string) => {});
+    socket.on(
+        SocketEvents.gameUpdateEndOfRoundAndStartOfNewRountToCLient,
+        (data: string) => {}
+    );
 });
