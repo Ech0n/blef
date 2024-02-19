@@ -2,7 +2,7 @@
     import { onDestroy, onMount } from 'svelte';
     import { io, Socket } from "socket.io-client";
     import { Player } from '../../../definitions/player';
-    import { playerStore } from '../game/stores';
+    import { playerStore../../../common/player
     import {SocketEvents} from '../../../src/types/socketEvents'
 
     export let usernameInput:string;

@@ -2,10 +2,12 @@ import type { IChecker } from './HandRankings';
 import { Game } from './Game';
 import { CardColor, type Card, Rank } from '../model/Card';
 import { checkFunctionsMap } from './HandRankings';
-import { Player } from '../../../definitions/player';
-
+import { Player } from '../../../common/player';
+import type {
+    checkToServerPayload,
+    checkToPlayersPayload,
+} from '../../../common/payloads';
 let deckInitialization: Card[] = [];
-type checkInfo = { newHands: any; players: Player[] };
 
 for (let card in Rank) {
     if (isNaN(Number(card))) {
@@ -78,7 +80,7 @@ export class GameServer extends Game {
         });
     }
 
-    check(data?: { newHand: Card[]; players: Player[] }): void {
+    check(data?: checkToPlayersPayload): void {
         if (!this.previousBet) {
             throw 'There is no bet';
         }
@@ -127,7 +129,7 @@ export class GameServer extends Game {
         }
     }
 
-    validateCheck(): checkInfo {
+    validateCheck(): checkToServerPayload {
         this.check();
         this.dealCards();
         console.log('this hands ', this.hands);

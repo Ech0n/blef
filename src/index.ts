@@ -5,11 +5,7 @@ import session from 'express-session';
 import { SocketEvents } from './types/socketEvents';
 import { v4 as uuidv4 } from 'uuid';
 import { IChecker } from './types/HandRankings';
-import {
-    Player,
-    IPlayer,
-    createPlayerFromIPlayer,
-} from '../definitions/player';
+import { Player, IPlayer, createPlayerFromIPlayer } from '../common/player';
 
 declare module 'express-session' {
     interface SessionData {

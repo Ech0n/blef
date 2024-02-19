@@ -52,15 +52,17 @@
                 game = game;
                 socket.emit(SocketEvents.checkToPlayers,checkResult);
             });
+        }else{
+            socket.on(SocketEvents.checkToPlayers, (data:any) => {
+                console.log("received check data:",data)
+                game.check(data);
+                game = game
+
+            });
         }
             
 
-        socket.on(SocketEvents.checkToPlayers, (data:any) => {
-            console.log("received check data:",data)
-            game.check(data);
-            game = game
 
-        });
     });
 
     // This function is called when the modal is closed and we have selected a bet

@@ -1,6 +1,9 @@
 import type { Card } from '../model/Card';
-import { Player } from '../../../definitions/player';
-type checkInfo = { newHands: any; players: Player[] };
+import { Player } from '../../../common/player';
+import type {
+    checkToServerPayload,
+    checkToPlayersPayload,
+} from '../../../common/payloads';
 
 export class Game {
     playerCount: number;
@@ -33,7 +36,7 @@ export class Game {
         this.currentPlayer = this.players[this.currentPlayerIndx].uid;
     }
 
-    check(data?: { newHand: Card[]; players: Player[] }): void {
+    check(data?: checkToPlayersPayload): void {
         if (!data) {
             return;
         }
@@ -42,8 +45,7 @@ export class Game {
         this.players = data.players;
         this.playerCount = this.players.length;
     }
-    
-    validateCheck(): checkInfo | undefined {
+    validateCheck(): checkToServerPayload | undefined {
         console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
         return;
     }
