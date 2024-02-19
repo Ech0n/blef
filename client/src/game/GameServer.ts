@@ -115,7 +115,7 @@ export class GameServer extends Game {
                 (this.currentPlayerIndx - 1 + this.playerCount) %
                 this.playerCount;
             this.currentPlayerIndx = prevPlayer;
-            this.currentPlayer = this.players[this.currentPlayerIndx].id;
+            this.currentPlayer = this.players[this.currentPlayerIndx].uid;
         }
         this.players[this.currentPlayerIndx].loses += 1;
         if (this.players[this.currentPlayerIndx].loses == 4) {
@@ -123,7 +123,7 @@ export class GameServer extends Game {
             this.players.slice(this.currentPlayerIndx, 1);
             this.playerCount -= 1;
             this.currentPlayerIndx -= 1;
-            this.currentPlayer = this.players[this.currentPlayerIndx].id;
+            this.currentPlayer = this.players[this.currentPlayerIndx].uid;
         }
     }
 

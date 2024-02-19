@@ -5,13 +5,13 @@
     import { GameServer } from './GameServer';
     import { SocketEvents } from '../../../src/types/socketEvents';
     import { Player } from '../../../definitions/player';
-    import CardModal from './CardModals.svelte'; // Make sure this path is correct
+    import CardModal from './CardModals.svelte';
     import { Game } from './Game';
 
     export let gameId: string;
     export let socket: Socket;
     export let initialPlayerList: Player[];
-    export let startingPlayerId: string; // Ensure this is correctly named
+    export let startingPlayerId: string;
     export let thisPlayerId: string;
     export let isHost:boolean|undefined = false;
 
@@ -19,7 +19,8 @@
     const serverUrl: string = "http://localhost:5678";
     let game: Game = (isHost) ? new GameServer(initialPlayerList, startingPlayerId) : new Game(initialPlayerList, startingPlayerId);
 
-    let showModal = false;
+    let showModal: boolean = false;
+    let betName: string = '';
     let selectedHand;
 
     const cardFullNames: { [key: string]: string } = {
@@ -27,8 +28,6 @@
         '9': 'Nine', '10': 'Ten', 'J': 'Jack', 'Q': 'Queen', 'K': 'King', 'A': 'Ace'
     };
 
-    let mesg = (isHost) ? "thisa host" : "this not a hosta"
-    console.log(mesg)
     onMount(() => {
         
         if (!socket) {
@@ -110,13 +109,23 @@
         return selectedRanking;
     }
 
+    // Reactive statements in Svelte btw :O
+    $: if (game.previousBet) {
+        betName = getBetName();
+    }
+
 </script>
 
 <h3>{#if gameId} Game ID: {gameId} {/if}</h3>
 <p>Players:</p>
 <ul>
-    {#each game.players as {name,loses}}
-        <li> {name} ❤️{5-loses}</li>
+    {#each game.players as {username, loses, uid}}
+        {#if (uid ===  game.currentPlayer)}
+            <strong> > {username}</strong>
+        {:else}
+            {username}
+        {/if}
+        ❤️ {5 - loses} <br>
     {/each}
 </ul>
 {#if game.currentPlayer == thisPlayerId}
@@ -125,10 +134,10 @@
     <button on:click={check}>Check</button>
 {/if}
 
-<p>Bet:</p>
+<p>Current bet:</p>
 {#if game.previousBet}
-    {getBetName()}
-    {:else}
+    {betName}
+{:else}
     No best has been made yet
 {/if}
 {#if showModal}
@@ -136,8 +145,9 @@
 {/if}
 
 <style>
-    li {
-        font-size: 20px;
+    strong {
+        font-weight: 900;
+        color: rgb(3, 0, 0);
     }
     p {
         font-size: 25px;

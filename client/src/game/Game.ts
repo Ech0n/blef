@@ -29,8 +29,7 @@ export class Game {
     }
 
     nextPlayer(): void {
-        this.currentPlayerIndx =
-            (this.currentPlayerIndx + 1) % this.playerCount;
+        this.currentPlayerIndx = (this.currentPlayerIndx + 1) % this.playerCount;
         this.currentPlayer = this.players[this.currentPlayerIndx].uid;
     }
 
@@ -38,10 +37,12 @@ export class Game {
         if (!data) {
             return;
         }
+
         this.hand = data.newHand;
         this.players = data.players;
         this.playerCount = this.players.length;
     }
+    
     validateCheck(): checkInfo | undefined {
         console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
         return;
