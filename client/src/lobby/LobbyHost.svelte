@@ -92,16 +92,19 @@
             <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players} {startinPlayerId}/>
         {/await}
     {:else}
-        Game ID: {#if gameId}{gameId}{/if}
+        Game ID: {#if gameId} {gameId} {/if}
         <br>
         Players:
         <ul>
-            {#each players as {id, name}}
+            {#each players as player}
                 <li>
-                    ID: {id}  NAME: {name}
+                    <strong>ID:</strong> {player.id}  <br>
+                    <strong>NAME:</strong> {player.name} <br>
+                    <strong>ONLINE:</strong> {player.isOnline ? 'Yes' : 'No'}
                 </li>
             {/each}
         </ul>
+        
         <div>
             <button on:click={startGame}>Start Game</button>
             <button on:click={closeGame}>Close Game</button>

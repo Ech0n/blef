@@ -38,9 +38,15 @@
             if (!data) {
                 dispatch('leave'); // Very scuffed way to force quit after joining wrong lobby by gameID
             }
+
             if (data.players) {
-                players = data.players.map((el)=> new Player(el.uid,el.username) );
+                players = data.players.map((el) => {
+                    let newPlayer: Player = new Player(el.uid, el.username);
+                    newPlayer.isOnline = true;
+                    return newPlayer
+                });
             }
+
             if (data.thisPlayerId && data.thisPlayerName) { //This if is wrong. If data does not exist error should be thrown
                 players = [...players, new Player(data.thisPlayerId,data.thisPlayerName)];
             }
@@ -96,11 +102,16 @@
         Game ID: {#if gameId}{gameId}{/if}
         <br>
         <ul>
-            {#each players as {id, name, isOnline}}
-                <li>
-                    ID: {id}  NAME: {name} ONLINE: {isOnline}
-                </li>
-            {/each}
+            <ul>
+                {#each players as player}
+                    <li>
+                        <strong>ID:</strong> {player.id}  <br>
+                        <strong>NAME:</strong> {player.name}  <br>
+                        <strong>ONLINE:</strong> {player.isOnline ? 'Yes' : 'No'}
+                    </li>
+                {/each}
+            </ul>
+            
             <button on:click={leaveGame}>Leave</button>
         </ul>
     {/if}

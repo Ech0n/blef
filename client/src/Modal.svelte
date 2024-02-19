@@ -8,6 +8,7 @@
   export let mode: 'join' | 'create' = 'join'; // Add a mode prop to determine which form to show
   let gameId: string = '';
   let username: string = '';
+  let errorMessage: string = ''; // Add an error message state
 
   function closeModal() {
       showModal = false;
@@ -15,12 +16,21 @@
   }
 
   function action() {
+      if (username.trim() === '') {
+          errorMessage = 'Please enter your name.';
+          return; // Stop the action if username is empty
+      }
+      
       if (mode === 'join') {
+          if (gameId.trim() === '') {
+              errorMessage = 'Please enter a game ID.';
+              return; // Stop the action if gameId is empty
+          }
           dispatch('joinGame', { username, gameId });
       } else {
           dispatch('createGame', { username });
       }
-      closeModal();
+      closeModal(); // Close the modal only if everything is correct
   }
 </script>
 
@@ -33,6 +43,9 @@
           <h2>{mode === 'join' ? 'Provide game ID:' : 'Enter Your Name:'}</h2>
       </div>
       <div class="modal-body">
+          {#if errorMessage}
+              <p class="error">{errorMessage}</p> <!-- Display error message if any -->
+          {/if}
           {#if mode === 'join'}
               <input type="text" placeholder="Enter Game ID" bind:value={gameId} />
           {/if}
@@ -43,6 +56,7 @@
   </div>
 </div>
 {/if}
+
 
   
   <style>

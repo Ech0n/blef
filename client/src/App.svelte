@@ -16,7 +16,7 @@
       player = new Player(newId, event.detail.username);
       player.isOnline = true; // Set the player as online upon joining
     }
-    playerStore.set(player!);
+    playerStore.set(player);
     gameView = import('./lobby/LobbyClient.svelte');
   }
 
@@ -28,7 +28,7 @@
       player = new Player(newId, event.detail.username);
       player.isOnline = true; // Set the player as online upon game creation
     }
-    playerStore.set(player!);
+    playerStore.set(player);
     gameView = import('./lobby/LobbyHost.svelte');
   }
 
