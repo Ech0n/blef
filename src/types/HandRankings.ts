@@ -1,3 +1,4 @@
+import { copyFileSync } from 'fs';
 import { CardColor, Rank } from '../../client/src/model/Card';
 
 //TODO: Change this into somekind of predefined structure that can be easily initalized. Reconsider if this is even a correct way to count of carts
@@ -48,9 +49,21 @@ export class CarrotChecker implements IChecker {
     }
 }
 
+// karty = {full:{
+//     triple:copyFileSync
+//     pair:copyFileSync
+//     typ:full
+// }}
+// checki{
+//     full:checkFull
+// }
+// karta = full
+// checki[karta.typ](dane)
+
 export class FullChecker implements IChecker {
     threeCard: Rank;
     twoCard: Rank;
+
     constructor(threeCard: Rank, twoCard: Rank) {
         this.threeCard = threeCard;
         this.twoCard = twoCard;
@@ -113,12 +126,13 @@ export class PairChecker implements IChecker {
 }
 
 export class OneChecker implements IChecker {
-    high: Rank;
-    constructor(card: Rank) {
-        this.high = card;
+    card: Rank;
+
+    constructor(data: { card: Rank }) {
+        this.card = data.card;
     }
     check(cards: CardDict): boolean {
-        return cards[this.high]['total'] >= 1;
+        return cards[this.card]['total'] >= 1;
     }
 }
 
