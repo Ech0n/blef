@@ -19,15 +19,15 @@
     const serverUrl: string = "http://localhost:5678";
     let game: Game = (isHost) ? new GameServer(initialPlayerList, startingPlayerId) : new Game(initialPlayerList, startingPlayerId);
 
-    let showModal = false; // State for showing/hiding the modal
-    let selectedHand; // Hold the selected hand from the modal
+    let showModal = false;
+    let selectedHand;
 
     const cardFullNames: { [key: string]: string } = {
         '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six', '7': 'Seven', '8': 'Eight', 
         '9': 'Nine', '10': 'Ten', 'J': 'Jack', 'Q': 'Queen', 'K': 'King', 'A': 'Ace'
     };
 
-    let mesg = (isHost)? "thisa host" : "this not a hosta"
+    let mesg = (isHost) ? "thisa host" : "this not a hosta"
     console.log(mesg)
     onMount(() => {
         
@@ -40,19 +40,18 @@
         });
 
         socket.on(SocketEvents.hit, (data: { move: any }) => {
-            // console.log("received hit data:", data.move, "; current player now: ", game.currentPlayer);
+            console.log("received hit data:", data.move, "; current player now: ", game.currentPlayer);
+            game = game;
             game.hit(data.move);
-            game = game
         });
 
-        if(isHost)
-        {
+        if (isHost) {
             socket.on(SocketEvents.checkToServer, (data) => {
                 let checkResult = game.validateCheck();
-                console.log("Valuidated check this is what goes further ",checkResult)
+                console.log("Valuidated check this is what goes further ",checkResult);
 
-                game = game
-                socket.emit(SocketEvents.checkToPlayers,checkResult)
+                game = game;
+                socket.emit(SocketEvents.checkToPlayers,checkResult);
             });
         }
             
@@ -85,26 +84,27 @@
 
         const { selectedRanking, primaryCard, secondaryCard, selectedColor, startingCard } = game.previousBet;
         let currentBet: string = selectedRanking;
+        console.log(selectedRanking);
 
         if (['One', 'Pair', 'Three', 'Four'].includes(selectedRanking)) {
             let cardName = cardFullNames[primaryCard];
-            return currentBet + " " + cardName + ((selectedRanking !== 'One') ? "s" : ""); 
+            return (currentBet + " " + cardName + ((selectedRanking !== 'One') ? "s" : "")); 
         }
 
 
         if (['Double', 'Full'].includes(selectedRanking)) {
             let primaryCardName = cardFullNames[primaryCard];
             let secondaryCardName = cardFullNames[secondaryCard]
-            return currentBet + " of 3 " + primaryCardName + " and 2 " + secondaryCardName; 
+            return (currentBet + " of 3 " + primaryCardName + "s and 2 " + secondaryCardName + "s"); 
         }
 
         if (['Flush', 'Street'].includes(selectedRanking)) {
             let cardName = cardFullNames[startingCard];
-            return currentBet + " starting from " + cardName + (selectedRanking === 'Flush') ? (" in color " + selectedColor) : "";
+            return (currentBet + " starting from " + cardName + ((selectedRanking === 'Flush') ? (" in color " + selectedColor) : ""));
         }
 
         if (selectedRanking === 'Royal') {
-            return selectedRanking + " Flush of color " + selectedColor;
+            return selectedRanking + " Flush of " + selectedColor;
         }
 
         return selectedRanking;
@@ -116,7 +116,7 @@
 <p>Players:</p>
 <ul>
     {#each game.players as {name,loses}}
-        <li>NAME: {name} ❤️{5-loses}</li>
+        <li> {name} ❤️{5-loses}</li>
     {/each}
 </ul>
 {#if game.currentPlayer == thisPlayerId}

@@ -41,8 +41,8 @@
             return;
         }
 
-        if (['Flush', 'Street'].includes(selectedRanking) && (!startingCard || ['J', 'Q', 'K', 'A'].includes(startingCard))) {
-            alert('Please select starting card and make sure it is not larger than 10.');
+        if (['Flush', 'Street'].includes(selectedRanking) && (!startingCard || ['10', 'J', 'Q', 'K', 'A'].includes(startingCard))) {
+            alert('Please select starting card and make sure it is not larger than 9.');
             return;
         }
 
