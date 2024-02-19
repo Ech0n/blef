@@ -2,6 +2,7 @@ import type { IChecker } from './HandRankings';
 import { Game } from './Game';
 import { Player } from '../model/Player';
 import { CardColor, type Card, Rank } from '../model/Card';
+import { checkFunctionsMap } from './HandRankings';
 
 let deckInitialization: Card[] = [];
 
@@ -23,7 +24,7 @@ export class GameServer extends Game {
     hands: { [playerId: string]: Card[] };
     deck: Card[];
     rejectedCards: Card[];
-    previousBet!: IChecker;
+    previousBet!: any;
     isFinished: boolean = false;
     currentPlayerIndx: number;
 
@@ -44,14 +45,15 @@ export class GameServer extends Game {
         this.nextPlayer();
     }
 
-    hit(bet: IChecker): void {
+    hit(bet: any): void {
         //TODO: consider validation if bet is possible?
         this.previousBet = bet;
         this.nextPlayer();
     }
 
     nextPlayer(): void {
-        this.currentPlayerIndx = (this.currentPlayerIndx + 1) % this.playerCount;
+        this.currentPlayerIndx =
+            (this.currentPlayerIndx + 1) % this.playerCount;
         this.currentPlayer = this.players[this.currentPlayerIndx].id;
     }
 
@@ -119,12 +121,19 @@ export class GameServer extends Game {
                 countedCards[card[0]][CardColor.colorless]++;
             });
         }
+        //end of cards counting-------
+
         console.log(this.previousBet);
-        let wasBetFound = this.previousBet.check(countedCards);
+        let wasBetFound = checkFunctionsMap[this.previousBet.selectedRanking](
+            countedCards,
+            this.previousBet
+        );
         if (wasBetFound) {
             this.players[this.currentPlayerIndx].loses += 1;
             if (this.players[this.currentPlayerIndx].loses == 4) {
-                this.eliminatedPlayers.push(this.players[this.currentPlayerIndx]);
+                this.eliminatedPlayers.push(
+                    this.players[this.currentPlayerIndx]
+                );
                 this.players.slice(this.currentPlayerIndx, 1);
                 this.playerCount -= 1;
             }

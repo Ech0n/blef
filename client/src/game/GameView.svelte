@@ -29,14 +29,16 @@
             dispatch('update', data);
         });
 
-        socket.on(SocketEvents.hit, (data: { move: HandRankings.IChecker }) => {
-            let move = new HandRankings.OneChecker(data.move.high);
-            game.hit(move);
+        socket.on(SocketEvents.hit, (data: { move: any }) => {
+            game.hit(data.move);
+            game = game
             console.log("received hit data:", data.move, "; current player now: ", game.currentPlayer);
         });
 
         socket.on(SocketEvents.checkToPlayers, () => {
             game.checkAndDeal();
+            game = game
+
         });
     });
 
@@ -75,8 +77,9 @@
 {/if}
 
 <p>Bet:</p>
-{getBetName()}
-
+{#if game.previousBet}
+    {game.previousBet.selectedRanking}
+{/if}
 {#if showModal}
     <CardModal on:close={() => showModal = false} on:select={handleBetSelection} />
 {/if}
