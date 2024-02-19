@@ -5,7 +5,6 @@
     import { GameServer } from './GameServer';
     import { SocketEvents } from '../../../src/types/socketEvents';
     import { Player } from '../../../definitions/player';
-    import * as HandRankings from '../../../src/types/HandRankings';
     import CardModal from './CardModals.svelte'; // Make sure this path is correct
     import { Game } from './Game';
 
@@ -18,10 +17,15 @@
 
     const dispatch = createEventDispatcher();
     const serverUrl: string = "http://localhost:5678";
-    let game: Game =(isHost)? new GameServer(initialPlayerList,startingPlayerId) : new Game(initialPlayerList,startingPlayerId)
+    let game: Game = (isHost) ? new GameServer(initialPlayerList, startingPlayerId) : new Game(initialPlayerList, startingPlayerId);
 
     let showModal = false; // State for showing/hiding the modal
     let selectedHand; // Hold the selected hand from the modal
+
+    const cardFullNames: { [key: string]: string } = {
+        '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six', '7': 'Seven', '8': 'Eight', 
+        '9': 'Nine', '10': 'Ten', 'J': 'Jack', 'Q': 'Queen', 'K': 'King', 'A': 'Ace'
+    };
 
     let mesg = (isHost)? "thisa host" : "this not a hosta"
     console.log(mesg)
@@ -70,18 +74,49 @@
         showModal = false; 
     }
 
-    function check() {
+    function check(): void {
         socket.emit(SocketEvents.checkToServer);
     }
 
+    function getBetName(): string {
+        if (!game.previousBet) {
+            return "Error has occured.";
+        }
+
+        const { selectedRanking, primaryCard, secondaryCard, selectedColor, startingCard } = game.previousBet;
+        let currentBet: string = selectedRanking;
+
+        if (['One', 'Pair', 'Three', 'Four'].includes(selectedRanking)) {
+            let cardName = cardFullNames[primaryCard];
+            return currentBet + " " + cardName + ((selectedRanking !== 'One') ? "s" : ""); 
+        }
+
+
+        if (['Double', 'Full'].includes(selectedRanking)) {
+            let primaryCardName = cardFullNames[primaryCard];
+            let secondaryCardName = cardFullNames[secondaryCard]
+            return currentBet + " of 3 " + primaryCardName + " and 2 " + secondaryCardName; 
+        }
+
+        if (['Flush', 'Street'].includes(selectedRanking)) {
+            let cardName = cardFullNames[startingCard];
+            return currentBet + " starting from " + cardName + (selectedRanking === 'Flush') ? (" in color " + selectedColor) : "";
+        }
+
+        if (selectedRanking === 'Royal') {
+            return selectedRanking + " Flush of color " + selectedColor;
+        }
+
+        return selectedRanking;
+    }
 
 </script>
 
 <h3>{#if gameId} Game ID: {gameId} {/if}</h3>
 <p>Players:</p>
 <ul>
-    {#each game.players as {name,loses}}
-        <li>NAME: {name} ❤️{5-loses}</li>
+    {#each game.players as {username,loses}}
+        <li>NAME: {username} ❤️{5-loses}</li>
     {/each}
 </ul>
 {#if game.currentPlayer == thisPlayerId}
@@ -92,7 +127,9 @@
 
 <p>Bet:</p>
 {#if game.previousBet}
-    {game.previousBet.selectedRanking}
+    {getBetName()}
+    {:else}
+    No best has been made yet
 {/if}
 {#if showModal}
     <CardModal on:close={() => showModal = false} on:select={handleBetSelection} />

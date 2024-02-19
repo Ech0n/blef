@@ -4,7 +4,7 @@
     const dispatch = createEventDispatcher();
     const handRankings = [
         'Royal', 'Flush', 'Four', 'Full', 'Street',
-        'Color', 'Triple', 'Double', 'Pair', 'One'
+        'Color', 'Three', 'Double', 'Pair', 'One'
     ];
     const cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
     const colors = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
@@ -31,17 +31,17 @@
             return;
         }
 
-        if (['Full', 'Double', 'Pair', 'One', 'Triple', 'Four'].includes(selectedRanking) && !primaryCard) {
+        if (['Full', 'Double', 'Pair', 'One', 'Three', 'Four'].includes(selectedRanking) && !primaryCard) {
             alert('Please select primary card.');
             return;
         }
 
-        if (['Full', 'Double'].includes(selectedRanking) && !secondaryCard && secondaryCard !== primaryCard) {
+        if (['Full', 'Double'].includes(selectedRanking) && (!secondaryCard || !primaryCard || secondaryCard === primaryCard)) {
             alert('Please select secondary card.');
             return;
         }
 
-        if (['Flush', 'Street'].includes(selectedRanking) && !startingCard && ['J', 'Q', 'K', 'A'].includes(startingCard)) {
+        if (['Flush', 'Street'].includes(selectedRanking) && (!startingCard || ['J', 'Q', 'K', 'A'].includes(startingCard))) {
             alert('Please select starting card and make sure it is not larger than 10.');
             return;
         }
@@ -95,7 +95,7 @@
                 </div>
             {/if}
 
-            {#if ['Full', 'Double', 'Pair', 'One', 'Triple', 'Four'].includes(selectedRanking)}
+            {#if ['Full', 'Double', 'Pair', 'One', 'Three', 'Four'].includes(selectedRanking)}
                 <div>
                     <h3>Select Primary Card</h3>
                     <select bind:value={primaryCard}>
