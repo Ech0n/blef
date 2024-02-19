@@ -2,10 +2,12 @@ import type { IChecker } from './HandRankings';
 import { Game } from './Game';
 import { CardColor, type Card, Rank } from '../model/Card';
 import { checkFunctionsMap } from './HandRankings';
-import { Player } from '../../../definitions/player';
-
+import { Player } from '../../../common/player';
+import type {
+    checkToServerPayload,
+    checkToPlayersPayload,
+} from '../../../common/payloads';
 let deckInitialization: Card[] = [];
-type checkInfo = { newHands: any; players: Player[] };
 
 for (let card in Rank) {
     if (isNaN(Number(card))) {
@@ -78,7 +80,7 @@ export class GameServer extends Game {
         });
     }
 
-    check(data?: { newHand: Card[]; players: Player[] }): void {
+    check(data?: checkToPlayersPayload): void {
         if (!this.previousBet) {
             throw 'There is no bet';
         }
@@ -115,7 +117,7 @@ export class GameServer extends Game {
                 (this.currentPlayerIndx - 1 + this.playerCount) %
                 this.playerCount;
             this.currentPlayerIndx = prevPlayer;
-            this.currentPlayer = this.players[this.currentPlayerIndx].id;
+            this.currentPlayer = this.players[this.currentPlayerIndx].uid;
         }
         this.players[this.currentPlayerIndx].loses += 1;
         if (this.players[this.currentPlayerIndx].loses == 4) {
@@ -123,11 +125,11 @@ export class GameServer extends Game {
             this.players.slice(this.currentPlayerIndx, 1);
             this.playerCount -= 1;
             this.currentPlayerIndx -= 1;
-            this.currentPlayer = this.players[this.currentPlayerIndx].id;
+            this.currentPlayer = this.players[this.currentPlayerIndx].uid;
         }
     }
 
-    validateCheck(): checkInfo {
+    validateCheck(): checkToServerPayload {
         this.check();
         this.dealCards();
         console.log('this hands ', this.hands);
