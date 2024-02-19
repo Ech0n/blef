@@ -1,8 +1,8 @@
 const { GameServer } = require('../GameServer');
 import { Player } from '../../model/Player';
-import type { CardDict, IChecker } from '../HandRankings';
-const { bets } = require('../HandRankings');
-import type * as Types from '../HandRankings';
+import type { CardDict, IChecker } from '../../../../src/types/HandRankings';
+const { bets } = require('../../../../src/types/HandRankings');
+import type * as Types from '../../../../src/types/HandRankings';
 
 let gs: typeof GameServer;
 

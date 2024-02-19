@@ -4,6 +4,7 @@ import http from 'http';
 import session from 'express-session';
 import { SocketEvents } from './types/socketEvents';
 import { v4 as uuidv4 } from 'uuid';
+import { IChecker } from './types/HandRankings';
 declare module 'express-session' {
     interface SessionData {
         uid: string;
@@ -214,12 +215,62 @@ io.on('connection', (socket) => {
             }
         }
     );
-    socket.on(SocketEvents.hitToHost, (data: string) => {});
-    socket.on(SocketEvents.checkToHost, (data: string) => {});
+    socket.on(SocketEvents.hitToServer, (data: { move: IChecker }) => {
+        if (!data || !data.move) {
+            throw 'No move data passed';
+        }
+        const hostSocket = io.sockets.sockets.get(sockets[hosts[session.uid]]);
+        if (!hostSocket) {
+            throw 'no host socket :(';
+        }
+        hostSocket.emit(SocketEvents.hitToHost, data);
+    });
+    socket.on(SocketEvents.checkToServer, () => {
+        const hostSocket = io.sockets.sockets.get(sockets[hosts[session.uid]]);
+        if (!hostSocket) {
+            throw 'no host socket :(';
+        }
+        hostSocket.emit(SocketEvents.hitToHost);
+    });
 
-    socket.on(SocketEvents.gameUpdateNextPlayerToClient, (data: string) => {});
+    socket.on(SocketEvents.gameUpdateNextPlayerToClient, (data: string) => {
+        for (let clt of clients[session.uid]) {
+            console.log('Trying to find client ', clt);
+            const clientSocket = io.sockets.sockets.get(sockets[clt]);
+            if (!clientSocket) {
+                throw 'no clietn socket :(';
+            }
+            clientSocket.emit(SocketEvents.gameUpdateNextPlayerToClient, data);
+            console.log(
+                'Sent gameUpdateNextPlayerToClient to: ',
+                clt,
+                ' payLoad: ',
+                data
+            );
+        }
+    });
     socket.on(
         SocketEvents.gameUpdateEndOfRoundAndStartOfNewRountToCLient,
-        (data: string) => {}
+        (data: string) => {
+            for (let clt of clients[session.uid]) {
+                console.log('Trying to find client ', clt);
+                const clientSocket = io.sockets.sockets.get(sockets[clt]);
+                if (!clientSocket) {
+                    throw 'no clietn socket :(';
+                }
+                clientSocket.emit(
+                    SocketEvents.gameUpdateEndOfRoundAndStartOfNewRountToCLient,
+                    data
+                );
+                console.log(
+                    'Sent gameUpdateEndOfRoundAndStartOfNewRountToCLient to: ',
+                    clt,
+                    ' payLoad: ',
+                    data
+                );
+            }
+        }
     );
 });
+
+//TODO: Go through every exception throw and remove them or create class for them so it can be caught later

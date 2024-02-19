@@ -1,4 +1,4 @@
-import { CardColor, Rank } from '../model/Card';
+import { CardColor, Rank } from '../../client/src/model/Card';
 
 //TODO: Change this into somekind of predefined structure that can be easily initalized. Reconsider if this is even a correct way to count of carts
 type ColorDict = any;

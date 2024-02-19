@@ -1,4 +1,4 @@
-import type { CardDict, IChecker } from './HandRankings';
+import type { CardDict, IChecker } from '../../../src/types/HandRankings';
 import { Game } from './Game';
 import { Player } from '../model/Player';
 import { CardColor, type Card, Rank } from '../model/Card';
