@@ -25,10 +25,28 @@
             alert('Please select a hand ranking.');
             return;
         }
-        // Additional validation logic can go here
+        
+        if (['Flush', 'Royal', 'Color'].includes(selectedRanking) && !selectedColor) {
+            alert('Please select a color ranking.');
+            return;
+        }
 
-        // If all checks pass
-        dispatch('confirm', {
+        if (['Full', 'Double', 'Pair', 'One', 'Triple', 'Four'].includes(selectedRanking) && !primaryCard) {
+            alert('Please select primary card.');
+            return;
+        }
+
+        if (['Full', 'Double'].includes(selectedRanking) && !secondaryCard && secondaryCard !== primaryCard) {
+            alert('Please select secondary card.');
+            return;
+        }
+
+        if (['Flush', 'Street'].includes(selectedRanking) && !startingCard && ['J', 'Q', 'K', 'A'].includes(startingCard)) {
+            alert('Please select starting card and make sure it is not larger than 10.');
+            return;
+        }
+
+        dispatch('select', {
             selectedRanking,
             primaryCard,
             secondaryCard,

@@ -95,6 +95,7 @@
         {#await gameView then { default: GameView }}
             <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players} {startingPlayerId} {thisPlayerId}/>
         {/await}
+        TODO: DO BANOWANIA GRACZY DEBILI
     {:else}
         Game ID: {#if gameId} {gameId} {/if}
         <br>

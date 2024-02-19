@@ -104,7 +104,6 @@
         {#await gameView then { default: GameClient }}
             <GameClient {gameId} {socket} on:leave={leaveGame} initialPlayerList={players} startingPlayerId={startingPlayerId} {thisPlayerId}/>
         {/await}
-        lista graczy
     {:else}
         Game ID: {#if gameId} {gameId} {/if}
         <br>

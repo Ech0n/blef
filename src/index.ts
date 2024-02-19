@@ -23,44 +23,6 @@ declare module 'socket.io' {
 
 const port = process.env.PORT || 5678;
 
-// This will also require a refactor
-interface Hosts {
-    // Client uid -> Host Socket
-    [key: string]: string;
-}
-
-interface Clients {
-    // Host uid -> [N] Client Socket
-    [key: string]: string[];
-}
-
-interface GameIds {
-    // Host Socket -> GameID
-    [key: string]: string;
-}
-
-interface Usernames {
-    // SessionId -> Username
-    [key: string]: string;
-}
-
-interface Sockets {
-    // SessionId -> Socket
-    [key: string]: string;
-}
-
-interface OnlineStatus {
-    // Client Socket -> OnlineStatus
-    [key: string]: boolean;
-}
-
-let hosts: Hosts = {};
-let clients: Clients = {};
-let gameIds: GameIds = {};
-let usernames: Usernames = {};
-let sockets: Sockets = {};
-let onlineStatus: OnlineStatus = {};
-
 let rooms = new Set<string>();
 let roomHosts = new Map<string, string>();
 // session.uid -> roomId/gameId
@@ -174,7 +136,7 @@ io.on('connection', (socket) => {
         socket.to(gameId).emit(SocketEvents.newPlayerJoined, {
             username: session.username,
             uid: session.uid,
-            isOnline: onlineStatus[session.uid],
+            isOnline: true,
         });
 
         socket.join(gameId);

@@ -40,30 +40,22 @@
         });
     });
 
-    function hit() {
-        showModal = true; // Show the modal when hit is clicked
-    }
-
     // This function is called when the modal is closed and we have selected a bet
     function handleBetSelection(event: CustomEvent) {
-        const { detail } = event; // get the selected hand details
-        selectedHand = detail; // Assuming the detail contains the hand selection information
-        // You can now use selectedHand to make a move or bet in your game
-        socket.emit(SocketEvents.hit, { move: selectedHand }); // Adjust according to your data structure
-        closeCardModal();  // Close the modal after selection
+        const { detail } = event;
+        selectedHand = detail;
+        console.log("AAAAAAAAAAAAAAAAAAAAA"); // https://www.youtube.com/watch?v=-UGFq6jAlZg
+        socket.emit(SocketEvents.hit, { move: selectedHand });
+        showModal = false; 
     }
 
     function check() {
         socket.emit(SocketEvents.checkToServer);
     }
 
-    function closeCardModal() { // Add a function to close the modal
-        showModal = false;
-    }
-
     function getBetName() {
         if (!game.previousBet) {
-            return "<to jest pierwszy ruch>";
+            return "<First move placeholder>";
         }
         return game.previousBet.constructor.name;
     }
@@ -72,13 +64,13 @@
 <h3>{#if gameId} Game ID: {gameId} {/if}</h3>
 <p>Players:</p>
 <ul>
-    {#each game.players as {id, name}}
+    {#each game.players as {name}}
         <li>NAME: {name}</li>
     {/each}
 </ul>
 {#if game.currentPlayer == thisPlayerId}
     <p>Your turn</p>
-    <button on:click={hit}>Raise</button>
+    <button on:click={() => showModal = true}>Raise</button>
     <button on:click={check}>Check</button>
 {/if}
 
@@ -86,7 +78,7 @@
 {getBetName()}
 
 {#if showModal}
-    <CardModal on:close={closeCardModal} on:select={handleBetSelection} />
+    <CardModal on:close={() => showModal = false} on:select={handleBetSelection} />
 {/if}
 
 <style>

@@ -124,7 +124,7 @@ export class GameServer extends Game {
         if (wasBetFound) {
             this.players[this.currentPlayerIndx].loses += 1;
             if (this.players[this.currentPlayerIndx].loses == 4) {
-                this.lostPlayers.push(this.players[this.currentPlayerIndx]);
+                this.eliminatedPlayers.push(this.players[this.currentPlayerIndx]);
                 this.players.slice(this.currentPlayerIndx, 1);
                 this.playerCount -= 1;
             }
