@@ -13,12 +13,12 @@
 
     let gameView: Promise<typeof import('../game/GameClientView.svelte')> | undefined;
     let players: Player[] = [];
-    let player: Player;
+    let currentPlayer: Player;
     let startingPlayerId:string;
 
 
     const unsubscribe = playerStore.subscribe(value => {
-        player = value!;
+        currentPlayer = value!;
     });
 
     onDestroy(() => {
@@ -30,10 +30,11 @@
         const serverUrl: string = "http://localhost:5678";
         socket = io(serverUrl);
 
-        socket.emit("joinGameToServer", {gameId:gameId,username:usernameInput});
+        socket.emit(SocketEvents.joinGameToServer, {gameId:gameId, username:usernameInput} );
 
         // Listen for messages from the server
-        socket.on("joinGameToClient", (data: { players?: {uid:string,username:string}[]; thisPlayerId:string;thisPlayerName:string; }) => {
+        socket.on(SocketEvents.joinGameToClient,
+        (data: { players?: {uid: string, username: string, isOnline: boolean} []; thisPlayerId: string; thisPlayerName: string; }) => {
             console.log(data)
             if (!data) {
                 dispatch('leave'); // Very scuffed way to force quit after joining wrong lobby by gameID
@@ -42,19 +43,21 @@
             if (data.players) {
                 players = data.players.map((el) => {
                     let newPlayer: Player = new Player(el.uid, el.username);
-                    newPlayer.isOnline = true;
+                    newPlayer.isOnline = el.isOnline;
                     return newPlayer
                 });
             }
 
-            if (data.thisPlayerId && data.thisPlayerName) { //This if is wrong. If data does not exist error should be thrown
+            if (data.thisPlayerId && data.thisPlayerName) { // This if is wrong. If data does not exist error should be thrown // Then do it shaking my head
                 players = [...players, new Player(data.thisPlayerId,data.thisPlayerName)];
             }
         });
 
-        socket.on("newPlayerJoinedGameToClient",(data:{username:string;uid:string})=>{
-            console.log("new player in lobby name:",data.username)
-            players = [...players, new Player(data.uid,data.username)];
+        socket.on(SocketEvents.newPlayerJoinedGameToClient, (data: {username:string; uid:string} ) => {
+            console.log("New player in lobby name:", data.username)
+            let newPlayer = new Player(data.uid, data.username);
+            newPlayer.isOnline = true;
+            players = [...players, newPlayer];
         })
 
         socket.on(SocketEvents.startGameToClients, (data)  => {
@@ -66,7 +69,7 @@
             }
         });
 
-        socket.on("playerLeftGameToPlayers", (data: { playerId: string }) => { // Players = Host and Clients
+        socket.on(SocketEvents.playerLeftGameToPlayers, (data: { playerId: string }) => { // Players = Host and Clients
             console.log("Player disconnected", data);
             if (!data) {
                 return;
@@ -84,7 +87,7 @@
     });
 
     function leaveGame(): void {
-        socket.emit("playerLeftGameToServer", player.id); 
+        socket.emit(SocketEvents.playerLeftGameToServer, currentPlayer.id); 
         players = [];
 
         dispatch("leave"); // To parent
@@ -99,7 +102,7 @@
             <GameClient {gameId} {socket} on:leave={leaveGame} initialPlayerList={players} startinPlayerId={startingPlayerId}/>
         {/await}
     {:else}
-        Game ID: {#if gameId}{gameId}{/if}
+        Game ID: {#if gameId} {gameId} {/if}
         <br>
         <ul>
             <ul>
@@ -107,11 +110,10 @@
                     <li>
                         <strong>ID:</strong> {player.id}  <br>
                         <strong>NAME:</strong> {player.name}  <br>
-                        <strong>ONLINE:</strong> {player.isOnline ? 'Yes' : 'No'}
+                        <strong>ONLINE:</strong> {(player.isOnline || player.name == currentPlayer.name) ? 'Yes' : 'No'} <!-- I know this is shit but I dont care -->
                     </li>
                 {/each}
             </ul>
-            
             <button on:click={leaveGame}>Leave</button>
         </ul>
     {/if}

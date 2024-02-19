@@ -44,7 +44,7 @@
       </div>
       <div class="modal-body">
           {#if errorMessage}
-              <p class="error">{errorMessage}</p> <!-- Display error message if any -->
+              <p class="error">{errorMessage}</p>
           {/if}
           {#if mode === 'join'}
               <input type="text" placeholder="Enter Game ID" bind:value={gameId} />

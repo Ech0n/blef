@@ -11,7 +11,7 @@
     let gameId: string;
     let player: Player | null;
     let startinPlayerId: string
-    let host:Player
+    let host: Player
 
     let gameView: Promise<typeof import('../game/GameHostView.svelte')> | undefined;
     let players: Player[] = [];
@@ -30,26 +30,30 @@
         const serverUrl: string = "http://localhost:5678";
         socket = io(serverUrl);
 
-        socket.emit(SocketEvents.createGameToServer,{username:usernameInput});
+        socket.emit(SocketEvents.createGameToServer, {username: usernameInput});
 
-        socket.on(SocketEvents.createGameToHost, (data: {gameId:string,hostId:string}) => {
+        socket.on(SocketEvents.createGameToHost, (data: {gameId: string, hostId: string}) => {
             console.log("User created a game, its id is:", data);
             gameId = data.gameId;
-            host = new Player(data.hostId,usernameInput)
-            players = [...players,host]
+            host = new Player(data.hostId, usernameInput)
+            host.isOnline = true;
+            players = [...players, host]
         });
 
-        socket.on(SocketEvents.newPlayerJoinedGameToHost, (data: { username: string,uid:string }) => {
-            console.log("join event", data);
+        socket.on(SocketEvents.newPlayerJoinedGameToHost, (data: {username: string, uid: string}) => {
+            console.log("Join event", data);
             if (!data) {
                 throw "No data from server"
             }
-            players = [...players, new Player(data.uid,data.username)];
 
+            let newPlayer: Player = new Player(data.uid, data.username);
+            newPlayer.isOnline = true;
+
+            players = [...players, newPlayer];
         });
 
         socket.on(SocketEvents.playerLeftGameToPlayers, (data: { playerId: string }) => {
-            console.log("player disconnected", data);
+            console.log("Player disconnected", data);
             if (!data) {
                 return;
             }

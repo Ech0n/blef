@@ -5,6 +5,7 @@ import session from 'express-session';
 import { SocketEvents } from './types/socketEvents';
 import { v4 as uuidv4 } from 'uuid';
 import { IChecker } from './types/HandRankings';
+
 declare module 'express-session' {
     interface SessionData {
         uid: string;
@@ -40,11 +41,17 @@ interface Sockets {
     [key: string]: string;
 }
 
+interface OnlineStatus {
+    // Client Socket -> OnlineStatus
+    [key: string]: boolean;
+}
+
 let hosts: Hosts = {};
 let clients: Clients = {};
 let gameIds: GameIds = {};
 let usernames: Usernames = {};
 let sockets: Sockets = {};
+let onlineStatus: OnlineStatus = {};
 
 // TODO: Reconsider using sessionId as identifier. Pro: this would remove need for usernames map since one could just get the data from session stroage. Con: Security?
 
@@ -84,15 +91,17 @@ io.on('connection', (socket) => {
         if (!data && !session.username) {
             console.log('No user name provided!', data);
             throw 'No user name';
-            return;
         }
+
         const gameId: string = `${Math.floor(Math.random() * 2137) + 1}`;
         if (data) {
             session.username = data.username;
         }
+
         gameIds[gameId] = session.uid;
         clients[session.uid] = [];
         usernames[session.uid] = session.username;
+        onlineStatus[session.uid] = true;
         console.log('User ', session.username, ' created a game; id: ', gameId);
         socket.emit(SocketEvents.createGameToHost, {
             gameId: gameId,
@@ -105,6 +114,7 @@ io.on('connection', (socket) => {
         let gameId = data.gameId;
         session.username = data.username;
         usernames[session.uid] = session.username;
+        onlineStatus[session.uid] = true;
 
         if (!(gameId in gameIds)) {
             socket.emit(SocketEvents.joinGameToClient, false);
@@ -119,15 +129,17 @@ io.on('connection', (socket) => {
                 username: session.username,
                 uid: session.uid,
             });
-            let joinedPlayerList: { uid: string; username: string }[] = clients[
-                hostUid
-            ].map((id) => {
-                return { uid: id, username: usernames[id] };
+
+            let joinedPlayerList = clients[hostUid].map((id) => {
+                return { uid: id, username: usernames[id], isOnline: true };
             });
+
             joinedPlayerList.push({
                 uid: hostUid,
                 username: usernames[hostUid],
+                isOnline: true
             });
+
             socket.emit(SocketEvents.joinGameToClient, {
                 players: joinedPlayerList,
                 thisPlayerId: session.uid,
@@ -140,6 +152,7 @@ io.on('connection', (socket) => {
                 clientSocket.emit(SocketEvents.newPlayerJoinedGameToClient, {
                     username: session.username,
                     uid: session.uid,
+                    isOnline: onlineStatus[session.uid]
                 });
             }
         });
@@ -147,7 +160,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on(SocketEvents.playerLeftGameToServer, (data: string) => {
-        console.log('A user disconnected, player.id:' + data); // This is player.id
+        console.log('A user disconnected, player.id:' + data);
         if (session.id in hosts) {
             let hostUid = hosts[session.uid];
 
@@ -172,22 +185,6 @@ io.on('connection', (socket) => {
         socket.emit(SocketEvents.playerLeftGameToPlayers, { uid: session.uid });
     });
 
-    // socket.on('gameStartedToClient', (data: string) => {
-    //     if (socket.id in clients) {
-    //         for(let clientSocketId in clients[socket.id])
-    //         {
-    //             let clientSock = io.sockets.sockets.get(clientSocketId);
-    //             clientSock.emit
-    //         }
-    //         console.log('Game ', gameIds[socket.id], ' has been started');
-    //         let indexOfClient = clients[hostSock].indexOf(socket.id);
-    //         if (indexOfClient >= 0) {
-    //             clients[hostSock].splice(indexOfClient, 1);
-    //         }
-    //     }
-
-    //     socket.emit('playerLeftGameToPlayers');
-    // });
     socket.on(
         SocketEvents.startGameToServer,
         (data: { startingPlayerId: string }) => {
