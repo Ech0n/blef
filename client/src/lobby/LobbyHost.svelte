@@ -12,6 +12,7 @@
     let player: Player | null;
     let startinPlayerId: string
     let host:Player
+    let thisPlayerId:string;
 
     let gameView: Promise<typeof import('../game/GameHostView.svelte')> | undefined;
     let players: Player[] = [];
@@ -37,6 +38,8 @@
             gameId = data.gameId;
             host = new Player(data.hostId,usernameInput)
             players = [...players,host]
+            thisPlayerId = data.hostId
+
         });
 
         socket.on(SocketEvents.newPlayerJoinedGameToHost, (data: { username: string,uid:string }) => {
@@ -89,7 +92,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameView }}
-            <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players} {startinPlayerId}/>
+            <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players} {startinPlayerId} {thisPlayerId}/>
         {/await}
     {:else}
         Game ID: {#if gameId} {gameId} {/if}

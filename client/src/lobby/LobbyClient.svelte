@@ -16,6 +16,8 @@
     let player: Player;
     let startingPlayerId:string;
 
+    let thisPlayerId:string;
+
 
     const unsubscribe = playerStore.subscribe(value => {
         player = value!;
@@ -49,6 +51,7 @@
 
             if (data.thisPlayerId && data.thisPlayerName) { //This if is wrong. If data does not exist error should be thrown
                 players = [...players, new Player(data.thisPlayerId,data.thisPlayerName)];
+                thisPlayerId = data.thisPlayerId
             }
         });
 
@@ -96,7 +99,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameClient }}
-            <GameClient {gameId} {socket} on:leave={leaveGame} initialPlayerList={players} startinPlayerId={startingPlayerId}/>
+            <GameClient {gameId} {socket} on:leave={leaveGame} initialPlayerList={players} startinPlayerId={startingPlayerId} {thisPlayerId}/>
         {/await}
     {:else}
         Game ID: {#if gameId}{gameId}{/if}
