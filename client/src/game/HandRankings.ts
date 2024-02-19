@@ -1,4 +1,4 @@
-import { CardColor, Rank } from '../model/Card';
+import { CardColor, Rank, cardToRankTranslation } from '../model/Card';
 
 //TODO: Change this into somekind of predefined structure that can be easily initalized. Reconsider if this is even a correct way to count of carts
 type ColorDict = any;
@@ -32,17 +32,25 @@ function colorChecker(cards: CardDict, handInfo: HandInfo) {
 }
 
 function fourChecker(cards: CardDict, handInfo: HandInfo) {
-    return cards[handInfo.primaryCard][CardColor.colorless] >= 4;
+    return (
+        cards[cardToRankTranslation[handInfo.primaryCard].numeric][
+            CardColor.colorless
+        ] >= 4
+    );
 }
 
 function fullChecker(cards: CardDict, handInfo: HandInfo) {
     return (
-        cards[handInfo.primaryCard][CardColor.colorless] >= 3 &&
-        cards[handInfo.secondaryCard][CardColor.colorless] >= 2
+        cards[cardToRankTranslation[handInfo.primaryCard].numeric][
+            CardColor.colorless
+        ] >= 3 &&
+        cards[cardToRankTranslation[handInfo.secondaryCard].numeric][
+            CardColor.colorless
+        ] >= 2
     );
 }
 function stritChecker(cards: CardDict, handInfo: HandInfo) {
-    let startingCard: Rank = Rank[handInfo.startingCard as keyof typeof Rank];
+    let startingCard = cardToRankTranslation[handInfo.startingCard].numeric;
     for (let i = 0; i < 5; i++) {
         if (cards[startingCard - i][CardColor.colorless] == 0) {
             return false;
@@ -51,13 +59,21 @@ function stritChecker(cards: CardDict, handInfo: HandInfo) {
     return true;
 }
 function tripleChecker(cards: CardDict, handInfo: HandInfo) {
-    return cards[handInfo.primaryCard][CardColor.colorless] >= 3;
+    return (
+        cards[cardToRankTranslation[handInfo.primaryCard].numeric][
+            CardColor.colorless
+        ] >= 3
+    );
 }
 
 function doubleChecker(cards: CardDict, handInfo: HandInfo) {
     return (
-        cards[handInfo.primaryCard][CardColor.colorless] >= 2 &&
-        cards[handInfo.secondaryCard][CardColor.colorless] >= 2
+        cards[cardToRankTranslation[handInfo.primaryCard].numeric][
+            CardColor.colorless
+        ] >= 2 &&
+        cards[cardToRankTranslation[handInfo.secondaryCard].numeric][
+            CardColor.colorless
+        ] >= 2
     );
 }
 
@@ -65,7 +81,12 @@ function pairChecker(cards: CardDict, handInfo: HandInfo) {
     return cards[handInfo.primaryCard][CardColor.colorless] >= 2;
 }
 function oneChecker(cards: CardDict, handInfo: HandInfo) {
-    return cards[handInfo.primaryCard][CardColor.colorless] >= 1;
+    console.log('handInfo', handInfo);
+    return (
+        cards[cardToRankTranslation[handInfo.primaryCard].numeric][
+            CardColor.colorless
+        ] >= 1
+    );
 }
 
 export const checkFunctionsMap: Record<

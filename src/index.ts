@@ -171,7 +171,7 @@ io.on('connection', (socket) => {
         if (!data || !data.move) {
             throw 'No move data passed';
         }
-        console.log('passing on hit data: ', data.move);
+        // console.log('passing on hit data: ', data.move);
         //TODO: Some kidn of validation would be useful
 
         io.in(session.gameId).emit(SocketEvents.hit, data);
@@ -192,13 +192,32 @@ io.on('connection', (socket) => {
     });
 
     socket.on(SocketEvents.checkToPlayers, (payload) => {
-        if (roomHosts.get(session.gameId) != session.uid) {
+        if (roomHosts.get(session.gameId) != socket.id) {
             socket.emit(SocketEvents.gameStarted, false);
             console.log('Could not check, (user is not a host)');
             return;
         }
+        const clients = io.sockets.adapter.rooms.get(session.gameId);
+        if (!clients) {
+            return;
+        }
+        for (const clientId of clients) {
+            const clientSocket = io.sockets.sockets.get(clientId);
 
-        io.to(session.gameId).emit(SocketEvents.checkToPlayers, payload);
+            if (clientSocket) {
+                let newPayload = {
+                    newHand: payload.newHands[clientSocket.player.uid],
+                    players: payload.players,
+                };
+                console.log(
+                    'Sending data to client',
+                    clientSocket.player,
+                    newPayload,
+                    payload
+                );
+                clientSocket.emit(SocketEvents.checkToPlayers, newPayload);
+            }
+        }
     });
 });
 //TODO: Go through every exception throw and remove them or create class for them so it can be caught later

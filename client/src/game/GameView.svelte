@@ -23,6 +23,8 @@
     let showModal = false; // State for showing/hiding the modal
     let selectedHand; // Hold the selected hand from the modal
 
+    let mesg = (isHost)? "thisa host" : "this not a hosta"
+    console.log(mesg)
     onMount(() => {
         
         if (!socket) {
@@ -34,13 +36,26 @@
         });
 
         socket.on(SocketEvents.hit, (data: { move: any }) => {
+            // console.log("received hit data:", data.move, "; current player now: ", game.currentPlayer);
             game.hit(data.move);
             game = game
-            console.log("received hit data:", data.move, "; current player now: ", game.currentPlayer);
         });
 
-        socket.on(SocketEvents.checkToPlayers, () => {
-            game.check();
+        if(isHost)
+        {
+            socket.on(SocketEvents.checkToServer, (data) => {
+                let checkResult = game.validateCheck();
+                console.log("Valuidated check this is what goes further ",checkResult)
+
+                game = game
+                socket.emit(SocketEvents.checkToPlayers,checkResult)
+            });
+        }
+            
+
+        socket.on(SocketEvents.checkToPlayers, (data:any) => {
+            console.log("received check data:",data)
+            game.check(data);
             game = game
 
         });
@@ -59,19 +74,14 @@
         socket.emit(SocketEvents.checkToServer);
     }
 
-    function getBetName() {
-        if (!game.previousBet) {
-            return "<First move placeholder>";
-        }
-        return game.previousBet.constructor.name;
-    }
+
 </script>
 
 <h3>{#if gameId} Game ID: {gameId} {/if}</h3>
 <p>Players:</p>
 <ul>
-    {#each game.players as {name}}
-        <li>NAME: {name}</li>
+    {#each game.players as {name,loses}}
+        <li>NAME: {name} ❤️{5-loses}</li>
     {/each}
 </ul>
 {#if game.currentPlayer == thisPlayerId}
