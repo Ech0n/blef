@@ -1,5 +1,4 @@
-import { copyFileSync } from 'fs';
-import { CardColor, Rank } from '../../client/src/model/Card';
+import { CardColor, Rank } from '../model/Card';
 
 //TODO: Change this into somekind of predefined structure that can be easily initalized. Reconsider if this is even a correct way to count of carts
 type ColorDict = any;
@@ -39,7 +38,7 @@ export class ColorChecker implements IChecker {
     }
 }
 
-export class CarrotChecker implements IChecker {
+export class FourChecker implements IChecker {
     card: Rank;
     constructor(card: Rank) {
         this.card = card;
@@ -136,12 +135,10 @@ export class OneChecker implements IChecker {
     }
 }
 
-export const bets: Record<
-    string,
-    new (cardA: Rank, cardB: Rank, color: CardColor) => IChecker> = {
+export const bets: Record<string, new (cardA: Rank, cardB: Rank, color: CardColor) => IChecker> = {
     'royal': RoyalFlushChecker,
     'flush': FlushChecker,
-    'carrot': CarrotChecker,
+    'four': FourChecker,
     'full': FullChecker,
     'strit': StritChecker,
     'color': ColorChecker,

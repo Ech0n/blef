@@ -1,8 +1,7 @@
-import type { CardDict, IChecker } from '../../../src/types/HandRankings';
+import type { IChecker } from './HandRankings';
 import { Game } from './Game';
 import { Player } from '../model/Player';
 import { CardColor, type Card, Rank } from '../model/Card';
-import { start } from 'repl';
 
 let deckInitialization: Card[] = [];
 
@@ -37,22 +36,25 @@ export class GameServer extends Game {
             (el) => startingPlayerId == el.id
         );
     }
+
     checkAndDeal(): void {
         this.check();
         this.collectCards();
         this.dealCards();
         this.nextPlayer();
     }
+
     hit(bet: IChecker): void {
         //TODO: consider validation if bet is possible?
         this.previousBet = bet;
         this.nextPlayer();
     }
+
     nextPlayer(): void {
-        this.currentPlayerIndx =
-            (this.currentPlayerIndx + 1) % this.playerCount;
+        this.currentPlayerIndx = (this.currentPlayerIndx + 1) % this.playerCount;
         this.currentPlayer = this.players[this.currentPlayerIndx].id;
     }
+
     drawCards(numberOfCards: number): Card[] {
         if (numberOfCards > 5) {
             throw 'Drawing more than 5 cards is not a possibility';
@@ -69,6 +71,7 @@ export class GameServer extends Game {
         }
         return drawnCards;
     }
+
     shuffleDeck(): void {
         if (this.rejectedCards.length == 0) {
             throw 'Too much cards on players hands';
@@ -76,6 +79,7 @@ export class GameServer extends Game {
         this.deck = deck.slice();
         this.rejectedCards = [];
     }
+
     dealCards(): void {
         let totalCardsToDraw = this.players.reduce(
             (prev: number, player: Player) => player.loses + 1 + prev,

@@ -10,10 +10,10 @@
     let socket: Socket;
     let gameId: string;
     let player: Player | null;
-    let startinPlayerId: string
+    let startingPlayerId: string
     let host:Player
     let thisPlayerId: string;
-    let gameView: Promise<typeof import('../game/GameHostView.svelte')> | undefined;
+    let gameView: Promise<typeof import('../game/GameView.svelte')> | undefined;
     let players: Player[] = [];
 
 
@@ -71,7 +71,7 @@
 
         socket.on(SocketEvents.startGameToHost, (data: boolean) => {
             if (data) {
-                gameView = import('../game/GameHostView.svelte');
+                gameView = import('../game/GameView.svelte');
             }
         });
 
@@ -79,8 +79,8 @@
 
     function startGame(): void {
         //TODO: Randomize starting player?
-        startinPlayerId = players[0].id
-        socket.emit(SocketEvents.startGameToServer,{startingPlayerId:startinPlayerId});
+        startingPlayerId = players[0].id
+        socket.emit(SocketEvents.startGameToServer,{startingPlayerId: startingPlayerId});
     }
 
     function closeGame(): void {
@@ -94,7 +94,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameView }}
-            <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players} {startinPlayerId} {thisPlayerId}/>
+            <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players} {startingPlayerId} {thisPlayerId}/>
         {/await}
     {:else}
         Game ID: {#if gameId} {gameId} {/if}

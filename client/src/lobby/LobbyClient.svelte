@@ -11,7 +11,7 @@
     const dispatch = createEventDispatcher();
     let socket: Socket;
 
-    let gameView: Promise<typeof import('../game/GameClientView.svelte')> | undefined;
+    let gameView: Promise<typeof import('../game/GameView.svelte')> | undefined;
     let players: Player[] = [];
     let currentPlayer: Player;
     let startingPlayerId:string;
@@ -67,8 +67,8 @@
             console.log("reveived game start message",data)
             if (data && data.startingPlayerId) {
                 console.log("game start good")
-                startingPlayerId = data.startingPlayerId
-                gameView = import('../game/GameClientView.svelte');
+                startingPlayerId = data.startingPlayerId;
+                gameView = import("../game/GameView.svelte")
             }
         });
 
@@ -102,7 +102,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameClient }}
-            <GameClient {gameId} {socket} on:leave={leaveGame} initialPlayerList={players} startinPlayerId={startingPlayerId} {thisPlayerId}/>
+            <GameClient {gameId} {socket} on:leave={leaveGame} initialPlayerList={players} startingPlayerId={startingPlayerId} {thisPlayerId}/>
         {/await}
         lista graczy
     {:else}

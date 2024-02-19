@@ -7,6 +7,7 @@ export class Game {
     lostPlayers: Player[];
     currentPlayer: string;
     hand: Card[];
+    
     constructor(players: Player[], startingPlayerId: string) {
         this.playerCount = players.length;
         this.players = structuredClone(players);
