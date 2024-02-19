@@ -4,8 +4,8 @@
     import { createEventDispatcher } from 'svelte';
     import { playerStore } from '../game/stores';
     import { SocketEvents } from '../../../src/types/socketEvents';
-    import { Player } from '../../../definitions/player';
-../../../common/player
+    import { Player } from '../../../common/player';
+
     export let usernameInput:string;
     export let gameId: string;
     const dispatch = createEventDispatcher();

@@ -4,7 +4,7 @@
     import type { Socket } from 'socket.io-client';
     import { GameServer } from './GameServer';
     import { SocketEvents } from '../../../src/types/socketEvents';
-    import { Player } from '../../../definitions/player';
+    import { Player } from '../../../common/player';
     import CardModal from './CardModals.svelte';
     import { Game } from './Game';
 

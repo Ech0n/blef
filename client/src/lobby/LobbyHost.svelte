@@ -1,9 +1,9 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
     import { io, Socket } from "socket.io-client";
-    import { Player } from '../../../definitions/player';
-    import { playerStore../../../common/player
+    import { Player } from '../../../common/player';
     import {SocketEvents} from '../../../src/types/socketEvents'
+    import { playerStore } from '../game/stores';
 
     export let usernameInput:string;
     
