@@ -4,15 +4,17 @@
     import { createEventDispatcher } from 'svelte';
     import { Player } from '../model/Player';
     import { playerStore } from '../game/stores';
+    import { SocketEvents } from '../../../src/types/socketEvents';
 
     export let usernameInput:string;
     export let gameId: string;
     const dispatch = createEventDispatcher();
     let socket: Socket;
 
-    let gameView: Promise<typeof import('../game/GameClient.svelte')> | undefined;
+    let gameView: Promise<typeof import('../game/GameClientView.svelte')> | undefined;
     let players: Player[] = [];
     let player: Player;
+    let startingPlayerId:string;
 
 
     const unsubscribe = playerStore.subscribe(value => {
@@ -49,9 +51,12 @@
             players = [...players, new Player(data.uid,data.username)];
         })
 
-        socket.on("startGameToClient", (data: { start: boolean }) => {
-            if (data && data.start) {
-                gameView = import('../game/GameClient.svelte');
+        socket.on(SocketEvents.startGameToClients, (data)  => {
+            console.log("reveived game start message",data)
+            if (data && data.startingPlayerId) {
+                console.log("game start good")
+                startingPlayerId = data.startingPlayerId
+                gameView = import('../game/GameClientView.svelte');
             }
         });
 
@@ -85,7 +90,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameClient }}
-            <GameClient {gameId} {socket} on:leave={leaveGame} />
+            <GameClient {gameId} {socket} on:leave={leaveGame} initialPlayerList={players} startinPlayerId={startingPlayerId}/>
         {/await}
     {:else}
         Game ID: {#if gameId}{gameId}{/if}

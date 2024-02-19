@@ -1,6 +1,4 @@
 import type { CardDict, IChecker } from './HandRankings';
-const { bets } = require('./HandRankings');
-import type * as Types from './HandRankings';
 import { Game } from './Game';
 import { Player } from '../model/Player';
 import { CardColor, type Card, Rank } from '../model/Card';
@@ -28,10 +26,9 @@ export class GameServer extends Game {
     previousBet!: IChecker;
     isFinished: boolean = false;
 
-    constructor(players: Player[]) {
-        super(players);
+    constructor(players: Player[], startingPlayerId: string) {
+        super(players, startingPlayerId);
         this.hands = {};
-        //TODO: Randomize starting player?
         this.deck = deck.slice();
         this.rejectedCards = [];
     }

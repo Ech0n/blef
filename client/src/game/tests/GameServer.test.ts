@@ -24,7 +24,7 @@ class MockBetFalse implements IChecker {
 }
 
 beforeEach(() => {
-    gs = new GameServer(playerList);
+    gs = new GameServer(playerList, '0');
     return gs;
 });
 

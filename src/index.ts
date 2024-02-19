@@ -3,9 +3,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import http from 'http';
 import session from 'express-session';
 import { SocketEvents } from './types/socketEvents';
-
-const { v4: uuidv4 } = require('uuid');
-
+import { v4 as uuidv4 } from 'uuid';
 declare module 'express-session' {
     interface SessionData {
         uid: string;
@@ -189,7 +187,33 @@ io.on('connection', (socket) => {
 
     //     socket.emit('playerLeftGameToPlayers');
     // });
+    socket.on(
+        SocketEvents.startGameToServer,
+        (data: { startingPlayerId: string }) => {
+            if (!data || !data.startingPlayerId) {
+                throw 'No startin player id message!';
+            }
+            if (!clients.hasOwnProperty(session.uid)) {
+                socket.emit(SocketEvents.startGameToHost, false);
+                console.log('Could not start the game');
+                return;
+            }
 
+            socket.emit(SocketEvents.startGameToHost, true);
+            for (let clt of clients[session.uid]) {
+                console.log('Trying to find client ', clt);
+                const clientSocket = io.sockets.sockets.get(sockets[clt]);
+                if (!clientSocket) {
+                    throw 'no clietn socket :(';
+                }
+                let payload = {
+                    startingPlayerId: data.startingPlayerId,
+                };
+                clientSocket.emit(SocketEvents.startGameToClients, payload);
+                console.log('Sent start game to: ', clt, ' payLoad: ', payload);
+            }
+        }
+    );
     socket.on(SocketEvents.hitToHost, (data: string) => {});
     socket.on(SocketEvents.checkToHost, (data: string) => {});
 

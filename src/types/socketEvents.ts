@@ -11,4 +11,8 @@ export enum SocketEvents {
     checkToHost = 'checkToHost',
     gameUpdateNextPlayerToClient = 'gameUpdateNextPlayerToClient',
     gameUpdateEndOfRoundAndStartOfNewRountToCLient = 'gameUpdateEndOfRoundAndStartOfNewRountToCLient',
+    startGameToServer = 'startGameToServer',
+    startGameToClients = 'startGameToClients',
+    startGameToHost = 'startGameToHost',
+    gameClosedToServer = 'gameClosedToServer',
 }

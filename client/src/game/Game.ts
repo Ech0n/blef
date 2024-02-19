@@ -5,13 +5,13 @@ export class Game {
     playerCount: number;
     players: Player[];
     lostPlayers: Player[];
-    currentPlayer: number;
+    currentPlayer: string;
     hand: Card[];
-    constructor(players: Player[]) {
+    constructor(players: Player[], startingPlayerId: string) {
         this.playerCount = players.length;
         this.players = structuredClone(players);
         this.hand = [];
-        this.currentPlayer = 0;
+        this.currentPlayer = startingPlayerId;
         this.lostPlayers = [];
     }
 }
