@@ -2,9 +2,9 @@
     import { onMount, onDestroy } from 'svelte';
     import { io, type Socket } from "socket.io-client";
     import { createEventDispatcher } from 'svelte';
-    import { Player } from '../model/Player';
     import { playerStore } from '../game/stores';
     import { SocketEvents } from '../../../src/types/socketEvents';
+    import { Player } from '../../../definitions/player';
 
     export let usernameInput:string;
     export let gameId: string;
@@ -79,7 +79,7 @@
 
             // Tag the disconnected player as not connected
             players = players.map(player => {
-                if (player.id === data.playerId) {
+                if (player.uid === data.playerId) {
                     return { ...player, isOnline: false };
                 }
                 return player;
@@ -89,7 +89,7 @@
     });
 
     function leaveGame(): void {
-        socket.emit(SocketEvents.playerLeftGame, currentPlayer.id); 
+        socket.emit(SocketEvents.playerLeftGame, currentPlayer.uid); 
         players = [];
 
         dispatch("leave"); // To parent
@@ -110,9 +110,9 @@
             <ul>
                 {#each players as player}
                     <li>
-                        <strong>ID:</strong> {player.id}  <br>
-                        <strong>NAME:</strong> {player.name}  <br>
-                        <strong>ONLINE:</strong> {(player.isOnline || player.name == currentPlayer.name) ? 'Yes' : 'No'} <!-- I know this is shit but I dont care -->
+                        <strong>ID:</strong> {player.uid}  <br>
+                        <strong>NAME:</strong> {player.username}  <br>
+                        <strong>ONLINE:</strong> {(player.isOnline || player.username == currentPlayer.username) ? 'Yes' : 'No'} <!-- I know this is shit but I dont care -->
                     </li>
                 {/each}
             </ul>

@@ -1,8 +1,8 @@
 import type { IChecker } from './HandRankings';
 import { Game } from './Game';
-import { Player } from '../model/Player';
 import { CardColor, type Card, Rank } from '../model/Card';
 import { checkFunctionsMap } from './HandRankings';
+import { Player } from '../../../definitions/player';
 
 let deckInitialization: Card[] = [];
 type checkInfo = { newHands: any; players: Player[] };
@@ -74,7 +74,7 @@ export class GameServer extends Game {
         this.shuffleDeck();
         this.hands = new Map<string, Card[]>();
         this.players.forEach((player: Player) => {
-            this.hands.set(player.id, this.drawCards(1 + player.loses));
+            this.hands.set(player.uid, this.drawCards(1 + player.loses));
         });
     }
 

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
     import { io, Socket } from "socket.io-client";
-    import { Player } from '../model/Player';
+    import { Player } from '../../../definitions/player';
     import { playerStore } from '../game/stores';
     import {SocketEvents} from '../../../src/types/socketEvents'
 
@@ -61,7 +61,7 @@
 
             // Tag the disconnected player as not connected
             players = players.map(player => {
-                if (player.id === data.playerId) {
+                if (player.uid === data.playerId) {
                     return { ...player, isOnline: false };
                 }
                 return player;
@@ -78,7 +78,7 @@
 
     function startGame(): void {
         //TODO: Randomize starting player?
-        startingPlayerId = players[0].id
+        startingPlayerId = players[0].uid
         socket.emit(SocketEvents.gameStarted,{startingPlayerId: startingPlayerId});
     }
 
@@ -103,8 +103,8 @@
         <ul>
             {#each players as player}
                 <li>
-                    <strong>ID:</strong> {player.id}  <br>
-                    <strong>NAME:</strong> {player.name} <br>
+                    <strong>ID:</strong> {player.uid}  <br>
+                    <strong>NAME:</strong> {player.username} <br>
                     <strong>ONLINE:</strong> {player.isOnline ? 'Yes' : 'No'}
                 </li>
             {/each}

@@ -2,9 +2,9 @@
     import { onMount, createEventDispatcher } from 'svelte';
     import { io } from "socket.io-client";
     import type { Socket } from 'socket.io-client';
-    import type { Player } from '../model/Player';
     import { GameServer } from './GameServer';
     import { SocketEvents } from '../../../src/types/socketEvents';
+    import { Player } from '../../../definitions/player';
     import * as HandRankings from '../../../src/types/HandRankings';
     import CardModal from './CardModals.svelte'; // Make sure this path is correct
     import { Game } from './Game';
