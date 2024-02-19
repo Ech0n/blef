@@ -11,7 +11,7 @@
     let gameId: string;
     let player: Player | null;
     let startinPlayerId: string
-    let host: Player
+    let host:Player
 
     let gameView: Promise<typeof import('../game/GameHostView.svelte')> | undefined;
     let players: Player[] = [];
@@ -32,7 +32,7 @@
 
         socket.emit(SocketEvents.createGameToServer, {username: usernameInput});
 
-        socket.on(SocketEvents.createGameToHost, (data: {gameId: string, hostId: string}) => {
+        socket.on(SocketEvents.createGameToHost, (data: {gameId:string,hostId:string}) => {
             console.log("User created a game, its id is:", data);
             gameId = data.gameId;
             host = new Player(data.hostId, usernameInput)
@@ -40,20 +40,20 @@
             players = [...players, host]
         });
 
-        socket.on(SocketEvents.newPlayerJoinedGameToHost, (data: {username: string, uid: string}) => {
+        socket.on(SocketEvents.newPlayerJoinedGameToHost, (data: {username: string, uid: string, isOnline: boolean }) => {
             console.log("Join event", data);
             if (!data) {
                 throw "No data from server"
             }
 
             let newPlayer: Player = new Player(data.uid, data.username);
-            newPlayer.isOnline = true;
+            newPlayer.isOnline = data.isOnline;
 
             players = [...players, newPlayer];
         });
 
         socket.on(SocketEvents.playerLeftGameToPlayers, (data: { playerId: string }) => {
-            console.log("Player disconnected", data);
+            console.log("player disconnected", data);
             if (!data) {
                 return;
             }

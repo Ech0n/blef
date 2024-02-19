@@ -2,6 +2,7 @@ import type { CardDict, IChecker } from '../../../src/types/HandRankings';
 import { Game } from './Game';
 import { Player } from '../model/Player';
 import { CardColor, type Card, Rank } from '../model/Card';
+import { start } from 'repl';
 
 let deckInitialization: Card[] = [];
 
@@ -25,12 +26,16 @@ export class GameServer extends Game {
     rejectedCards: Card[];
     previousBet!: IChecker;
     isFinished: boolean = false;
+    currentPlayerIndx: number;
 
     constructor(players: Player[], startingPlayerId: string) {
         super(players, startingPlayerId);
         this.hands = {};
         this.deck = deck.slice();
         this.rejectedCards = [];
+        this.currentPlayerIndx = this.players.findIndex(
+            (el) => startingPlayerId == el.id
+        );
     }
     checkAndDeal(): void {
         this.check();
@@ -44,7 +49,9 @@ export class GameServer extends Game {
         this.nextPlayer();
     }
     nextPlayer(): void {
-        this.currentPlayer = (this.currentPlayer + 1) % this.playerCount;
+        this.currentPlayerIndx =
+            (this.currentPlayerIndx + 1) % this.playerCount;
+        this.currentPlayer = this.players[this.currentPlayerIndx].id;
     }
     drawCards(numberOfCards: number): Card[] {
         if (numberOfCards > 5) {
@@ -111,15 +118,16 @@ export class GameServer extends Game {
 
         let wasBetFound = this.previousBet.check(countedCards);
         if (wasBetFound) {
-            this.players[this.currentPlayer].loses += 1;
-            if (this.players[this.currentPlayer].loses == 4) {
-                this.lostPlayers.push(this.players[this.currentPlayer]);
-                this.players.slice(this.currentPlayer, 1);
+            this.players[this.currentPlayerIndx].loses += 1;
+            if (this.players[this.currentPlayerIndx].loses == 4) {
+                this.lostPlayers.push(this.players[this.currentPlayerIndx]);
+                this.players.slice(this.currentPlayerIndx, 1);
                 this.playerCount -= 1;
             }
         } else {
             const prevPlayer =
-                (this.currentPlayer - 1 + this.playerCount) % this.playerCount;
+                (this.currentPlayerIndx - 1 + this.playerCount) %
+                this.playerCount;
             this.players[prevPlayer].loses += 1;
         }
     }
