@@ -41,7 +41,8 @@ function fullChecker(cards: CardDict, handInfo: HandInfo) {
         cards[handInfo.secondaryCard][CardColor.colorless] >= 2
     );
 }
-function stritChecker(cards: CardDict, handInfo: HandInfo) {
+
+function streetChecker(cards: CardDict, handInfo: HandInfo) {
     let startingCard: Rank = Rank[handInfo.startingCard as keyof typeof Rank];
     for (let i = 0; i < 5; i++) {
         if (cards[startingCard - i][CardColor.colorless] == 0) {
@@ -50,7 +51,8 @@ function stritChecker(cards: CardDict, handInfo: HandInfo) {
     }
     return true;
 }
-function tripleChecker(cards: CardDict, handInfo: HandInfo) {
+
+function threeChecker(cards: CardDict, handInfo: HandInfo) {
     return cards[handInfo.primaryCard][CardColor.colorless] >= 3;
 }
 
@@ -64,6 +66,7 @@ function doubleChecker(cards: CardDict, handInfo: HandInfo) {
 function pairChecker(cards: CardDict, handInfo: HandInfo) {
     return cards[handInfo.primaryCard][CardColor.colorless] >= 2;
 }
+
 function oneChecker(cards: CardDict, handInfo: HandInfo) {
     return cards[handInfo.primaryCard][CardColor.colorless] >= 1;
 }
@@ -77,8 +80,8 @@ export const checkFunctionsMap: Record<
     'Color': colorChecker,
     'Four': fourChecker,
     'Full': fullChecker,
-    'Street': stritChecker,
-    'Triple': tripleChecker,
+    'Street': streetChecker,
+    'Three': threeChecker,
     'Double': doubleChecker,
     'Pair': pairChecker,
     'One': oneChecker,

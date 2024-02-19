@@ -5,7 +5,6 @@
     import type { Player } from '../model/Player';
     import { GameServer } from './GameServer';
     import { SocketEvents } from '../../../src/types/socketEvents';
-    import * as HandRankings from '../../../src/types/HandRankings';
     import CardModal from './CardModals.svelte'; // Make sure this path is correct
     import { Game } from './Game';
 
@@ -18,10 +17,15 @@
 
     const dispatch = createEventDispatcher();
     const serverUrl: string = "http://localhost:5678";
-    let game: Game =(isHost)? new GameServer(initialPlayerList,startingPlayerId) : new Game(initialPlayerList,startingPlayerId)
+    let game: Game = (isHost) ? new GameServer(initialPlayerList, startingPlayerId) : new Game(initialPlayerList, startingPlayerId)
 
-    let showModal = false; // State for showing/hiding the modal
-    let selectedHand; // Hold the selected hand from the modal
+    let showModal = false; 
+    let selectedHand;
+
+    const cardFullNames: { [key: string]: string } = {
+        '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six', '7': 'Seven', '8': 'Eight', 
+        '9': 'Nine', '10': 'Ten', 'J': 'Jack', 'Q': 'Queen', 'K': 'King', 'A': 'Ace'
+    };
 
     onMount(() => {
         
@@ -35,8 +39,8 @@
 
         socket.on(SocketEvents.hit, (data: { move: any }) => {
             game.hit(data.move);
-            game = game
-            console.log("received hit data:", data.move, "; current player now: ", game.currentPlayer);
+            game = game; // As scuffed as this is, it reloads data
+            console.log("Received hit data:", data.move, "; Current player now: ", game.currentPlayer);
         });
 
         socket.on(SocketEvents.checkToPlayers, () => {
@@ -55,16 +59,42 @@
         showModal = false; 
     }
 
-    function check() {
+    function check(): void {
         socket.emit(SocketEvents.checkToServer);
     }
 
-    function getBetName() {
+    function getBetName(): string {
         if (!game.previousBet) {
-            return "<First move placeholder>";
+            return "Error has occured.";
         }
-        return game.previousBet.constructor.name;
+
+        const { selectedRanking, primaryCard, secondaryCard, selectedColor, startingCard } = game.previousBet;
+        let currentBet: string = selectedRanking;
+
+        if (['One', 'Pair', 'Three', 'Four'].includes(selectedRanking)) {
+            let cardName = cardFullNames[primaryCard];
+            return currentBet + " " + cardName + ((selectedRanking !== 'One') ? "s" : ""); 
+        }
+
+
+        if (['Double', 'Full'].includes(selectedRanking)) {
+            let primaryCardName = cardFullNames[primaryCard];
+            let secondaryCardName = cardFullNames[secondaryCard]
+            return currentBet + " of 3 " + primaryCardName + " and 2 " + secondaryCardName; 
+        }
+
+        if (['Flush', 'Street'].includes(selectedRanking)) {
+            let cardName = cardFullNames[startingCard];
+            return currentBet + " starting from " + cardName + (selectedRanking === 'Flush') ? (" in color " + selectedColor) : "";
+        }
+
+        if (selectedRanking === 'Royal') {
+            return selectedRanking + " Flush of color " + selectedColor;
+        }
+
+        return selectedRanking;
     }
+
 </script>
 
 <h3>{#if gameId} Game ID: {gameId} {/if}</h3>
@@ -82,7 +112,9 @@
 
 <p>Bet:</p>
 {#if game.previousBet}
-    {game.previousBet.selectedRanking}
+    {getBetName()}
+    {:else}
+    No best has been made yet
 {/if}
 {#if showModal}
     <CardModal on:close={() => showModal = false} on:select={handleBetSelection} />

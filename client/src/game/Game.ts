@@ -28,8 +28,7 @@ export class Game {
     }
 
     nextPlayer(): void {
-        this.currentPlayerIndx =
-            (this.currentPlayerIndx + 1) % this.playerCount;
+        this.currentPlayerIndx = (this.currentPlayerIndx + 1) % this.playerCount;
         this.currentPlayer = this.players[this.currentPlayerIndx].id;
     }
 
