@@ -5,6 +5,7 @@ import { CardColor, type Card, Rank } from '../model/Card';
 import { checkFunctionsMap } from './HandRankings';
 
 let deckInitialization: Card[] = [];
+type checkInfo = { newHands: any; players: Player[] };
 
 for (let card in Rank) {
     if (isNaN(Number(card))) {
@@ -21,21 +22,17 @@ for (let card in Rank) {
 export const deck: Card[] = deckInitialization;
 
 export class GameServer extends Game {
-    hands: { [playerId: string]: Card[] };
+    hands: Map<string, Card[]>;
     deck: Card[];
-    rejectedCards: Card[];
     isFinished: boolean = false;
 
     constructor(players: Player[], startingPlayerId: string) {
         super(players, startingPlayerId);
-        this.hands = {};
+        this.hands = new Map<string, Card[]>();
         this.deck = deck.slice();
-        this.rejectedCards = [];
     }
 
     checkAndDeal(): void {
-        this.check();
-        this.collectCards();
         this.dealCards();
         this.nextPlayer();
     }
@@ -54,36 +51,34 @@ export class GameServer extends Game {
             );
             drawnCards.push(this.deck.splice(randomIndex, 1)[0]);
         }
+        console.log('drawn cards ', drawnCards);
         return drawnCards;
     }
 
     shuffleDeck(): void {
-        if (this.rejectedCards.length == 0) {
-            throw 'Too much cards on players hands';
-        }
         this.deck = deck.slice();
-        this.rejectedCards = [];
     }
 
     dealCards(): void {
-        let totalCardsToDraw = this.players.reduce(
-            (prev: number, player: Player) => player.loses + 1 + prev,
-            0
-        );
+        // let totalCardsToDraw = this.players.reduce(
+        //     (prev: number, player: Player) => player.loses + 1 + prev,
+        //     0
+        // );
 
-        if (totalCardsToDraw > this.deck.length) {
-            if (this.rejectedCards.length < totalCardsToDraw) {
-                throw 'Now enough cards to draw from';
-            }
-            this.shuffleDeck();
-        }
-        this.hands = {};
+        // if (totalCardsToDraw > this.deck.length) {
+        //     if (this.rejectedCards.length < totalCardsToDraw) {
+        //         throw 'Now enough cards to draw from';
+        //     }
+        //     this.shuffleDeck();
+        // }
+        this.shuffleDeck();
+        this.hands = new Map<string, Card[]>();
         this.players.forEach((player: Player) => {
-            this.hands[player.id] = this.drawCards(1 + player.loses);
+            this.hands.set(player.id, this.drawCards(1 + player.loses));
         });
     }
 
-    check(data: { newHand: Card[]; newCurrentPlayer: string }): void {
+    check(data?: { newHand: Card[]; players: Player[] }): void {
         if (!this.previousBet) {
             throw 'There is no bet';
         }
@@ -100,10 +95,13 @@ export class GameServer extends Game {
         }
 
         for (const player in this.hands) {
-            this.hands[player].forEach((card: Card) => {
-                countedCards[card[0]][card[1]]++;
-                countedCards[card[0]][CardColor.colorless]++;
-            });
+            let hands = this.hands.get(player);
+            if (hands) {
+                hands.forEach((card: Card) => {
+                    countedCards[card[0]][card[1]]++;
+                    countedCards[card[0]][CardColor.colorless]++;
+                });
+            }
         }
         //end of cards counting-------
 
@@ -112,27 +110,30 @@ export class GameServer extends Game {
             countedCards,
             this.previousBet
         );
-        if (wasBetFound) {
-            this.players[this.currentPlayerIndx].loses += 1;
-            if (this.players[this.currentPlayerIndx].loses == 4) {
-                this.eliminatedPlayers.push(
-                    this.players[this.currentPlayerIndx]
-                );
-                this.players.slice(this.currentPlayerIndx, 1);
-                this.playerCount -= 1;
-            }
-        } else {
+        if (!wasBetFound) {
             const prevPlayer =
                 (this.currentPlayerIndx - 1 + this.playerCount) %
                 this.playerCount;
-            this.players[prevPlayer].loses += 1;
+            this.currentPlayerIndx = prevPlayer;
+            this.currentPlayer = this.players[this.currentPlayerIndx].id;
+        }
+        this.players[this.currentPlayerIndx].loses += 1;
+        if (this.players[this.currentPlayerIndx].loses == 4) {
+            this.eliminatedPlayers.push(this.players[this.currentPlayerIndx]);
+            this.players.slice(this.currentPlayerIndx, 1);
+            this.playerCount -= 1;
+            this.currentPlayerIndx -= 1;
+            this.currentPlayer = this.players[this.currentPlayerIndx].id;
         }
     }
 
-    collectCards(): void {
-        for (const player in this.hands) {
-            this.rejectedCards = [...this.rejectedCards, ...this.hands[player]];
-            this.hands[player] = [];
-        }
+    validateCheck(): checkInfo {
+        this.check();
+        this.dealCards();
+        console.log('this hands ', this.hands);
+        return {
+            newHands: Object.fromEntries(this.hands),
+            players: this.players,
+        };
     }
 }

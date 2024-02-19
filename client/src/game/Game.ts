@@ -1,5 +1,6 @@
 import type { Card } from '../model/Card';
 import { Player } from '../model/Player';
+type checkInfo = { newHands: any; players: Player[] };
 
 export class Game {
     playerCount: number;
@@ -32,8 +33,16 @@ export class Game {
         this.currentPlayer = this.players[this.currentPlayerIndx].id;
     }
 
-    check(data: { newHand: Card[]; newCurrentPlayer: string }): void {
+    check(data?: { newHand: Card[]; players: Player[] }): void {
+        if (!data) {
+            return;
+        }
         this.hand = data.newHand;
-        this.currentPlayer = data.newCurrentPlayer;
+        this.players = data.players;
+        this.playerCount = this.players.length;
+    }
+    validateCheck(): checkInfo | undefined {
+        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
+        return;
     }
 }

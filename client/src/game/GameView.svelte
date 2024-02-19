@@ -17,16 +17,18 @@
 
     const dispatch = createEventDispatcher();
     const serverUrl: string = "http://localhost:5678";
-    let game: Game = (isHost) ? new GameServer(initialPlayerList, startingPlayerId) : new Game(initialPlayerList, startingPlayerId)
+    let game: Game = (isHost) ? new GameServer(initialPlayerList, startingPlayerId) : new Game(initialPlayerList, startingPlayerId);
 
-    let showModal = false; 
-    let selectedHand;
+    let showModal = false; // State for showing/hiding the modal
+    let selectedHand; // Hold the selected hand from the modal
 
     const cardFullNames: { [key: string]: string } = {
         '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six', '7': 'Seven', '8': 'Eight', 
         '9': 'Nine', '10': 'Ten', 'J': 'Jack', 'Q': 'Queen', 'K': 'King', 'A': 'Ace'
     };
 
+    let mesg = (isHost)? "thisa host" : "this not a hosta"
+    console.log(mesg)
     onMount(() => {
         
         if (!socket) {
@@ -38,13 +40,26 @@
         });
 
         socket.on(SocketEvents.hit, (data: { move: any }) => {
+            // console.log("received hit data:", data.move, "; current player now: ", game.currentPlayer);
             game.hit(data.move);
-            game = game; // As scuffed as this is, it reloads data
-            console.log("Received hit data:", data.move, "; Current player now: ", game.currentPlayer);
+            game = game
         });
 
-        socket.on(SocketEvents.checkToPlayers, () => {
-            game.check();
+        if(isHost)
+        {
+            socket.on(SocketEvents.checkToServer, (data) => {
+                let checkResult = game.validateCheck();
+                console.log("Valuidated check this is what goes further ",checkResult)
+
+                game = game
+                socket.emit(SocketEvents.checkToPlayers,checkResult)
+            });
+        }
+            
+
+        socket.on(SocketEvents.checkToPlayers, (data:any) => {
+            console.log("received check data:",data)
+            game.check(data);
             game = game
 
         });
@@ -100,8 +115,8 @@
 <h3>{#if gameId} Game ID: {gameId} {/if}</h3>
 <p>Players:</p>
 <ul>
-    {#each game.players as {name}}
-        <li>NAME: {name}</li>
+    {#each game.players as {name,loses}}
+        <li>NAME: {name} ❤️{5-loses}</li>
     {/each}
 </ul>
 {#if game.currentPlayer == thisPlayerId}
