@@ -32,10 +32,10 @@
         const serverUrl: string = "http://localhost:5678";
         socket = io(serverUrl);
 
-        socket.emit(SocketEvents.joinGameToServer, {gameId:gameId, username:usernameInput} );
+        socket.emit(SocketEvents.joinGame, {gameId:gameId, username:usernameInput} );
 
         // Listen for messages from the server
-        socket.on(SocketEvents.joinGameToClient,
+        socket.on(SocketEvents.joinGame,
         (data: { players?: {uid: string, username: string, isOnline: boolean} []; thisPlayerId: string; thisPlayerName: string; }) => {
             console.log(data)
             if (!data) {
@@ -56,14 +56,14 @@
             }
         });
 
-        socket.on(SocketEvents.newPlayerJoinedGameToClient, (data: {username:string; uid:string} ) => {
+        socket.on(SocketEvents.newPlayerJoined, (data: {username:string; uid:string} ) => {
             console.log("New player in lobby name:", data.username)
             let newPlayer = new Player(data.uid, data.username);
             newPlayer.isOnline = true;
             players = [...players, newPlayer];
         })
 
-        socket.on(SocketEvents.startGameToClients, (data)  => {
+        socket.on(SocketEvents.gameStarted, (data)  => {
             console.log("reveived game start message",data)
             if (data && data.startingPlayerId) {
                 console.log("game start good")
@@ -72,7 +72,7 @@
             }
         });
 
-        socket.on(SocketEvents.playerLeftGameToPlayers, (data: { playerId: string }) => { // Players = Host and Clients
+        socket.on(SocketEvents.playerLeftGame, (data: { playerId: string }) => { // Players = Host and Clients
             console.log("Player disconnected", data);
             if (!data) {
                 return;
@@ -90,7 +90,7 @@
     });
 
     function leaveGame(): void {
-        socket.emit(SocketEvents.playerLeftGameToServer, currentPlayer.id); 
+        socket.emit(SocketEvents.playerLeftGame, currentPlayer.id); 
         players = [];
 
         dispatch("leave"); // To parent

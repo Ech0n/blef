@@ -29,7 +29,7 @@
             dispatch('update', data);
         });
 
-        socket.on(SocketEvents.hitToPlayers, (data: { move: HandRankings.IChecker }) => {
+        socket.on(SocketEvents.hit, (data: { move: HandRankings.IChecker }) => {
             let move = new HandRankings.OneChecker(data.move.high);
             game.hit(move);
             console.log("received hit data:", data.move, "; current player now: ", game.currentPlayer);
@@ -49,7 +49,7 @@
         const { detail } = event; // get the selected hand details
         selectedHand = detail; // Assuming the detail contains the hand selection information
         // You can now use selectedHand to make a move or bet in your game
-        socket.emit(SocketEvents.hitToServer, { move: selectedHand }); // Adjust according to your data structure
+        socket.emit(SocketEvents.hit, { move: selectedHand }); // Adjust according to your data structure
         closeCardModal();  // Close the modal after selection
     }
 

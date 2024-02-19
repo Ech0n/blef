@@ -13,6 +13,14 @@ declare module 'express-session' {
     }
 }
 
+type Player = { username: string; uid: string; isOnline: boolean };
+
+declare module 'socket.io' {
+    interface Socket {
+        player: Player;
+    }
+}
+
 const port = process.env.PORT || 5678;
 
 // This will also require a refactor
@@ -53,6 +61,11 @@ let usernames: Usernames = {};
 let sockets: Sockets = {};
 let onlineStatus: OnlineStatus = {};
 
+let rooms = new Set<string>();
+let roomHosts = new Map<string, string>();
+// session.uid -> roomId/gameId
+// let roomIds = new Map<string, string>();
+
 // TODO: Reconsider using sessionId as identifier. Pro: this would remove need for usernames map since one could just get the data from session stroage. Con: Security?
 
 const server = http.createServer(app).listen(port, () => {
@@ -84,180 +97,146 @@ io.on('connection', (socket) => {
     const req: any = socket.request;
     const session = req.session;
     const sessionId = req.sessionID;
-    session.uid = uuidv4();
-    sockets[session.uid] = socket.id;
+    if (!session.uid) {
+        session.uid = uuidv4();
+    }
 
-    socket.on(SocketEvents.createGameToServer, (data) => {
+    socket.on(SocketEvents.createGame, (data) => {
         if (!data && !session.username) {
             console.log('No user name provided!', data);
             throw 'No user name';
         }
+        session.username = data.username;
 
         const gameId: string = `${Math.floor(Math.random() * 2137) + 1}`;
-        if (data) {
-            session.username = data.username;
-        }
+        rooms.add(gameId);
+        roomHosts.set(gameId, socket.id);
+        // roomIds.set(session.uid, gameId);
+        socket.join(gameId);
+        session.gameId = gameId;
 
-        gameIds[gameId] = session.uid;
-        clients[session.uid] = [];
-        usernames[session.uid] = session.username;
-        onlineStatus[session.uid] = true;
-        console.log('User ', session.username, ' created a game; id: ', gameId);
-        socket.emit(SocketEvents.createGameToHost, {
+        socket.player = {
+            username: session.username,
+            uid: session.uid,
+            isOnline: true,
+        };
+
+        socket.emit(SocketEvents.createGame, {
             gameId: gameId,
             hostId: session.uid,
         });
     });
 
-    socket.on(SocketEvents.joinGameToServer, (data) => {
-        console.log('Received message from client:', data);
+    socket.on(SocketEvents.joinGame, (data) => {
+        if (!data || !data.gameId || !data.username) {
+            socket.emit(SocketEvents.joinGame, {
+                err: 'Wrong or no payload provided',
+            });
+            return;
+        }
         let gameId = data.gameId;
         session.username = data.username;
-        usernames[session.uid] = session.username;
-        onlineStatus[session.uid] = true;
 
-        if (!(gameId in gameIds)) {
-            socket.emit(SocketEvents.joinGameToClient, false);
+        if (!rooms.has(gameId)) {
+            socket.emit(SocketEvents.joinGame, false);
+            console.log('Ok what now', rooms);
             socket.disconnect(true);
             return;
         }
-        const hostUid: string = gameIds[gameId];
 
-        let hostSocket = io.sockets.sockets.get(sockets[hostUid]);
-        if (hostSocket) {
-            hostSocket.emit(SocketEvents.newPlayerJoinedGameToHost, {
-                username: session.username,
-                uid: session.uid,
-            });
-
-            let joinedPlayerList = clients[hostUid].map((id) => {
-                return { uid: id, username: usernames[id], isOnline: true };
-            });
-
-            joinedPlayerList.push({
-                uid: hostUid,
-                username: usernames[hostUid],
-                isOnline: true
-            });
-
-            socket.emit(SocketEvents.joinGameToClient, {
-                players: joinedPlayerList,
-                thisPlayerId: session.uid,
-                thisPlayerName: session.username,
-            });
+        let clientsInRoom = io.sockets.adapter.rooms.get(gameId);
+        if (!clientsInRoom) {
+            throw 'Huh!?';
         }
-        clients[hostUid].forEach((clientId) => {
-            const clientSocket = io.sockets.sockets.get(sockets[clientId]);
-            if (clientSocket) {
-                clientSocket.emit(SocketEvents.newPlayerJoinedGameToClient, {
-                    username: session.username,
-                    uid: session.uid,
-                    isOnline: onlineStatus[session.uid]
-                });
+        let playersInRoom: Player[] = [];
+        for (const clientId of clientsInRoom) {
+            const clientSocket = io.sockets.sockets.get(clientId);
+            if (!clientSocket) {
+                throw 'Bruh';
             }
+            playersInRoom.push(clientSocket.player);
+        }
+
+        session.gameId = gameId;
+        // roomIds.set(session.uid, gameId);
+
+        socket.player = {
+            username: session.username,
+            uid: session.uid,
+            isOnline: true,
+        };
+        socket.emit(SocketEvents.joinGame, {
+            players: playersInRoom,
+            thisPlayerId: session.uid,
+            thisPlayerName: session.username,
         });
-        clients[hostUid].push(session.uid);
-        hosts[session.uid] = hostUid;
+
+        socket.to(gameId).emit(SocketEvents.newPlayerJoined, {
+            username: session.username,
+            uid: session.uid,
+            isOnline: onlineStatus[session.uid],
+        });
+
+        socket.join(gameId);
     });
 
-    socket.on(SocketEvents.playerLeftGameToServer, (data: string) => {
+    socket.on(SocketEvents.playerLeftGame, (data: string) => {
         console.log('A user disconnected, player.id:' + data);
-        if (session.id in hosts) {
-            let hostUid = hosts[session.uid];
+        socket.leave(session.gameId);
 
-            let indexOfClient = clients[hostUid].indexOf(session.uid);
-            if (indexOfClient >= 0) {
-                clients[hostUid].splice(indexOfClient, 1);
-            }
-        }
-
-        if (session.uid in clients) {
-            delete clients[session.uid];
-        }
-
-        if (session.uid in usernames) {
-            delete usernames[session.uid];
-        }
-
-        if (session.uid in sockets) {
-            delete sockets[session.uid];
-        }
-
-        socket.emit(SocketEvents.playerLeftGameToPlayers, { uid: session.uid });
+        socket.emit(SocketEvents.playerLeftGame, { uid: session.uid });
     });
 
     socket.on(
-        SocketEvents.startGameToServer,
+        SocketEvents.gameStarted,
         (data: { startingPlayerId: string }) => {
             if (!data || !data.startingPlayerId) {
                 throw 'No startin player id message!';
             }
-            if (!clients.hasOwnProperty(session.uid)) {
-                socket.emit(SocketEvents.startGameToHost, false);
-                console.log('Could not start the game');
+            if (roomHosts.get(session.gameId) != socket.id) {
+                socket.emit(SocketEvents.gameStarted, false);
+                console.log('Could not start the game, (user is not a host)');
                 return;
             }
 
-            socket.emit(SocketEvents.startGameToHost, true);
-            for (let clt of clients[session.uid]) {
-                console.log('Trying to find client ', clt);
-                const clientSocket = io.sockets.sockets.get(sockets[clt]);
-                if (!clientSocket) {
-                    throw 'no clietn socket :(';
-                }
-                let payload = {
-                    startingPlayerId: data.startingPlayerId,
-                };
-                clientSocket.emit(SocketEvents.startGameToClients, payload);
-                console.log('Sent start game to: ', clt, ' payLoad: ', payload);
-            }
+            let payload = {
+                startingPlayerId: data.startingPlayerId,
+            };
+            io.in(session.gameId).emit(SocketEvents.gameStarted, payload);
         }
     );
-    socket.on(SocketEvents.hitToServer, (data: { move: IChecker }) => {
+    socket.on(SocketEvents.hit, (data: { move: IChecker }) => {
         if (!data || !data.move) {
             throw 'No move data passed';
         }
-        let hostUid = session.uid;
-        if (!clients[session.uid]) {
-            hostUid = hosts[session.uid];
-        }
-        const hostSocket = io.sockets.sockets.get(sockets[hostUid]);
 
-        if (!hostSocket) {
-            throw 'no host socket :(';
-        }
+        //TODO: Some kidn of validation would be useful
 
-        hostSocket.emit(SocketEvents.hitToPlayers, data);
-        for (let clt of clients[hostUid]) {
-            const clientSocket = io.sockets.sockets.get(sockets[clt]);
-            if (!clientSocket) {
-                throw 'no clietn socket :(';
-            }
-            console.log('sending hit to players');
-            clientSocket.emit(SocketEvents.hitToPlayers, data);
-        }
+        io.in(session.gameId).emit(SocketEvents.hit, data);
     });
     socket.on(SocketEvents.checkToServer, () => {
-        let hostUid = session.uid;
-        if (!clients[session.uid]) {
-            hostUid = hosts[session.uid];
+        let roomHostSocketId = roomHosts.get(session.gameId);
+        let roomHostSocket;
+        if (roomHostSocketId) {
+            roomHostSocket = io.sockets.sockets.get(roomHostSocketId);
+        } else {
+            socket.emit(SocketEvents.checkToServer, {
+                err: 'ur room does not have a host',
+            });
         }
-        const hostSocket = io.sockets.sockets.get(sockets[hostUid]);
-
-        if (!hostSocket) {
-            throw 'no host socket :(';
-        }
-
-        hostSocket.emit(SocketEvents.checkToPlayers);
-        for (let clt of clients[hostUid]) {
-            const clientSocket = io.sockets.sockets.get(sockets[clt]);
-            if (!clientSocket) {
-                throw 'no clietn socket :(';
-            }
-            console.log('sending check to players');
-            clientSocket.emit(SocketEvents.checkToPlayers);
+        if (roomHostSocket) {
+            roomHostSocket.emit(SocketEvents.checkToServer);
         }
     });
-});
 
+    socket.on(SocketEvents.checkToPlayers, (payload) => {
+        if (roomHosts.get(session.gameId) != session.uid) {
+            socket.emit(SocketEvents.gameStarted, false);
+            console.log('Could not check, (user is not a host)');
+            return;
+        }
+
+        session.to(session.gameId).emit(SocketEvents.checkToPlayers, payload);
+    });
+});
 //TODO: Go through every exception throw and remove them or create class for them so it can be caught later

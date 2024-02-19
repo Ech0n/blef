@@ -30,9 +30,9 @@
         const serverUrl: string = "http://localhost:5678";
         socket = io(serverUrl);
 
-        socket.emit(SocketEvents.createGameToServer, {username: usernameInput});
+        socket.emit(SocketEvents.createGame, {username: usernameInput});
 
-        socket.on(SocketEvents.createGameToHost, (data: {gameId:string,hostId:string}) => {
+        socket.on(SocketEvents.createGame, (data: {gameId:string,hostId:string}) => {
             console.log("User created a game, its id is:", data);
             gameId = data.gameId;
             host = new Player(data.hostId, usernameInput)
@@ -41,7 +41,7 @@
             thisPlayerId = data.hostId
         });
 
-        socket.on(SocketEvents.newPlayerJoinedGameToHost, (data: {username: string, uid: string, isOnline: boolean }) => {
+        socket.on(SocketEvents.newPlayerJoined, (data: {username: string, uid: string, isOnline: boolean }) => {
             console.log("Join event", data);
             if (!data) {
                 throw "No data from server"
@@ -53,7 +53,7 @@
             players = [...players, newPlayer];
         });
 
-        socket.on(SocketEvents.playerLeftGameToPlayers, (data: { playerId: string }) => {
+        socket.on(SocketEvents.playerLeftGame, (data: { playerId: string }) => {
             console.log("player disconnected", data);
             if (!data) {
                 return;
@@ -69,22 +69,21 @@
         });
 
 
-        socket.on(SocketEvents.startGameToHost, (data: boolean) => {
+        socket.on(SocketEvents.gameStarted, (data: boolean) => {
             if (data) {
                 gameView = import('../game/GameView.svelte');
             }
         });
-
     });
 
     function startGame(): void {
         //TODO: Randomize starting player?
         startingPlayerId = players[0].id
-        socket.emit(SocketEvents.startGameToServer,{startingPlayerId: startingPlayerId});
+        socket.emit(SocketEvents.gameStarted,{startingPlayerId: startingPlayerId});
     }
 
     function closeGame(): void {
-        socket.emit(SocketEvents.gameClosedToServer, { gameId });
+        socket.emit(SocketEvents.gameClosed, { gameId });
 
         gameView = undefined; 
         players = [];

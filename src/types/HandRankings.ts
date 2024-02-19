@@ -55,10 +55,10 @@ export class CarrotChecker implements IChecker {
 //     typ:full
 // }}
 // checki{
-//     full:checkFull
+//     full:checkFull()
 // }
-// karta = full
-// checki[karta.typ](dane)
+// uklad = full
+// checki[uklad.typ](uklad)
 
 export class FullChecker implements IChecker {
     threeCard: Rank;
