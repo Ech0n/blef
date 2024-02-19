@@ -7,20 +7,24 @@
     import { SocketEvents } from '../../../src/types/socketEvents';
     import * as HandRankings from '../../../src/types/HandRankings';
     import CardModal from './CardModals.svelte'; // Make sure this path is correct
+    import { Game } from './Game';
 
     export let gameId: string;
     export let socket: Socket;
     export let initialPlayerList: Player[];
     export let startingPlayerId: string; // Ensure this is correctly named
     export let thisPlayerId: string;
+    export let isHost:boolean|undefined = false;
 
     const dispatch = createEventDispatcher();
     const serverUrl: string = "http://localhost:5678";
-    let game: GameServer = new GameServer(initialPlayerList, startingPlayerId);
+    let game: Game =(isHost)? new GameServer(initialPlayerList,startingPlayerId) : new Game(initialPlayerList,startingPlayerId)
+
     let showModal = false; // State for showing/hiding the modal
     let selectedHand; // Hold the selected hand from the modal
 
     onMount(() => {
+        
         if (!socket) {
             socket = io(serverUrl);
         }
@@ -36,7 +40,7 @@
         });
 
         socket.on(SocketEvents.checkToPlayers, () => {
-            game.checkAndDeal();
+            game.check();
             game = game
 
         });

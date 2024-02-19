@@ -15,7 +15,6 @@
     let players: Player[] = [];
     let currentPlayer: Player;
     let startingPlayerId:string;
-
     let thisPlayerId:string;
 
 
@@ -102,7 +101,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameClient }}
-            <GameClient {gameId} {socket} on:leave={leaveGame} initialPlayerList={players} startingPlayerId={startingPlayerId} {thisPlayerId}/>
+            <GameClient {gameId} {socket} on:leave={leaveGame} initialPlayerList={players} startingPlayerId={startingPlayerId} {thisPlayerId}  />
         {/await}
     {:else}
         Game ID: {#if gameId} {gameId} {/if}

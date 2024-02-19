@@ -93,7 +93,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameView }}
-            <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players} {startingPlayerId} {thisPlayerId}/>
+            <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players} {startingPlayerId} {thisPlayerId}  isHost />
         {/await}
         TODO: DO BANOWANIA GRACZY DEBILI
     {:else}

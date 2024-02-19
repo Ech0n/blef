@@ -24,18 +24,13 @@ export class GameServer extends Game {
     hands: { [playerId: string]: Card[] };
     deck: Card[];
     rejectedCards: Card[];
-    previousBet!: any;
     isFinished: boolean = false;
-    currentPlayerIndx: number;
 
     constructor(players: Player[], startingPlayerId: string) {
         super(players, startingPlayerId);
         this.hands = {};
         this.deck = deck.slice();
         this.rejectedCards = [];
-        this.currentPlayerIndx = this.players.findIndex(
-            (el) => startingPlayerId == el.id
-        );
     }
 
     checkAndDeal(): void {
@@ -43,18 +38,6 @@ export class GameServer extends Game {
         this.collectCards();
         this.dealCards();
         this.nextPlayer();
-    }
-
-    hit(bet: any): void {
-        //TODO: consider validation if bet is possible?
-        this.previousBet = bet;
-        this.nextPlayer();
-    }
-
-    nextPlayer(): void {
-        this.currentPlayerIndx =
-            (this.currentPlayerIndx + 1) % this.playerCount;
-        this.currentPlayer = this.players[this.currentPlayerIndx].id;
     }
 
     drawCards(numberOfCards: number): Card[] {
@@ -87,6 +70,7 @@ export class GameServer extends Game {
             (prev: number, player: Player) => player.loses + 1 + prev,
             0
         );
+
         if (totalCardsToDraw > this.deck.length) {
             if (this.rejectedCards.length < totalCardsToDraw) {
                 throw 'Now enough cards to draw from';
@@ -99,7 +83,7 @@ export class GameServer extends Game {
         });
     }
 
-    check(): void {
+    check(data: { newHand: Card[]; newCurrentPlayer: string }): void {
         if (!this.previousBet) {
             throw 'There is no bet';
         }

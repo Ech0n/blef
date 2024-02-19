@@ -198,7 +198,7 @@ io.on('connection', (socket) => {
             return;
         }
 
-        session.to(session.gameId).emit(SocketEvents.checkToPlayers, payload);
+        io.to(session.gameId).emit(SocketEvents.checkToPlayers, payload);
     });
 });
 //TODO: Go through every exception throw and remove them or create class for them so it can be caught later
