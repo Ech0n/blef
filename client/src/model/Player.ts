@@ -1,4 +1,4 @@
-export class Player {
+export class aaPlayer {
     id: string;
     name: string;
     isOnline!: boolean;

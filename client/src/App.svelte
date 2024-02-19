@@ -1,6 +1,6 @@
 <script lang="ts">
   import Menu from "./Menu.svelte";
-  import { Player } from "./model/Player";
+  import { Player } from "../../definitions/player";
   import { playerStore } from './game/stores';
 
   let gameView: Promise<any> | undefined;

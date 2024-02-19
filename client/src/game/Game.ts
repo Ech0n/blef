@@ -1,5 +1,5 @@
 import type { Card } from '../model/Card';
-import { Player } from '../model/Player';
+import { Player } from '../../../definitions/player';
 type checkInfo = { newHands: any; players: Player[] };
 
 export class Game {
@@ -18,7 +18,7 @@ export class Game {
         this.currentPlayer = startingPlayerId;
         this.eliminatedPlayers = [];
         this.currentPlayerIndx = this.players.findIndex(
-            (el) => startingPlayerId == el.id
+            (el) => startingPlayerId == el.uid
         );
     }
 
@@ -29,8 +29,9 @@ export class Game {
     }
 
     nextPlayer(): void {
-        this.currentPlayerIndx = (this.currentPlayerIndx + 1) % this.playerCount;
-        this.currentPlayer = this.players[this.currentPlayerIndx].id;
+        this.currentPlayerIndx =
+            (this.currentPlayerIndx + 1) % this.playerCount;
+        this.currentPlayer = this.players[this.currentPlayerIndx].uid;
     }
 
     check(data?: { newHand: Card[]; players: Player[] }): void {

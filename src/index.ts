@@ -5,6 +5,11 @@ import session from 'express-session';
 import { SocketEvents } from './types/socketEvents';
 import { v4 as uuidv4 } from 'uuid';
 import { IChecker } from './types/HandRankings';
+import {
+    Player,
+    IPlayer,
+    createPlayerFromIPlayer,
+} from '../definitions/player';
 
 declare module 'express-session' {
     interface SessionData {
@@ -13,11 +18,9 @@ declare module 'express-session' {
     }
 }
 
-type Player = { username: string; uid: string; isOnline: boolean };
-
 declare module 'socket.io' {
     interface Socket {
-        player: Player;
+        player: IPlayer;
     }
 }
 
@@ -25,8 +28,6 @@ const port = process.env.PORT || 5678;
 
 let rooms = new Set<string>();
 let roomHosts = new Map<string, string>();
-// session.uid -> roomId/gameId
-// let roomIds = new Map<string, string>();
 
 // TODO: Reconsider using sessionId as identifier. Pro: this would remove need for usernames map since one could just get the data from session stroage. Con: Security?
 
@@ -81,6 +82,7 @@ io.on('connection', (socket) => {
             username: session.username,
             uid: session.uid,
             isOnline: true,
+            isHost: true,
         };
 
         socket.emit(SocketEvents.createGame, {
@@ -116,7 +118,7 @@ io.on('connection', (socket) => {
             if (!clientSocket) {
                 throw 'Bruh';
             }
-            playersInRoom.push(clientSocket.player);
+            playersInRoom.push(createPlayerFromIPlayer(clientSocket.player));
         }
 
         session.gameId = gameId;
@@ -126,6 +128,7 @@ io.on('connection', (socket) => {
             username: session.username,
             uid: session.uid,
             isOnline: true,
+            isHost: false,
         };
         socket.emit(SocketEvents.joinGame, {
             players: playersInRoom,
@@ -144,8 +147,9 @@ io.on('connection', (socket) => {
 
     socket.on(SocketEvents.playerLeftGame, (data: string) => {
         console.log('A user disconnected, player.id:' + data);
+        if (roomHosts.get(session.gameId) != socket.id) {
+        }
         socket.leave(session.gameId);
-
         socket.emit(SocketEvents.playerLeftGame, { uid: session.uid });
     });
 
