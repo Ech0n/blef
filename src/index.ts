@@ -157,6 +157,7 @@ io.on('connection', (socket) => {
             }
         });
         clients[hostUid].push(session.uid);
+        hosts[session.uid] = hostUid;
     });
 
     socket.on(SocketEvents.playerLeftGameToServer, (data: string) => {
@@ -216,14 +217,18 @@ io.on('connection', (socket) => {
         if (!data || !data.move) {
             throw 'No move data passed';
         }
-        const hostSocket = io.sockets.sockets.get(
-            sockets[hosts[session.uid] || session.uid]
-        );
+        let hostUid = session.uid;
+        if (!clients[session.uid]) {
+            hostUid = hosts[session.uid];
+        }
+        const hostSocket = io.sockets.sockets.get(sockets[hostUid]);
 
         if (!hostSocket) {
             throw 'no host socket :(';
         }
-        for (let clt of clients[session.uid]) {
+
+        hostSocket.emit(SocketEvents.hitToPlayers, data);
+        for (let clt of clients[hostUid]) {
             const clientSocket = io.sockets.sockets.get(sockets[clt]);
             if (!clientSocket) {
                 throw 'no clietn socket :(';
@@ -231,23 +236,27 @@ io.on('connection', (socket) => {
             console.log('sending hit to players');
             clientSocket.emit(SocketEvents.hitToPlayers, data);
         }
-        hostSocket.emit(SocketEvents.hitToPlayers, data);
     });
     socket.on(SocketEvents.checkToServer, () => {
-        const hostSocket = io.sockets.sockets.get(sockets[hosts[session.uid]]);
+        let hostUid = session.uid;
+        if (!clients[session.uid]) {
+            hostUid = hosts[session.uid];
+        }
+        const hostSocket = io.sockets.sockets.get(sockets[hostUid]);
 
         if (!hostSocket) {
             throw 'no host socket :(';
         }
-        for (let clt of clients[session.uid]) {
+
+        hostSocket.emit(SocketEvents.checkToPlayers);
+        for (let clt of clients[hostUid]) {
             const clientSocket = io.sockets.sockets.get(sockets[clt]);
             if (!clientSocket) {
                 throw 'no clietn socket :(';
             }
+            console.log('sending check to players');
             clientSocket.emit(SocketEvents.checkToPlayers);
         }
-
-        hostSocket.emit(SocketEvents.checkToPlayers);
     });
 });
 

@@ -115,7 +115,7 @@ export class GameServer extends Game {
                 countedCards[card[0]][CardColor.colorless]++;
             });
         }
-
+        console.log(this.previousBet);
         let wasBetFound = this.previousBet.check(countedCards);
         if (wasBetFound) {
             this.players[this.currentPlayerIndx].loses += 1;

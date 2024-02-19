@@ -35,7 +35,8 @@
             });
 
             socket.on(SocketEvents.hitToPlayers,(data:{move:HandRankings.IChecker})=>{
-                game.hit(data.move)
+                let move = new HandRankings.OneChecker(data.move.high)
+                game.hit(move)
             console.log("received hit data; current player now: ",game.players[game.currentPlayerIndx].name)
             game = game
             })

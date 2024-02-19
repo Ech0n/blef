@@ -32,13 +32,14 @@
         });
 
         socket.on(SocketEvents.hitToPlayers,(data:{move:HandRankings.IChecker})=>{
-            game.hit(data.move)
-            console.log("received hit data; current player now: ",game.currentPlayer)
+            let move = new HandRankings.OneChecker(data.move.high)
+            game.hit(move)
+            console.log("received hit data:",data.move,"; current player now: ",game.currentPlayer)
             game = game
         })
 
         socket.on(SocketEvents.checkToPlayers,()=>{
-            game.check()                
+            game.checkAndDeal()                
             game = game
 
         })
@@ -49,7 +50,7 @@
         socket.emit(SocketEvents.hitToServer,{move:bet})
     }
     function check(){
-        socket.emit(SocketEvents.hitToServer)
+        socket.emit(SocketEvents.checkToServer)
     }
     function getBetName(){
         if(!game.previousBet){
