@@ -133,9 +133,9 @@
 </ul>
 <div>
     <p>Your cards:</p>
-    <div>
+    <div class="hand">
         {#each game.hand as card}
-            <div>
+            <div class="card">
                 {card[0]} , {card[1]} 
             </div>
         {/each}
@@ -158,6 +158,20 @@
 {/if}
 
 <style>
+    .hand{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: row;
+    }
+    .card{
+        padding: 30px;
+        padding-left: 50px;
+        padding-right: 50px;
+        border-radius: 10px;
+        background-color: whitesmoke;
+        color:black
+    }
     strong {
         font-weight: 900;
         color: rgb(3, 0, 0);
