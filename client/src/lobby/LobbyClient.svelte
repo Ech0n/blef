@@ -17,7 +17,7 @@
     let gameView: Promise<typeof import('../game/GameView.svelte')> | undefined;
     let players: Player[] = [];
     let currentPlayer: Player;
-    let startingPlayerId:string;
+    let startingPlayerId: string;
     let gameStartData: gameStartPayload;
     let thisPlayerId: string
 
@@ -106,10 +106,10 @@
     {:else}
         Game ID: {#if gameId} {gameId} {/if}
         <br>
-        <ul>
-            <LobbyPlayerList {players}/>
+        <div>
+            <LobbyPlayerList {players} thisPlayer={currentPlayer}/>
 
             <button on:click={leaveGame}>Leave</button>
-        </ul>
+        </div>
     {/if}
 </h1>

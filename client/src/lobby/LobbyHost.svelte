@@ -14,7 +14,7 @@
     let socket: Socket;
     let gameId: string;
     let player: Player | null;
-    let host:Player
+    let host: Player
     let thisPlayerId: string;
     let gameView: Promise<typeof import('../game/GameView.svelte')> | undefined;
     let gameStartData: gameStartPayload;
@@ -112,9 +112,9 @@
                     <div class= "playerItemForHost">
                          {player.username} 
                          {#if player.isOnline}
-                         🟢 
+                            🟢 
                          {:else}
-                         🔴
+                            🔴
                          {/if}
                          <button class="kick-button" on:click={()=>kickPlayer(player.uid)}>kick :)</button>
                     </div>
@@ -126,7 +126,7 @@
         Game ID: {#if gameId} {gameId} {/if}
         <br>
         Players:
-        <LobbyPlayerList {players}/>
+        <LobbyPlayerList {players} thisPlayer={host}/>
         <div>
             <button on:click={startGame}>Start Game</button>
             <button on:click={closeGame}>Close Game</button>

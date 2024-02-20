@@ -7,7 +7,6 @@
     import { Player } from '../../../common/player';
     import CardModal from './CardModals.svelte';
     import { Game } from './Game';
-    import type {Card} from '../model/Card'
     import type { checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
 
     export let gameId: string;
@@ -155,7 +154,7 @@
 {/if}
 
 <style>
-    .hand{
+    .hand {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -163,7 +162,7 @@
         flex-wrap: wrap; 
         gap: 15px;
     }
-    .card{
+    .card {
         padding: 30px;
         padding-left: 50px;
         padding-right: 50px;

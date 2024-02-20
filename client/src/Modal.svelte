@@ -56,9 +56,9 @@
               <p class="error">{errorMessage}</p>
           {/if}
           {#if mode === 'join'}
-              <input type="text" placeholder="Enter Game ID" bind:value={gameId} />
+          <input type="text" placeholder="Enter Game ID" bind:value={gameId} maxlength="10" />
           {/if}
-          <input type="text" placeholder="Enter Your Name" bind:value={username} />
+          <input type="text" placeholder="Enter Your Name" bind:value={username} maxlength="20" />
           <button on:click={action}>{mode === 'join' ? 'Join Game' : 'Create Game'}</button>
           <button on:click={closeModal}>Close</button>
       </div>
