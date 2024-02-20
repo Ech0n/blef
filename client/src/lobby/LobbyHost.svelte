@@ -7,6 +7,7 @@
     import { initalizeGame } from '../model/Card';
     import type { gameStartPayload } from '../../../common/payloads';
     import e from 'express';
+    import LobbyPlayerList from './LobbyPlayerList.svelte';
 
     export let usernameInput:string;
     
@@ -125,16 +126,7 @@
         Game ID: {#if gameId} {gameId} {/if}
         <br>
         Players:
-        <ul>
-            {#each players as player}
-                <li>
-                    <strong>ID:</strong> {player.uid}  <br>
-                    <strong>NAME:</strong> {player.username} <br>
-                    <strong>ONLINE:</strong> {player.isOnline ? 'Yes' : 'No'}
-                </li>
-            {/each}
-        </ul>
-        
+        <LobbyPlayerList {players}/>
         <div>
             <button on:click={startGame}>Start Game</button>
             <button on:click={closeGame}>Close Game</button>

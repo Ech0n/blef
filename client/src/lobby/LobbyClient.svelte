@@ -7,6 +7,7 @@
     import { Player } from '../../../common/player';
     import type { gameStartPayload } from '../../../common/payloads';
     import type { Card } from '../model/Card';
+    import LobbyPlayerList from './LobbyPlayerList.svelte';
 
     export let usernameInput:string;
     export let gameId: string;
@@ -106,15 +107,8 @@
         Game ID: {#if gameId} {gameId} {/if}
         <br>
         <ul>
-            <ul>
-                {#each players as player}
-                    <li>
-                        <strong>ID:</strong> {player.uid}  <br>
-                        <strong>NAME:</strong> {player.username}  <br>
-                        <strong>ONLINE:</strong> {(player.isOnline || player.username == currentPlayer.username) ? 'Yes' : 'No'} <!-- I know this is shit but I dont care -->
-                    </li>
-                {/each}
-            </ul>
+            <LobbyPlayerList {players}/>
+
             <button on:click={leaveGame}>Leave</button>
         </ul>
     {/if}
