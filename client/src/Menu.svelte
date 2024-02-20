@@ -20,7 +20,13 @@
 </script>
 
 <div>
-  <button on:click={() => { showModal = true; mode = 'join'; }}>Join Game</button>
-  <button on:click={() => { showModal = true; mode = 'create'; }}>Create Game</button>
+  <button class="start-close" on:click={() => { showModal = true; mode = 'join'; }}>Join Game</button>
+  <button class="start-close" on:click={() => { showModal = true; mode = 'create'; }}>Create Game</button>
   <Modal {showModal} {mode} on:close={() => showModal = false} on:joinGame={joinGame} on:createGame={createGame}/>
 </div>
+
+<style>
+  .start-close {
+      color: aliceblue;
+  }
+</style>

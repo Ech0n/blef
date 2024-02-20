@@ -29,12 +29,12 @@
     }
 
     .playerItem {
-        background-color: #4f3acc;;
+        background-color: #1e1e22;;
         border-radius: 20px;
-        border-color: #210097;
+        border-color: #07050f;
         border-style: solid;
         min-width: 300px;
-        padding: 3px 10px 3px 10px;
+        padding: 10px 20px 10px 20px;
         margin: 20px 0 15px 0;
         white-space: nowrap; 
     }

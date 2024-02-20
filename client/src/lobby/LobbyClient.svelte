@@ -109,7 +109,13 @@
         <div>
             <LobbyPlayerList {players} thisPlayer={currentPlayer}/>
 
-            <button on:click={leaveGame}>Leave</button>
+            <button class="start-close" on:click={leaveGame}>Leave</button>
         </div>
     {/if}
 </h1>
+
+<style>
+    .start-close {
+        color: aliceblue;
+    }
+</style>
