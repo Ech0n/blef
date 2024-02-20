@@ -128,14 +128,14 @@
         Players:
         <LobbyPlayerList {players} thisPlayer={host}/>
         <div>
-            <button on:click={startGame}>Start Game</button>
-            <button on:click={closeGame}>Close Game</button>
+            <button class="start-close" on:click={startGame}>Start Game</button>
+            <button class="start-close" on:click={closeGame}>Close Game</button>
         </div>
     {/if}
 </h1>
 
 <style>
-    p{
+    p {
         font-size:15px;
     }
     .hostPlayerToolContainer{
@@ -150,4 +150,8 @@
         font-size: 1rem;
         background-color: brown;
     }
+    .start-close {
+        color: aliceblue;
+    }
+
 </style>
