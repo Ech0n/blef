@@ -8,79 +8,52 @@ interface hitPayload {
     startingCard: string;
 }
 
-export function compareRankings(
-    oldRanking: hitPayload,
-    newRanking: hitPayload
-): boolean {
-    if (
-        compareHierarchy[oldRanking.selectedRanking] <
-        compareHierarchy[newRanking.selectedRanking]
-    ) {
-        return true;
-    }
-    if (
-        compareHierarchy[oldRanking.selectedRanking] ==
-        compareHierarchy[newRanking.selectedRanking]
-    ) {
-        console.debug(
-            'ranks are equal, checking cards ',
-            oldRanking,
-            newRanking
-        );
-        if (['One', 'Pair', 'Three'].includes(oldRanking.selectedRanking)) {
-            console.debug('rank is one');
-            return (
-                cardToRankTranslation[oldRanking.primaryCard].numeric <
-                cardToRankTranslation[newRanking.primaryCard].numeric
-            );
+export function compareRankings(oldRanking: hitPayload, newRanking: hitPayload): boolean {
+    console.log(compareHierarchy[oldRanking.selectedRanking], compareHierarchy[newRanking.selectedRanking]);
+
+    if (compareHierarchy[oldRanking.selectedRanking] === compareHierarchy[newRanking.selectedRanking]) {
+        console.log('Ranks are equal, checking cards ',);
+
+        if (['one', 'pair', 'three', 'four'].includes(oldRanking.selectedRanking)) {
+            console.log('Rank is One, Two, Three, Four');
+            return (cardToRankTranslation[oldRanking.primaryCard].numeric > cardToRankTranslation[newRanking.primaryCard].numeric);
         }
-        if (['Double', 'Full'].includes(oldRanking.selectedRanking)) {
-            if (
-                cardToRankTranslation[oldRanking.primaryCard].numeric ==
-                cardToRankTranslation[newRanking.primaryCard].numeric
-            ) {
-                return (
-                    cardToRankTranslation[oldRanking.secondaryCard].numeric <
-                    cardToRankTranslation[newRanking.secondaryCard].numeric
-                );
+
+        if (['double', 'full'].includes(oldRanking.selectedRanking)) {
+            if (cardToRankTranslation[oldRanking.primaryCard].numeric === cardToRankTranslation[newRanking.primaryCard].numeric) {
+                return (cardToRankTranslation[oldRanking.secondaryCard].numeric > cardToRankTranslation[newRanking.secondaryCard].numeric);
             }
-            return (
-                cardToRankTranslation[oldRanking.primaryCard].numeric <
-                cardToRankTranslation[newRanking.primaryCard].numeric
-            );
+
+            return (cardToRankTranslation[oldRanking.primaryCard].numeric > cardToRankTranslation[newRanking.primaryCard].numeric);
         }
-        if (['Color'].includes(oldRanking.selectedRanking)) {
-            return (
-                colorHierarchy[oldRanking.selectedColor] <
-                colorHierarchy[newRanking.selectedColor]
-            );
+
+        if (['color'].includes(oldRanking.selectedRanking)) {
+            return (colorHierarchy[oldRanking.selectedColor] > colorHierarchy[newRanking.selectedColor]);
         }
-        if (['Street'].includes(oldRanking.selectedRanking)) {
-            return (
-                cardToRankTranslation[oldRanking.startingCard].numeric <
-                cardToRankTranslation[newRanking.startingCard].numeric
-            );
+
+        if (['street'].includes(oldRanking.selectedRanking)) {
+            return (cardToRankTranslation[oldRanking.startingCard].numeric > cardToRankTranslation[newRanking.startingCard].numeric);
         }
     }
-    return false;
+    return (compareHierarchy[oldRanking.selectedRanking] > compareHierarchy[newRanking.selectedRanking]);
 }
 
 let compareHierarchy: { [key: string]: number } = {
-    'Royal': 9,
-    'Flush': 8,
-    'Four': 7,
-    'Full': 6,
-    'Street': 5,
-    'Color': 4,
-    'Three': 3,
-    'Double': 2,
-    'Pair': 1,
-    'One': 0,
+    'royal': 9,
+    'flush': 8,
+    'four': 7,
+    'full': 6,
+    'street': 5,
+    'color': 4,
+    'double': 3,
+    'three': 2,
+    'pair': 1,
+    'one': 0,
 };
 
 let colorHierarchy: { [key: string]: number } = {
-    'Spades': 4,
-    'Hearts': 3,
-    'Diamonds': 2,
-    'Clubs': 1,
+    'spades': 4,
+    'hearts': 3,
+    'diamonds': 2,
+    'clubs': 1,
 };

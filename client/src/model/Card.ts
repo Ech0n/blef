@@ -30,10 +30,10 @@ export enum CardColor {
 }
 
 export let ColorToIndex: { [key: string]: number } = {
-    'spade': 4,
-    'heart': 3,
-    'diamond': 2,
-    'club': 1,
+    'spades': 4,
+    'hearts': 3,
+    'diamonds': 2,
+    'clubs': 1,
     'colorless': 0,
 };
 
@@ -52,9 +52,7 @@ export enum Rank {
     three,
     two,
 }
-export const cardToRankTranslation: {
-    [key: string]: { numeric: number | Rank; string: string };
-} = {
+export const cardToRankTranslation: { [key: string]: { numeric: number | Rank; string: string }; } = {
     '2': { numeric: 2, string: 'two' },
     '3': { numeric: 3, string: 'three' },
     '4': { numeric: 4, string: 'four' },
@@ -85,11 +83,10 @@ export const cardToRankTranslation: {
 
 export function initalizeGame(players: IPlayer[]): {
     cardCounts: CardCountTable;
-    payload: gameStartPayload;
-} {
+    payload: gameStartPayload; } {
+
     let cardCounts = initalizeCountTable();
 
-    //select random player to start
     let initialGameData: gameStartPayload;
     let startingPlayerId = players[0].uid;
 
@@ -98,10 +95,7 @@ export function initalizeGame(players: IPlayer[]): {
     for (let card in Rank) {
         if (isNaN(Number(card))) {
             for (let color in CardColor) {
-                if (
-                    isNaN(Number(color)) &&
-                    color != CardColor[CardColor.colorless]
-                ) {
+                if (isNaN(Number(color)) && color != CardColor[CardColor.colorless]) {
                     deckInitialization.push([card, color]);
                 }
             }
@@ -111,16 +105,10 @@ export function initalizeGame(players: IPlayer[]): {
     let hands: { [key: string]: Card[] } = {};
 
     players.map((player) => {
-        let randomIndex: number = Math.floor(
-            Math.random() * deckInitialization.length
-        );
+        let randomIndex: number = Math.floor(Math.random() * deckInitialization.length);
         let randomCard = deckInitialization.splice(randomIndex, 1);
-        cardCounts[cardToRankTranslation[randomCard[0][0]].numeric][
-            ColorToIndex[randomCard[0][1]]
-        ] += 1;
-        cardCounts[cardToRankTranslation[randomCard[0][0]].numeric][
-            ColorToIndex['colorless']
-        ] += 1;
+        cardCounts[cardToRankTranslation[randomCard[0][0]].numeric][ColorToIndex[randomCard[0][1]]] += 1;
+        cardCounts[cardToRankTranslation[randomCard[0][0]].numeric][ColorToIndex['colorless']] += 1;
         hands[player.uid] = randomCard;
     });
 
