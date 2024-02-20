@@ -33,7 +33,10 @@ test('One cardCheck', () => {
     expect(checker).toBe(true);
 
     thisHand.primaryCard = '5';
-    expect(cardToRankTranslation[thisHand.primaryCard].numeric).toBe(5);
+    checker = checkFunctionsMap[thisHand.selectedRanking](karty, thisHand);
+    expect(checker).toBe(false);
+
+    thisHand.primaryCard = '6';
     checker = checkFunctionsMap[thisHand.selectedRanking](karty, thisHand);
     expect(checker).toBe(false);
 });

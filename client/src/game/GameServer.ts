@@ -1,6 +1,12 @@
 import type { IChecker } from './HandRankings';
 import { Game } from './Game';
-import { CardColor, type Card, Rank } from '../model/Card';
+import {
+    CardColor,
+    type Card,
+    Rank,
+    type CardCountTable,
+    cardToRankTranslation,
+} from '../model/Card';
 import { checkFunctionsMap } from './HandRankings';
 import { Player } from '../../../common/player';
 import type {
@@ -74,14 +80,19 @@ export class GameServer extends Game {
             throw 'There is no bet';
         }
         //card counting
-        let countedCards: any = {};
+        let countedCards: CardCountTable = {};
 
         //TODO: Extract card list initalization to function and use it to initalize this.betDetails
         for (const card in Rank) {
-            countedCards[card] = {};
-            countedCards[card][CardColor.colorless] = 0;
-            for (const color in CardColor) {
-                countedCards[card][color] = 0;
+            let translatrion = cardToRankTranslation[Rank[card] as string];
+            if (translatrion) {
+                let cardToNumber = translatrion.numeric;
+
+                countedCards[cardToNumber] = {};
+                countedCards[cardToNumber][CardColor.colorless] = 0;
+                for (const color in CardColor) {
+                    countedCards[cardToNumber][color] = 0;
+                }
             }
         }
 
@@ -89,8 +100,9 @@ export class GameServer extends Game {
             let hands = this.hands.get(player);
             if (hands) {
                 hands.forEach((card: Card) => {
-                    countedCards[card[0]][card[1]]++;
-                    countedCards[card[0]][CardColor.colorless]++;
+                    let cardToNumber = cardToRankTranslation[card[0]].numeric;
+                    countedCards[cardToNumber][card[1]]++;
+                    countedCards[cardToNumber][CardColor.colorless]++;
                 });
             }
         }

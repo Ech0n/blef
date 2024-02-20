@@ -61,6 +61,19 @@ export const cardToRankTranslation: {
     'Q': { numeric: 12, string: 'Queen' },
     'K': { numeric: 13, string: 'King' },
     'A': { numeric: 14, string: 'Ace' },
+    'two': { numeric: 2, string: 'two' },
+    'three': { numeric: 3, string: 'three' },
+    'four': { numeric: 4, string: 'four' },
+    'five': { numeric: 5, string: 'five' },
+    'six': { numeric: 6, string: 'six' },
+    'seven': { numeric: 7, string: 'seven' },
+    'eight': { numeric: 8, string: 'eight' },
+    'nine': { numeric: 9, string: 'nine' },
+    'ten': { numeric: 10, string: 'ten' },
+    'Jupek': { numeric: 11, string: 'Jupek' },
+    'Queen': { numeric: 12, string: 'Queen' },
+    'King': { numeric: 13, string: 'King' },
+    'Ace': { numeric: 14, string: 'Ace' },
 };
 
 export function initalizeGame(players: IPlayer[]): gameStartPayload {

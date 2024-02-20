@@ -100,7 +100,7 @@ function doubleChecker(cards: CardDict, handInfo: HandInfo) {
     );
 }
 
-function pairChecker(cards: CardDict, handInfo: HandInfo) {
+function pairChecker(cards: CardCountTable, handInfo: HandInfo) {
     let primCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
     if (!cards[primCard]) {
         return false;
@@ -120,7 +120,7 @@ function oneChecker(cards: CardCountTable, handInfo: HandInfo) {
 
 export const checkFunctionsMap: Record<
     string,
-    (cards: CardDict, handInfo: HandInfo) => boolean
+    (cards: CardCountTable, handInfo: HandInfo) => boolean
 > = {
     'Royal': royalFlushChecker,
     'Flush': flushChecker,
