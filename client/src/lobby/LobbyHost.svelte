@@ -5,6 +5,7 @@
     import {SocketEvents} from '../../../src/types/socketEvents'
     import { playerStore } from '../game/stores';
     import { initalizeGame } from '../model/Card';
+    import type { gameStartPayload } from '../../../common/payloads';
 
     export let usernameInput:string;
     
@@ -34,7 +35,7 @@
         socket.emit(SocketEvents.createGame, {username: usernameInput});
 
         socket.on(SocketEvents.createGame, (data: {gameId:string,hostId:string}) => {
-            console.log("User created a game, its id is:", data);
+            console.log("User created a game, its id is:", data.gameId);
             gameId = data.gameId;
             host = new Player(data.hostId, usernameInput)
             host.isOnline = true;
@@ -43,7 +44,7 @@
         });
 
         socket.on(SocketEvents.newPlayerJoined, (data: {username: string, uid: string, isOnline: boolean }) => {
-            console.log("Join event", data);
+            console.log("Join event", data.username);
             if (!data) {
                 throw "No data from server"
             }
@@ -55,7 +56,7 @@
         });
 
         socket.on(SocketEvents.playerLeftGame, (data: { playerId: string }) => {
-            console.log("player disconnected", data);
+            console.log("player disconnected", data.playerId);
             if (!data) {
                 return;
             }
@@ -70,7 +71,7 @@
         });
 
 
-        socket.on(SocketEvents.gameStarted, (data: boolean) => {
+        socket.on(SocketEvents.gameStarted, (data: gameStartPayload) => {
             if (data) {
                 gameStartData = data
                 gameView = import('../game/GameView.svelte');

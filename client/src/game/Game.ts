@@ -14,6 +14,7 @@ export class Game {
     hand: Card[];
     currentPlayerIndx: number;
     previousBet!: any;
+    thisPlayerId: string;
 
     constructor(
         players: Player[],
@@ -28,6 +29,7 @@ export class Game {
         this.currentPlayerIndx = this.players.findIndex(
             (el) => gameStartData.startingPlayerId == el.uid
         );
+        this.thisPlayerId = thisPlayerId;
     }
 
     hit(bet: any): void {
@@ -50,6 +52,11 @@ export class Game {
         this.hand = data.newHand;
         this.players = data.players;
         this.playerCount = this.players.length;
+        this.currentPlayer = data.roundStartingPlayerId;
+        this.currentPlayerIndx = this.players.findIndex((pl) => {
+            return pl.uid == this.currentPlayer;
+        });
+        this.previousBet = undefined;
     }
     validateCheck(): checkToServerPayload | undefined {
         console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');

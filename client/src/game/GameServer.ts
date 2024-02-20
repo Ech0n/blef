@@ -29,7 +29,6 @@ export class GameServer extends Game {
     hands: Map<string, Card[]>;
     deck: Card[];
     isFinished: boolean = false;
-
     constructor(
         players: Player[],
         gameStartData: gameStartPayload,
@@ -38,11 +37,6 @@ export class GameServer extends Game {
         super(players, gameStartData, thisPlayerId);
         this.hands = new Map(Object.entries(gameStartData.newHands));
         this.deck = deck.slice();
-    }
-
-    checkAndDeal(): void {
-        this.dealCards();
-        this.nextPlayer();
     }
 
     drawCards(numberOfCards: number): Card[] {
@@ -68,17 +62,6 @@ export class GameServer extends Game {
     }
 
     dealCards(): void {
-        // let totalCardsToDraw = this.players.reduce(
-        //     (prev: number, player: Player) => player.loses + 1 + prev,
-        //     0
-        // );
-
-        // if (totalCardsToDraw > this.deck.length) {
-        //     if (this.rejectedCards.length < totalCardsToDraw) {
-        //         throw 'Now enough cards to draw from';
-        //     }
-        //     this.shuffleDeck();
-        // }
         this.shuffleDeck();
         this.hands = new Map<string, Card[]>();
         this.players.forEach((player: Player) => {
@@ -118,7 +101,7 @@ export class GameServer extends Game {
             countedCards,
             this.previousBet
         );
-        if (!wasBetFound) {
+        if (wasBetFound) {
             const prevPlayer =
                 (this.currentPlayerIndx - 1 + this.playerCount) %
                 this.playerCount;
@@ -126,6 +109,7 @@ export class GameServer extends Game {
             this.currentPlayer = this.players[this.currentPlayerIndx].uid;
         }
         this.players[this.currentPlayerIndx].loses += 1;
+
         if (this.players[this.currentPlayerIndx].loses == 4) {
             this.eliminatedPlayers.push(this.players[this.currentPlayerIndx]);
             this.players.slice(this.currentPlayerIndx, 1);
@@ -133,15 +117,23 @@ export class GameServer extends Game {
             this.currentPlayerIndx -= 1;
             this.currentPlayer = this.players[this.currentPlayerIndx].uid;
         }
+
+        this.previousBet = undefined;
     }
 
     validateCheck(): checkToServerPayload {
         this.check();
         this.dealCards();
         console.log('this hands ', this.hands);
+        let newHand = this.hands.get(this.thisPlayerId);
+        if (!newHand) {
+            throw 'Didnt get any new cards !';
+        }
+        this.hand = newHand;
         return {
             newHands: Object.fromEntries(this.hands),
             players: this.players,
+            roundStartingPlayerId: this.currentPlayer,
         };
     }
 }

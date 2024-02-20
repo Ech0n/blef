@@ -8,7 +8,7 @@
     import CardModal from './CardModals.svelte';
     import { Game } from './Game';
     import type {Card} from '../model/Card'
-    import type { gameStartPayload } from '../../../common/payloads';
+    import type { checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
 
     export let gameId: string;
     export let socket: Socket;
@@ -31,7 +31,6 @@
     };
 
     onMount(() => {
-        console.log(game.hand)
         if (!socket) {
             socket = io(serverUrl);
         }
@@ -41,7 +40,6 @@
         });
 
         socket.on(SocketEvents.hit, (data: { move: any }) => {
-            console.log("received hit data:", data.move, "; current player now: ", game.currentPlayer);
             game = game;
             game.hit(data.move);
         });
@@ -54,8 +52,8 @@
                 socket.emit(SocketEvents.checkToPlayers,checkResult);
             });
         }else{
-            socket.on(SocketEvents.checkToPlayers, (data:any) => {
-                console.log("received check data:",data)
+            socket.on(SocketEvents.checkToPlayers, (data:checkToPlayersPayload) => {
+                console.log("received check data!",data)
                 game.check(data);
                 game = game
 
@@ -70,7 +68,7 @@
     function handleBetSelection(event: CustomEvent) {
         const { detail } = event;
         selectedHand = detail;
-        console.log("AAAAAAAAAAAAAAAAAAAAA"); // https://www.youtube.com/watch?v=-UGFq6jAlZg
+        console.debug("AAAAAAAAAAAAAAAAAAAAA"); // https://www.youtube.com/watch?v=-UGFq6jAlZg
         socket.emit(SocketEvents.hit, { move: selectedHand });
         showModal = false; 
     }
@@ -86,7 +84,6 @@
 
         const { selectedRanking, primaryCard, secondaryCard, selectedColor, startingCard } = game.previousBet;
         let currentBet: string = selectedRanking;
-        console.log(selectedRanking);
 
         if (['One', 'Pair', 'Three', 'Four'].includes(selectedRanking)) {
             let cardName = cardFullNames[primaryCard];

@@ -38,7 +38,6 @@
         // Listen for messages from the server
         socket.on(SocketEvents.joinGame,
         (data: { players?: {uid: string, username: string, isOnline: boolean} []; thisPlayerId: string; thisPlayerName: string; }) => {
-            console.log(data)
             if (!data) {
                 dispatch('leave'); // Very scuffed way to force quit after joining wrong lobby by gameID
             }
@@ -58,23 +57,21 @@
         });
 
         socket.on(SocketEvents.newPlayerJoined, (data: {username:string; uid:string} ) => {
-            console.log("New player in lobby name:", data.username)
+            console.debug("New player in lobby name:", data.username)
             let newPlayer = new Player(data.uid, data.username);
             newPlayer.isOnline = true;
             players = [...players, newPlayer];
         })
 
         socket.on(SocketEvents.gameStarted, (data:gameStartPayload)  => {
-            console.log("reveived game start message",data)
+            console.debug("reveived game start message",data)
             if (data && data.startingPlayerId) {
-                console.log("game start good")
                 gameStartData = data
                 gameView = import("../game/GameView.svelte")
             }
         });
 
         socket.on(SocketEvents.playerLeftGame, (data: { playerId: string }) => { // Players = Host and Clients
-            console.log("Player disconnected", data);
             if (!data) {
                 return;
             }
@@ -95,7 +92,6 @@
         players = [];
 
         dispatch("leave"); // To parent
-        console.log("Left the game and returned to the main menu");
     }
 
 </script>

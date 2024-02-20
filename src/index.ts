@@ -6,7 +6,7 @@ import { SocketEvents } from './types/socketEvents';
 import { v4 as uuidv4 } from 'uuid';
 import { IChecker } from './types/HandRankings';
 import { Player, IPlayer, createPlayerFromIPlayer } from '../common/player';
-import { gameStartPayload } from '../common/payloads';
+import { checkToServerPayload, gameStartPayload } from '../common/payloads';
 
 declare module 'express-session' {
     interface SessionData {
@@ -100,7 +100,7 @@ io.on('connection', (socket) => {
 
         if (!rooms.has(gameId)) {
             socket.emit(SocketEvents.joinGame, false);
-            console.log('Ok what now', rooms);
+            console.debug('room does not exist', rooms);
             socket.disconnect(true);
             return;
         }
@@ -186,7 +186,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on(SocketEvents.checkToPlayers, (payload) => {
+    socket.on(SocketEvents.checkToPlayers, (payload: checkToServerPayload) => {
         if (roomHosts.get(session.gameId) != socket.id) {
             socket.emit(SocketEvents.gameStarted, false);
             console.log('Could not check, (user is not a host)');
@@ -203,13 +203,8 @@ io.on('connection', (socket) => {
                 let newPayload = {
                     newHand: payload.newHands[clientSocket.player.uid],
                     players: payload.players,
+                    roundStartingPlayerId: payload.roundStartingPlayerId,
                 };
-                console.log(
-                    'Sending data to client',
-                    clientSocket.player,
-                    newPayload,
-                    payload
-                );
                 clientSocket.emit(SocketEvents.checkToPlayers, newPayload);
             }
         }

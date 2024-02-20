@@ -87,11 +87,8 @@ function pairChecker(cards: CardDict, handInfo: HandInfo) {
 
 function oneChecker(cards: CardDict, handInfo: HandInfo) {
     console.log('handInfo', handInfo);
-    return (
-        cards[cardToRankTranslation[handInfo.primaryCard].numeric][
-            CardColor.colorless
-        ] >= 1
-    );
+    let cardAsNumber = cardToRankTranslation[handInfo.primaryCard].numeric;
+    return cards[cardAsNumber][CardColor.colorless] >= 1;
 }
 
 export const checkFunctionsMap: Record<

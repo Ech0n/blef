@@ -1,14 +1,23 @@
 <!-- Modal.svelte -->
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
+    import { is_empty } from 'svelte/internal';
 
   const dispatch = createEventDispatcher();
 
   export let showModal: boolean = false;
   export let mode: 'join' | 'create' = 'join'; // Add a mode prop to determine which form to show
   let gameId: string = '';
-  let username: string = '';
+  let username: string = "";
   let errorMessage: string = ''; // Add an error message state
+
+  onMount(()=>{
+    let usernameFromStorage = sessionStorage.getItem('username')
+    if(usernameFromStorage)
+    {
+      username = usernameFromStorage
+    }
+  })
 
   function closeModal() {
       showModal = false;
@@ -20,7 +29,7 @@
           errorMessage = 'Please enter your name.';
           return; // Stop the action if username is empty
       }
-      
+      sessionStorage.setItem("username",username)
       if (mode === 'join') {
           if (gameId.trim() === '') {
               errorMessage = 'Please enter a game ID.';
