@@ -1,6 +1,10 @@
-<script>
+<script >
     import { createEventDispatcher } from 'svelte';
+    import { compareRankings } from './Comparators';
 
+    // @ts-ignore
+    export let previousBet 
+    
     const dispatch = createEventDispatcher();
     const handRankings = [
         'Royal', 'Flush', 'Four', 'Full', 'Street',
@@ -14,6 +18,7 @@
     let secondaryCard = '';
     let selectedColor = '';
     let startingCard = '';
+
 
     function closeModal() {
         dispatch('close');
@@ -52,13 +57,34 @@
         selectedColor = selectedColor.toLowerCase();
         startingCard = startingCard.toLowerCase();
 
-        dispatch('select', {
+        selectedRanking = selectedRanking.toLowerCase();
+        primaryCard = primaryCard.toLowerCase();
+        secondaryCard = secondaryCard.toLowerCase();
+        selectedColor = selectedColor.toLowerCase();
+        startingCard = startingCard.toLowerCase();
+
+        if (['Flush', 'Street'].includes(selectedRanking) && (!startingCard || ['10', 'J', 'Q', 'K', 'A'].includes(startingCard))) {
+            alert('Please select starting card and make sure it is not larger than 9.');
+            return;
+        }
+
+        let newBet = {
             selectedRanking,
             primaryCard,
             secondaryCard,
             selectedColor,
             startingCard
-        });
+        }
+
+        // @ts-ignore
+        if (!previousBet) {
+            if (compareRankings(previousBet, newBet)) {
+                alert("New ranking must be higher than previous one")
+                return
+            }
+        }
+
+        dispatch('select', newBet);
         closeModal();
     }
 </script>

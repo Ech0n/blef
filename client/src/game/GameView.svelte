@@ -178,7 +178,7 @@
     {/if}
 </div>
 {#if showModal}
-    <CardModal on:close={() => showModal = false} on:select={handleBetSelection} />
+    <CardModal on:close={() => showModal = false} on:select={handleBetSelection} previousBet={game.previousBet} />
 {/if}
 
 <style>
