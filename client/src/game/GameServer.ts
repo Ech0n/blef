@@ -46,9 +46,9 @@ export class GameServer extends Game {
     }
 
     drawCards(numberOfCards: number): Card[] {
-        if (numberOfCards > 5) {
-            throw 'Drawing more than 5 cards is not a possibility';
-        }
+        // if (numberOfCards > 5) {
+        //     throw 'Drawing more than 5 cards is not a possibility';
+        // }
         if (numberOfCards > this.deck.length) {
             throw 'Not enough cards in deck to draw cards';
         }
@@ -125,11 +125,14 @@ export class GameServer extends Game {
 
         this.players[this.currentPlayerIndx].loses += 1;
 
-        if (this.players[this.currentPlayerIndx].loses == 4) {
+        if (this.players[this.currentPlayerIndx].loses == 5) {
             this.eliminatedPlayers.push(this.players[this.currentPlayerIndx]);
-            this.players.slice(this.currentPlayerIndx, 1);
+            this.players.splice(this.currentPlayerIndx, 1);
             this.playerCount -= 1;
-            this.currentPlayerIndx -= 1;
+            this.currentPlayerIndx = this.currentPlayerIndx - 1;
+            if (this.currentPlayerIndx < 0) {
+                this.currentPlayerIndx = this.players.length - 1;
+            }
             this.currentPlayer = this.players[this.currentPlayerIndx].uid;
         }
 
@@ -145,11 +148,13 @@ export class GameServer extends Game {
             throw 'Didnt get any new cards !';
         }
         this.hand = newHand;
-        return {
+        let payload = {
             newHands: Object.fromEntries(this.hands),
             players: this.players,
             roundStartingPlayerId: this.currentPlayer,
             eliminatedPlayers: this.eliminatedPlayers,
         };
+        console.log('sending payload ', payload);
+        return payload;
     }
 }

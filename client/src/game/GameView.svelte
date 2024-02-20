@@ -19,7 +19,7 @@
     const dispatch = createEventDispatcher();
     const serverUrl: string = "http://localhost:5678";
     let game: Game = (isHost) ? new GameServer(initialPlayerList, gameStartData,thisPlayerId) : new Game(initialPlayerList, gameStartData,thisPlayerId);
-
+    let eliminated = false
     let showModal: boolean = false;
     let betName: string = '';
     let selectedHand;
@@ -39,8 +39,8 @@
         });
 
         socket.on(SocketEvents.hit, (data: { move: any }) => {
-            game = game;
             game.hit(data.move);
+            game = game;
         });
 
         if (isHost) {
@@ -49,13 +49,24 @@
                 console.log("Valuidated check this is what goes further ",checkResult);
                 game = game;
                 socket.emit(SocketEvents.checkToPlayers,checkResult);
+                game.eliminatedPlayers.forEach((pl)=>{
+                    if(pl.uid == thisPlayerId)
+                    {
+                        eliminated = true
+                    }
+                })
             });
         }else{
             socket.on(SocketEvents.checkToPlayers, (data:checkToPlayersPayload) => {
                 console.log("received check data!",data)
                 game.check(data);
                 game = game
-
+                game.eliminatedPlayers.forEach((pl)=>{
+                    if(pl.uid == thisPlayerId)
+                    {
+                        eliminated = true
+                    }
+                })
             });
         }
             
@@ -119,15 +130,19 @@
 <p>Players:</p>
 <ul>
     {#each game.players as {username, loses, uid}}
-        {#if (uid ===  game.currentPlayer)}
+        {#if ( uid ===  game.currentPlayer)}
             <strong> > {username}</strong>
         {:else}
             {username}
         {/if}
         ❤️ {5 - loses} <br>
     {/each}
+    {#each game.eliminatedPlayers as {username}}
+        <p class="eliminated">{username}</p>
+    {/each}
 </ul>
 <div>
+    {#if !eliminated}
     <p>Your cards:</p>
     <div class="hand">
         {#each game.hand as card}
@@ -136,6 +151,7 @@
             </div>
         {/each}
     </div>
+    {/if}
 </div>
 {#if game.currentPlayer == thisPlayerId}
     <p>Your turn</p>
@@ -154,6 +170,9 @@
 {/if}
 
 <style>
+    .eliminated{
+        color:rgb(167, 167, 167);
+    }
     .hand {
         display: flex;
         align-items: center;
