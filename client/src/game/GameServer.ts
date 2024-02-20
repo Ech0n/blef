@@ -101,6 +101,8 @@ export class GameServer extends Game {
             countedCards,
             this.previousBet
         );
+        //If cards were found than current player is set to previous one
+        // next for the current player one lose is added
         if (wasBetFound) {
             const prevPlayer =
                 (this.currentPlayerIndx - 1 + this.playerCount) %
@@ -108,6 +110,7 @@ export class GameServer extends Game {
             this.currentPlayerIndx = prevPlayer;
             this.currentPlayer = this.players[this.currentPlayerIndx].uid;
         }
+
         this.players[this.currentPlayerIndx].loses += 1;
 
         if (this.players[this.currentPlayerIndx].loses == 4) {

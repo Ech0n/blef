@@ -3,6 +3,7 @@ import type { IPlayer } from '../../../common/player';
 
 export type Card = [string, string];
 export type CardList = Card[];
+export type CardCountTable = { [key: number]: { [key: number]: number } };
 export enum CardColor {
     spade,
     hearts,

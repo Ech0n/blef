@@ -4,9 +4,12 @@ import http from 'http';
 import session from 'express-session';
 import { SocketEvents } from './types/socketEvents';
 import { v4 as uuidv4 } from 'uuid';
-import { IChecker } from './types/HandRankings';
 import { Player, IPlayer, createPlayerFromIPlayer } from '../common/player';
-import { checkToServerPayload, gameStartPayload } from '../common/payloads';
+import {
+    checkToServerPayload,
+    gameStartPayload,
+    hitPayload,
+} from '../common/payloads';
 
 declare module 'express-session' {
     interface SessionData {
@@ -48,6 +51,9 @@ const sessionConfig = session({
 });
 app.set('trust proxy', 1); // trust first proxy
 app.use(sessionConfig);
+interface IChecker {
+    check(cards: any): boolean;
+}
 
 io.engine.use(sessionConfig);
 
@@ -162,7 +168,7 @@ io.on('connection', (socket) => {
 
         io.in(session.gameId).emit(SocketEvents.gameStarted, data);
     });
-    socket.on(SocketEvents.hit, (data: { move: IChecker }) => {
+    socket.on(SocketEvents.hit, (data: hitPayload) => {
         if (!data || !data.move) {
             throw 'No move data passed';
         }

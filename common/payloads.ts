@@ -17,3 +17,7 @@ export interface gameStartPayload {
     startingPlayerId: string;
     newHands: { [key: string]: Card[] };
 }
+
+export interface hitPayload {
+    move: any;
+}
