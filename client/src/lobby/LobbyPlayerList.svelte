@@ -3,6 +3,8 @@
 
     export let players:Player[]
 
+    export let thisPlayer: Player;
+
 
 </script>
 
@@ -10,7 +12,7 @@
     {#each players as player}
         <div class="playerItem">
             {player.username}
-            {#if player.isOnline}
+            {#if (player.isOnline || player.username === thisPlayer.username)}
                 🟢 
                 {:else}
                 🔴
@@ -26,14 +28,15 @@
         align-items: center;
     }
 
-    .playerItem{
-        background-color: #363636;;
+    .playerItem {
+        background-color: #4f3acc;;
         border-radius: 20px;
-        border-color: #464646;
+        border-color: #210097;
         border-style: solid;
-        width:300px;
-        padding-top:3px;
-        padding-bottom: 3px;
+        min-width: 300px;
+        padding: 3px 10px 3px 10px;
+        margin: 20px 0 15px 0;
+        white-space: nowrap; 
     }
 </style>
 
