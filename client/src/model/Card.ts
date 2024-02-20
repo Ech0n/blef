@@ -25,16 +25,16 @@ export function initalizeCountTable(): CardCountTable {
 }
 export enum CardColor {
     spade,
-    hearts,
-    diamonds,
-    clubs,
+    heart,
+    diamond,
+    club,
     colorless,
 }
 export enum Rank {
-    Ace,
-    King,
-    Queen,
-    Jupek,
+    ace,
+    king,
+    queen,
+    jack,
     ten,
     nine,
     eight,
@@ -57,10 +57,10 @@ export const cardToRankTranslation: {
     '8': { numeric: 8, string: 'eight' },
     '9': { numeric: 9, string: 'nine' },
     '10': { numeric: 10, string: 'ten' },
-    'J': { numeric: 11, string: 'Jupek' },
-    'Q': { numeric: 12, string: 'Queen' },
-    'K': { numeric: 13, string: 'King' },
-    'A': { numeric: 14, string: 'Ace' },
+    'j': { numeric: 11, string: 'jack' },
+    'q': { numeric: 12, string: 'queen' },
+    'k': { numeric: 13, string: 'king' },
+    'a': { numeric: 14, string: 'ace' },
     'two': { numeric: 2, string: 'two' },
     'three': { numeric: 3, string: 'three' },
     'four': { numeric: 4, string: 'four' },
@@ -70,10 +70,10 @@ export const cardToRankTranslation: {
     'eight': { numeric: 8, string: 'eight' },
     'nine': { numeric: 9, string: 'nine' },
     'ten': { numeric: 10, string: 'ten' },
-    'Jupek': { numeric: 11, string: 'Jupek' },
-    'Queen': { numeric: 12, string: 'Queen' },
-    'King': { numeric: 13, string: 'King' },
-    'Ace': { numeric: 14, string: 'Ace' },
+    'jack': { numeric: 11, string: 'jack' },
+    'queen': { numeric: 12, string: 'queen' },
+    'king': { numeric: 13, string: 'king' },
+    'ace': { numeric: 14, string: 'ace' },
 };
 
 export function initalizeGame(players: IPlayer[]): gameStartPayload {

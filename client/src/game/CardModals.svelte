@@ -46,6 +46,12 @@
             return;
         }
 
+        selectedRanking = selectedRanking.toLowerCase();
+        primaryCard = primaryCard.toLowerCase();
+        secondaryCard = secondaryCard.toLowerCase();
+        selectedColor = selectedColor.toLowerCase();
+        startingCard = startingCard.toLowerCase();
+
         dispatch('select', {
             selectedRanking,
             primaryCard,
@@ -140,10 +146,10 @@
         background-color: rgba(0,0,0,0.4);
     }
     .modal-content {
-        background-color: #fefefe;
+        background-color: #3a3636;
+        border-radius: 10px;
         margin: 15% auto;
         padding: 20px;
-        border: 1px solid #888;
         width: 50%;
     }
     .close {
@@ -174,5 +180,6 @@
     button {
         margin-left: 10px;
         padding: 5px 15px;
+        color: aliceblue;
     }
 </style>

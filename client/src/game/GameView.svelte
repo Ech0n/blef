@@ -8,6 +8,7 @@
     import CardModal from './CardModals.svelte';
     import { Game } from './Game';
     import type { checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
+    import CardImageHandler from './CardImageHandler';
 
     export let gameId: string;
     export let socket: Socket;
@@ -24,6 +25,7 @@
     let betName: string = '';
     let selectedHand;
 
+    const cardImageHandler = new CardImageHandler();
     const cardFullNames: { [key: string]: string } = {
         '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six', '7': 'Seven', '8': 'Eight', 
         '9': 'Nine', '10': 'Ten', 'J': 'Jack', 'Q': 'Queen', 'K': 'King', 'A': 'Ace'
@@ -78,7 +80,7 @@
     function handleBetSelection(event: CustomEvent) {
         const { detail } = event;
         selectedHand = detail;
-        console.debug("AAAAAAAAAAAAAAAAAAAAA"); // https://www.youtube.com/watch?v=-UGFq6jAlZg
+        console.log(selectedHand); // https://www.youtube.com/watch?v=-UGFq6jAlZg
         socket.emit(SocketEvents.hit, { move: selectedHand });
         showModal = false; 
     }
@@ -92,7 +94,14 @@
             return "Error has occured.";
         }
 
-        const { selectedRanking, primaryCard, secondaryCard, selectedColor, startingCard } = game.previousBet;
+        const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+        let { selectedRanking, primaryCard, secondaryCard, selectedColor, startingCard } = game.previousBet;
+        selectedRanking = capitalize(selectedRanking);
+        primaryCard = capitalize(primaryCard);
+        secondaryCard = capitalize(secondaryCard);
+        selectedColor = capitalize(selectedColor);
+        startingCard = capitalize(startingCard);
+
         let currentBet: string = selectedRanking;
 
         if (['One', 'Pair', 'Three', 'Four'].includes(selectedRanking)) {
@@ -130,12 +139,14 @@
 <p>Players:</p>
 <ul>
     {#each game.players as {username, loses, uid}}
-        {#if ( uid ===  game.currentPlayer)}
+    <div style="white-space: nowrap; font-size: 32px">
+        {#if (uid ===  game.currentPlayer)}
             <strong> > {username}</strong>
         {:else}
             {username}
         {/if}
         ❤️ {5 - loses} <br>
+    </div>
     {/each}
     {#each game.eliminatedPlayers as {username}}
         <p class="eliminated">{username}</p>
@@ -146,25 +157,26 @@
     <p>Your cards:</p>
     <div class="hand">
         {#each game.hand as card}
-            <div class="card">
-                {card[0]} {card[1]} 
-            </div>
+            <!-- svelte-ignore a11y-missing-attribute -->
+            <img src={cardImageHandler.getCardImage(card[0] + " " + card[1])}>
         {/each}
     </div>
     {/if}
 </div>
 {#if game.currentPlayer == thisPlayerId}
     <p>Your turn</p>
-    <button on:click={() => showModal = true}>Raise</button>
-    <button on:click={check}>Check</button>
+    <button class="start-close" on:click={() => showModal = true}>Raise</button>
+    <button class="start-close" on:click={check}>Check</button>
 {/if}
 
-<p>Current bet:</p>
-{#if game.previousBet}
-    {betName}
-{:else}
-    No best has been made yet
-{/if}
+<div class="bet-container">
+    <p>Current bet:</p>
+    {#if game.previousBet}
+        {betName}
+    {:else}
+        No bet has been made yet
+    {/if}
+</div>
 {#if showModal}
     <CardModal on:close={() => showModal = false} on:select={handleBetSelection} />
 {/if}
@@ -181,19 +193,23 @@
         flex-wrap: wrap; 
         gap: 15px;
     }
-    .card {
-        padding: 30px;
-        padding-left: 50px;
-        padding-right: 50px;
-        border-radius: 10px;
-        background-color: whitesmoke;
-        color:black
-    }
     strong {
         font-weight: 900;
-        color: rgb(3, 0, 0);
+        font-size: 34px;
+        color: aliceblue;
+        white-space: nowrap;
     }
     p {
         font-size: 20px;
+    }
+    .start-close {
+        color: aliceblue;
+        font-size: 35px;
+    }
+    .bet-container {
+        background-color: rgb(26, 25, 25);
+        padding: 5px 15px 15px 15px;
+        margin: 15px 0;
+        border-radius: 10px;
     }
 </style>
