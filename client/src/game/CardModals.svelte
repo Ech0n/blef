@@ -8,7 +8,7 @@
     const dispatch = createEventDispatcher();
     const handRankings = [
         'Royal', 'Flush', 'Four', 'Full', 'Street',
-        'Color', 'Three', 'Double', 'Pair', 'One'
+        'Color', 'Double', 'Three', 'Pair', 'One'
     ];
     const cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
     const colors = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];

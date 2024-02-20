@@ -123,7 +123,7 @@
         if (['Double', 'Full'].includes(selectedRanking)) {
             let primaryCardName = cardFullNames[primaryCard];
             let secondaryCardName = cardFullNames[secondaryCard]
-            return (currentBet + " of 3 " + primaryCardName + "s and 2 " + secondaryCardName + "s"); 
+            return (currentBet + " of " + (selectedRanking === 'Double' ? "2 " : "3 ") + primaryCardName + "s and 2 " + secondaryCardName + "s"); 
         }
 
         if (['Flush', 'Street'].includes(selectedRanking)) {
