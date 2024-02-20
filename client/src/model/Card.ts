@@ -3,7 +3,26 @@ import type { IPlayer } from '../../../common/player';
 
 export type Card = [string, string];
 export type CardList = Card[];
-export type CardCountTable = { [key: number]: { [key: number]: number } };
+export type CardCountTable = { [key: number]: { [key: string]: number } };
+
+export function initalizeCountTable(): CardCountTable {
+    // let table = new Map<Number, Map<Number, Number>>();
+    let table: { [key: number]: { [key: number]: number } } = {};
+
+    const colorTable: { [key: string]: number } = {};
+    for (let item in CardColor) {
+        if (isNaN(Number(item))) {
+            colorTable[CardColor[item]] = 0;
+        }
+    }
+    for (let color in CardColor)
+        for (let cardString in cardToRankTranslation) {
+            table[cardToRankTranslation[cardString].numeric] = {
+                ...colorTable,
+            };
+        }
+    return table;
+}
 export enum CardColor {
     spade,
     hearts,

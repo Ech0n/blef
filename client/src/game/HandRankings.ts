@@ -1,4 +1,10 @@
-import { CardColor, Rank, cardToRankTranslation } from '../model/Card';
+import {
+    CardColor,
+    Rank,
+    cardToRankTranslation,
+    type CardCountTable,
+    initalizeCountTable,
+} from '../model/Card';
 
 //TODO: Change this into somekind of predefined structure that can be easily initalized. Reconsider if this is even a correct way to count of carts
 type ColorDict = any;
@@ -32,26 +38,36 @@ function colorChecker(cards: CardDict, handInfo: HandInfo) {
 }
 
 function fourChecker(cards: CardDict, handInfo: HandInfo) {
-    return (
-        cards[cardToRankTranslation[handInfo.primaryCard].numeric][
-            CardColor.colorless
-        ] >= 4
-    );
+    let primCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
+
+    if (!cards[primCard]) {
+        return false;
+    }
+    return cards[primCard][CardColor.colorless] >= 4;
 }
 
 function fullChecker(cards: CardDict, handInfo: HandInfo) {
+    let primCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
+
+    if (!cards[primCard]) {
+        return false;
+    }
+    let secCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
+
+    if (!cards[secCard]) {
+        return false;
+    }
     return (
-        cards[cardToRankTranslation[handInfo.primaryCard].numeric][
-            CardColor.colorless
-        ] >= 3 &&
-        cards[cardToRankTranslation[handInfo.secondaryCard].numeric][
-            CardColor.colorless
-        ] >= 2
+        cards[primCard][CardColor.colorless] >= 3 &&
+        cards[secCard][CardColor.colorless] >= 2
     );
 }
 function streetChecker(cards: CardDict, handInfo: HandInfo) {
     let startingCard = cardToRankTranslation[handInfo.startingCard].numeric;
     for (let i = 0; i < 5; i++) {
+        if (!cards[startingCard - i]) {
+            return false;
+        }
         if (cards[startingCard - i][CardColor.colorless] == 0) {
             return false;
         }
@@ -59,36 +75,47 @@ function streetChecker(cards: CardDict, handInfo: HandInfo) {
     return true;
 }
 function threeChecker(cards: CardDict, handInfo: HandInfo) {
-    return (
-        cards[cardToRankTranslation[handInfo.primaryCard].numeric][
-            CardColor.colorless
-        ] >= 3
-    );
+    let primCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
+
+    if (!cards[primCard]) {
+        return false;
+    }
+    return cards[primCard][CardColor.colorless] >= 3;
 }
 
 function doubleChecker(cards: CardDict, handInfo: HandInfo) {
+    let primCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
+
+    if (!cards[primCard]) {
+        return false;
+    }
+    let secCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
+
+    if (!cards[secCard]) {
+        return false;
+    }
     return (
-        cards[cardToRankTranslation[handInfo.primaryCard].numeric][
-            CardColor.colorless
-        ] >= 2 &&
-        cards[cardToRankTranslation[handInfo.secondaryCard].numeric][
-            CardColor.colorless
-        ] >= 2
+        cards[primCard][CardColor.colorless] >= 2 &&
+        cards[secCard][CardColor.colorless] >= 2
     );
 }
 
 function pairChecker(cards: CardDict, handInfo: HandInfo) {
-    return (
-        cards[cardToRankTranslation[handInfo.primaryCard].numeric][
-            CardColor.colorless
-        ] >= 2
-    );
+    let primCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
+    if (!cards[primCard]) {
+        return false;
+    }
+    return cards[primCard][CardColor.colorless] >= 2;
 }
 
-function oneChecker(cards: CardDict, handInfo: HandInfo) {
+function oneChecker(cards: CardCountTable, handInfo: HandInfo) {
     console.log('handInfo', handInfo);
-    let cardAsNumber = cardToRankTranslation[handInfo.primaryCard].numeric;
-    return cards[cardAsNumber][CardColor.colorless] >= 1;
+    let primCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
+
+    if (!cards[primCard]) {
+        return false;
+    }
+    return cards[primCard][CardColor.colorless] >= 1;
 }
 
 export const checkFunctionsMap: Record<
