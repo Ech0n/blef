@@ -4,6 +4,7 @@ import {
     cardToRankTranslation,
     type CardCountTable,
     initalizeCountTable,
+    ColorToIndex,
 } from '../model/Card';
 
 //TODO: Change this into somekind of predefined structure that can be easily initalized. Reconsider if this is even a correct way to count of carts
@@ -43,7 +44,7 @@ function fourChecker(cards: CardDict, handInfo: HandInfo) {
     if (!cards[primCard]) {
         return false;
     }
-    return cards[primCard][CardColor.colorless] >= 4;
+    return cards[primCard][ColorToIndex['colorless']] >= 4;
 }
 
 function fullChecker(cards: CardDict, handInfo: HandInfo) {
@@ -58,8 +59,8 @@ function fullChecker(cards: CardDict, handInfo: HandInfo) {
         return false;
     }
     return (
-        cards[primCard][CardColor.colorless] >= 3 &&
-        cards[secCard][CardColor.colorless] >= 2
+        cards[primCard][ColorToIndex['colorless']] >= 3 &&
+        cards[secCard][ColorToIndex['colorless']] >= 2
     );
 }
 function streetChecker(cards: CardDict, handInfo: HandInfo) {
@@ -68,7 +69,7 @@ function streetChecker(cards: CardDict, handInfo: HandInfo) {
         if (!cards[startingCard - i]) {
             return false;
         }
-        if (cards[startingCard - i][CardColor.colorless] == 0) {
+        if (cards[startingCard - i][ColorToIndex['colorless']] == 0) {
             return false;
         }
     }
@@ -80,7 +81,7 @@ function threeChecker(cards: CardDict, handInfo: HandInfo) {
     if (!cards[primCard]) {
         return false;
     }
-    return cards[primCard][CardColor.colorless] >= 3;
+    return cards[primCard][ColorToIndex['colorless']] >= 3;
 }
 
 function doubleChecker(cards: CardDict, handInfo: HandInfo) {
@@ -95,8 +96,8 @@ function doubleChecker(cards: CardDict, handInfo: HandInfo) {
         return false;
     }
     return (
-        cards[primCard][CardColor.colorless] >= 2 &&
-        cards[secCard][CardColor.colorless] >= 2
+        cards[primCard][ColorToIndex['colorless']] >= 2 &&
+        cards[secCard][ColorToIndex['colorless']] >= 2
     );
 }
 
@@ -105,7 +106,7 @@ function pairChecker(cards: CardCountTable, handInfo: HandInfo) {
     if (!cards[primCard]) {
         return false;
     }
-    return cards[primCard][CardColor.colorless] >= 2;
+    return cards[primCard][ColorToIndex['colorless']] >= 2;
 }
 
 function oneChecker(cards: CardCountTable, handInfo: HandInfo) {
@@ -115,7 +116,7 @@ function oneChecker(cards: CardCountTable, handInfo: HandInfo) {
     if (!cards[primCard]) {
         return false;
     }
-    return cards[primCard][CardColor.colorless] >= 1;
+    return cards[primCard][ColorToIndex['colorless']] >= 1;
 }
 
 export const checkFunctionsMap: Record<

@@ -6,6 +6,8 @@ import {
     Rank,
     type CardCountTable,
     cardToRankTranslation,
+    initalizeCountTable,
+    ColorToIndex,
 } from '../model/Card';
 import { checkFunctionsMap } from './HandRankings';
 import { Player } from '../../../common/player';
@@ -35,14 +37,17 @@ export class GameServer extends Game {
     hands: Map<string, Card[]>;
     deck: Card[];
     isFinished: boolean = false;
+    cardCounts: CardCountTable;
     constructor(
         players: Player[],
         gameStartData: gameStartPayload,
-        thisPlayerId: string
+        thisPlayerId: string,
+        initialCardCounts: CardCountTable
     ) {
         super(players, gameStartData, thisPlayerId);
         this.hands = new Map(Object.entries(gameStartData.newHands));
         this.deck = deck.slice();
+        this.cardCounts = initialCardCounts;
     }
 
     drawCards(numberOfCards: number): Card[] {
@@ -57,7 +62,14 @@ export class GameServer extends Game {
             let randomIndex: number = Math.floor(
                 Math.random() * this.deck.length
             );
-            drawnCards.push(this.deck.splice(randomIndex, 1)[0]);
+            let card = this.deck.splice(randomIndex, 1)[0];
+            drawnCards.push(card);
+            this.cardCounts[cardToRankTranslation[card[0]].numeric][
+                ColorToIndex[card[1]]
+            ] += 1;
+            this.cardCounts[cardToRankTranslation[card[0]].numeric][
+                ColorToIndex['colorless']
+            ] += 1;
         }
         console.log('drawn cards ', drawnCards);
         return drawnCards;
@@ -68,6 +80,7 @@ export class GameServer extends Game {
     }
 
     dealCards(): void {
+        this.cardCounts = initalizeCountTable();
         this.shuffleDeck();
         this.hands = new Map<string, Card[]>();
         this.players.forEach((player: Player) => {
@@ -83,39 +96,42 @@ export class GameServer extends Game {
         let countedCards: CardCountTable = {};
 
         //TODO: Extract card list initalization to function and use it to initalize this.betDetails
-        for (const card in Rank) {
-            let translatrion = cardToRankTranslation[Rank[card] as string];
-            if (translatrion) {
-                let cardToNumber = translatrion.numeric;
+        // for (const card in Rank) {
+        //     let translatrion = cardToRankTranslation[Rank[card] as string];
+        //     if (translatrion) {
+        //         let cardToNumber = translatrion.numeric;
 
-                countedCards[cardToNumber] = {};
-                countedCards[cardToNumber][CardColor.colorless] = 0;
-                for (const color in CardColor) {
-                    countedCards[cardToNumber][color] = 0;
-                }
-            }
-        }
+        //         countedCards[cardToNumber] = {};
+        //         countedCards[cardToNumber][CardColor.colorless] = 0;
+        //         for (const color in CardColor) {
+        //             countedCards[cardToNumber][color] = 0;
+        //         }
+        //     }
+        // }
 
-        for (const player in this.hands) {
-            let hands = this.hands.get(player);
-            if (hands) {
-                hands.forEach((card: Card) => {
-                    let cardToNumber = cardToRankTranslation[card[0]].numeric;
-                    countedCards[cardToNumber][card[1]]++;
-                    countedCards[cardToNumber][CardColor.colorless]++;
-                });
-            }
-        }
+        // for (const player in this.hands) {
+        //     let hands = this.hands.get(player);
+        //     if (hands) {
+        //         hands.forEach((card: Card) => {
+        //             let cardToNumber = cardToRankTranslation[card[0]].numeric;
+        //             countedCards[cardToNumber][card[1]] =
+        //                 countedCards[cardToNumber][card[1]] + 1;
+        //             countedCards[cardToNumber][CardColor.colorless] =
+        //                 countedCards[cardToNumber][CardColor.colorless] + 1;
+        //         });
+        //     }
+        // }
         //end of cards counting-------
 
-        console.log(this.previousBet);
+        // console.log(this.previousBet);
+        console.log('Policzone karty: ', this.cardCounts);
         let wasBetFound = checkFunctionsMap[this.previousBet.selectedRanking](
-            countedCards,
+            this.cardCounts,
             this.previousBet
         );
         //If cards were found than current player is set to previous one
         // next for the current player one lose is added
-        if (wasBetFound) {
+        if (!wasBetFound) {
             const prevPlayer =
                 (this.currentPlayerIndx - 1 + this.playerCount) %
                 this.playerCount;
@@ -141,6 +157,12 @@ export class GameServer extends Game {
 
     validateCheck(): checkToServerPayload {
         this.check();
+        console.log(
+            'PLAYER ',
+            this.players[this.currentPlayerIndx],
+            ' has lsot this round'
+        );
+
         this.dealCards();
         console.log('this hands ', this.hands);
         let newHand = this.hands.get(this.thisPlayerId);

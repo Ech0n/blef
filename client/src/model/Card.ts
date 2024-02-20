@@ -3,19 +3,17 @@ import type { IPlayer } from '../../../common/player';
 
 export type Card = [string, string];
 export type CardList = Card[];
-export type CardCountTable = { [key: number]: { [key: string]: number } };
+export type CardCountTable = { [key: number]: { [key: number]: number } };
 
 export function initalizeCountTable(): CardCountTable {
     // let table = new Map<Number, Map<Number, Number>>();
     let table: { [key: number]: { [key: number]: number } } = {};
 
-    const colorTable: { [key: string]: number } = {};
-    for (let item in CardColor) {
-        if (isNaN(Number(item))) {
-            colorTable[CardColor[item]] = 0;
-        }
+    const colorTable: { [key: number]: number } = {};
+    for (let item in ColorToIndex) {
+        colorTable[ColorToIndex[item]] = 0;
     }
-    for (let color in CardColor)
+    for (let color in ColorToIndex)
         for (let cardString in cardToRankTranslation) {
             table[cardToRankTranslation[cardString].numeric] = {
                 ...colorTable,
@@ -30,6 +28,15 @@ export enum CardColor {
     clubs,
     colorless,
 }
+
+export let ColorToIndex: { [key: string]: number } = {
+    'spade': 4,
+    'hearts': 3,
+    'diamonds': 2,
+    'clubs': 1,
+    'colorless': 0,
+};
+
 export enum Rank {
     Ace,
     King,
@@ -76,7 +83,12 @@ export const cardToRankTranslation: {
     'Ace': { numeric: 14, string: 'Ace' },
 };
 
-export function initalizeGame(players: IPlayer[]): gameStartPayload {
+export function initalizeGame(players: IPlayer[]): {
+    cardCounts: CardCountTable;
+    payload: gameStartPayload;
+} {
+    let cardCounts = initalizeCountTable();
+
     //select random player to start
     let initialGameData: gameStartPayload;
     let startingPlayerId = players[0].uid;
@@ -103,9 +115,16 @@ export function initalizeGame(players: IPlayer[]): gameStartPayload {
             Math.random() * deckInitialization.length
         );
         let randomCard = deckInitialization.splice(randomIndex, 1);
+        cardCounts[cardToRankTranslation[randomCard[0][0]].numeric][
+            ColorToIndex[randomCard[0][1]]
+        ] += 1;
+        cardCounts[cardToRankTranslation[randomCard[0][0]].numeric][
+            ColorToIndex['colorless']
+        ] += 1;
         hands[player.uid] = randomCard;
     });
 
+    console.log('inital cards coutns: ', cardCounts);
     initialGameData = { newHands: hands, startingPlayerId: startingPlayerId };
-    return initialGameData;
+    return { cardCounts: cardCounts, payload: initialGameData };
 }

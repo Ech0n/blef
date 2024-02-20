@@ -8,6 +8,7 @@
     import CardModal from './CardModals.svelte';
     import { Game } from './Game';
     import type { checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
+    import type { CardCountTable } from '../model/Card';
 
     export let gameId: string;
     export let socket: Socket;
@@ -15,10 +16,11 @@
     export let thisPlayerId: string;
     export let isHost:boolean|undefined = false;
     export let gameStartData: gameStartPayload
+    export let cardCounts: CardCountTable
 
     const dispatch = createEventDispatcher();
     const serverUrl: string = "http://localhost:5678";
-    let game: Game = (isHost) ? new GameServer(initialPlayerList, gameStartData,thisPlayerId) : new Game(initialPlayerList, gameStartData,thisPlayerId);
+    let game: Game = (isHost) ? new GameServer(initialPlayerList, gameStartData,thisPlayerId,cardCounts) : new Game(initialPlayerList, gameStartData,thisPlayerId);
     let eliminated = false
     let showModal: boolean = false;
     let betName: string = '';
@@ -81,7 +83,7 @@
 
 
     });
-
+//TODO: On finished game when new game is tarted players are not initalized properly
     // This function is called when the modal is closed and we have selected a bet
     function handleBetSelection(event: CustomEvent) {
         const { detail } = event;

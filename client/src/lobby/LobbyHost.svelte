@@ -4,7 +4,7 @@
     import { Player } from '../../../common/player';
     import {SocketEvents} from '../../../src/types/socketEvents'
     import { playerStore } from '../game/stores';
-    import { initalizeGame } from '../model/Card';
+    import { initalizeGame, type CardCountTable, initalizeCountTable } from '../model/Card';
     import type { gameStartPayload } from '../../../common/payloads';
     import e from 'express';
     import LobbyPlayerList from './LobbyPlayerList.svelte';
@@ -19,6 +19,8 @@
     let gameView: Promise<typeof import('../game/GameView.svelte')> | undefined;
     let gameStartData: gameStartPayload;
     let players: Player[] = [];
+
+    let cardCounts : CardCountTable = initalizeCountTable()
 
 
     const unsubscribe = playerStore.subscribe(value => {
@@ -83,7 +85,9 @@
 
     function startGame(): void {
         //TODO: Randomize starting player?
-        let startPayload = initalizeGame(players)
+        let initializationData = initalizeGame(players)
+        cardCounts = initializationData.cardCounts
+        let startPayload = initializationData.payload
         socket.emit(SocketEvents.gameStarted,startPayload);
     }
 
@@ -101,6 +105,7 @@
     function showWinnner(winner:any):void
     {
         gameView = undefined
+        
         if(winner.detail && winner.detail.username)
         {
             alert("Wygrał gracz: "+winner.detail.username)
@@ -111,7 +116,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameView }}
-            <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players} on:gameFinished={showWinnner}  {thisPlayerId} {gameStartData} isHost />
+            <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players} on:gameFinished={showWinnner}  {thisPlayerId} {gameStartData} isHost  {cardCounts}/>
         {/await}
         <p>host options:</p>
         <p>kick player:</p>
