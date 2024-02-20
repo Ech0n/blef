@@ -149,6 +149,7 @@ export class GameServer extends Game {
             newHands: Object.fromEntries(this.hands),
             players: this.players,
             roundStartingPlayerId: this.currentPlayer,
+            eliminatedPlayers: this.eliminatedPlayers,
         };
     }
 }
