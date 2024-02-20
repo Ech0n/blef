@@ -19,8 +19,7 @@ export class Game {
     constructor(
         players: Player[],
         gameStartData: gameStartPayload,
-        thisPlayerId: string
-    ) {
+        thisPlayerId: string) {
         this.playerCount = players.length;
         this.players = structuredClone(players);
         this.hand = gameStartData.newHands[thisPlayerId];

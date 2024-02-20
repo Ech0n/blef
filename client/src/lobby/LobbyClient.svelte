@@ -76,7 +76,7 @@
             dispatch("gameClosed")
         })
 
-        socket.on(SocketEvents.playerLeftGame, (data: { playerId: string }) => { // Players = Host and Clients
+        socket.on(SocketEvents.playerLeftGame, (data: { playerId: string }) => {
             if (!data) {
                 return;
             }

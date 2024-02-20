@@ -42,8 +42,8 @@ export class GameServer extends Game {
         players: Player[],
         gameStartData: gameStartPayload,
         thisPlayerId: string,
-        initialCardCounts: CardCountTable
-    ) {
+        initialCardCounts: CardCountTable) {
+
         super(players, gameStartData, thisPlayerId);
         this.hands = new Map(Object.entries(gameStartData.newHands));
         this.deck = deck.slice();
