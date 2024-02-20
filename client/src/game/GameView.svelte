@@ -64,7 +64,7 @@
                     dispatch("gameFinished",game.players[0])
                 }
             });
-        }else{
+        } else {
             socket.on(SocketEvents.checkToPlayers, (data:checkToPlayersPayload) => {
                 console.log("received check data!",data)
                 game.check(data);
@@ -85,12 +85,12 @@
 
 
     });
-//TODO: On finished game when new game is tarted players are not initalized properly
+    //TODO: On finished game when new game is tarted players are not initalized properly
     // This function is called when the modal is closed and we have selected a bet
     function handleBetSelection(event: CustomEvent) {
         const { detail } = event;
         selectedHand = detail;
-        console.log(selectedHand); // https://www.youtube.com/watch?v=-UGFq6jAlZg
+        // console.log(selectedHand); // https://www.youtube.com/watch?v=-UGFq6jAlZg
         socket.emit(SocketEvents.hit, { move: selectedHand });
         showModal = false; 
     }
@@ -146,16 +146,15 @@
 </script>
 
 <h3>{#if gameId} Game ID: {gameId} {/if}</h3>
-<p>Players:</p>
 <ul>
     {#each game.players as {username, loses, uid}}
     <div style="white-space: nowrap; font-size: 32px">
-        {#if (uid ===  game.currentPlayer)}
+        {#if uid === game.currentPlayer}
             <strong> > {username}</strong>
         {:else}
             {username}
         {/if}
-        ❤️ {5 - loses} <br>
+        | {1 + loses} Cards 🂠 
     </div>
     {/each}
     {#each game.eliminatedPlayers as {username}}

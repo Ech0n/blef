@@ -69,6 +69,7 @@
             selectedColor,
             startingCard
         }
+        
         // @ts-ignore
         if (previousBet) {
             if (compareRankings(previousBet, newBet)) {

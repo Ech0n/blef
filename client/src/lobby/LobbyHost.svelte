@@ -104,16 +104,14 @@
         players = [];
     }
 
-    function kickPlayer(id:string){
+    function kickPlayer(id: string) {
         socket.emit(SocketEvents.kickPlayer,id)
     }
 
-    function showWinnner(winner:any):void
-    {
+    function showWinnner(winner: any): void {
         gameView = undefined
         
-        if(winner.detail && winner.detail.username)
-        {
+        if(winner.detail && winner.detail.username) {
             alert("Wygrał gracz: "+winner.detail.username)
         }
     }
@@ -122,7 +120,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameView }}
-            <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players} on:gameFinished={showWinnner}  {thisPlayerId} {gameStartData} isHost  {cardCounts}/>
+            <GameView on:leave={closeGame}  on:gameFinished={showWinnner}  {gameId} {socket} initialPlayerList={players} {thisPlayerId} {gameStartData} isHost {cardCounts}/>
         {/await}
         <p>host options:</p>
         <p>kick player:</p>
@@ -136,7 +134,7 @@
                          {:else}
                             🔴
                          {/if}
-                         <button class="kick-button" on:click={()=>kickPlayer(player.uid)}>kick :)</button>
+                         <button class="kick-button" on:click={()=>kickPlayer(player.uid)}>Kick player</button>
                     </div>
                 {/if}
             {/each}
@@ -158,9 +156,6 @@
 <style>
     p {
         font-size:15px;
-    }
-    .hostPlayerToolContainer {
-
     }
     .playerItemForHost {
         font-size:13px;

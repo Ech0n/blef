@@ -6,7 +6,7 @@
     import { SocketEvents } from '../../../src/types/socketEvents';
     import { Player } from '../../../common/player';
     import type { gameStartPayload } from '../../../common/payloads';
-    import type { Card } from '../model/Card';
+    import type { CardCountTable } from '../model/Card';
     import LobbyPlayerList from './LobbyPlayerList.svelte';
 
     export let usernameInput:string;
@@ -17,9 +17,9 @@
     let gameView: Promise<typeof import('../game/GameView.svelte')> | undefined;
     let players: Player[] = [];
     let currentPlayer: Player;
-    let startingPlayerId: string;
     let gameStartData: gameStartPayload;
     let thisPlayerId: string
+    let _: CardCountTable; // This is completely useless and made to avoid errors
 
     const unsubscribe = playerStore.subscribe(value => {
         currentPlayer = value!;
@@ -99,11 +99,10 @@
         dispatch("gameClosed"); // To parent
     }
 
-    function showWinnner(winner:any):void
+    function showWinnner(winner: any): void
     {
         gameView = undefined
-        if(winner.detail && winner.detail.username)
-        {
+        if(winner.detail && winner.detail.username) {
             alert("Wygrał gracz: "+winner.detail.username)
         }
     }
@@ -112,9 +111,8 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameClient }}
-            <GameClient {gameId} {socket} on:leave={leaveGame} on:gameFinished={showWinnner} initialPlayerList={players}  {thisPlayerId} {gameStartData} />
+            <GameClient on:leave={leaveGame} on:gameFinished={showWinnner} {gameId} {socket} initialPlayerList={players} {thisPlayerId} isHost={false} {gameStartData} cardCounts={_} />
         {/await}
-
     {:else}
         Game ID: {#if gameId} {gameId} {/if}
         <br>
