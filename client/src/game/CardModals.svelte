@@ -51,22 +51,16 @@
             return;
         }
 
-        selectedRanking = selectedRanking.toLowerCase();
-        primaryCard = primaryCard.toLowerCase();
-        secondaryCard = secondaryCard.toLowerCase();
-        selectedColor = selectedColor.toLowerCase();
-        startingCard = startingCard.toLowerCase();
-
-        selectedRanking = selectedRanking.toLowerCase();
-        primaryCard = primaryCard.toLowerCase();
-        secondaryCard = secondaryCard.toLowerCase();
-        selectedColor = selectedColor.toLowerCase();
-        startingCard = startingCard.toLowerCase();
-
         if (['Flush', 'Street'].includes(selectedRanking) && (!startingCard || ['10', 'J', 'Q', 'K', 'A'].includes(startingCard))) {
             alert('Please select starting card and make sure it is not larger than 9.');
             return;
         }
+
+        selectedRanking = selectedRanking.toLowerCase();
+        primaryCard = primaryCard.toLowerCase();
+        secondaryCard = secondaryCard.toLowerCase();
+        selectedColor = selectedColor.toLowerCase();
+        startingCard = startingCard.toLowerCase();
 
         let newBet = {
             selectedRanking,
