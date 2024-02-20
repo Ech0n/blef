@@ -8,7 +8,7 @@ interface hitPayload {
     startingCard: string;
 }
 
-function compareRankings(
+export function compareRankings(
     oldRanking: hitPayload,
     newRanking: hitPayload
 ): boolean {
@@ -22,37 +22,43 @@ function compareRankings(
         compareHierarchy[oldRanking.selectedRanking] ==
         compareHierarchy[newRanking.selectedRanking]
     ) {
-        if (oldRanking.selectedRanking in ['One', 'Pair', 'Three']) {
+        console.debug(
+            'ranks are equal, checking cards ',
+            oldRanking,
+            newRanking
+        );
+        if (['One', 'Pair', 'Three'].includes(oldRanking.selectedRanking)) {
+            console.debug('rank is one');
             return (
-                cardToRankTranslation[oldRanking.primaryCard] <
-                cardToRankTranslation[newRanking.primaryCard]
+                cardToRankTranslation[oldRanking.primaryCard].numeric <
+                cardToRankTranslation[newRanking.primaryCard].numeric
             );
         }
-        if (oldRanking.selectedRanking in ['Double', 'Full']) {
+        if (['Double', 'Full'].includes(oldRanking.selectedRanking)) {
             if (
-                cardToRankTranslation[oldRanking.primaryCard] ==
-                cardToRankTranslation[newRanking.primaryCard]
+                cardToRankTranslation[oldRanking.primaryCard].numeric ==
+                cardToRankTranslation[newRanking.primaryCard].numeric
             ) {
                 return (
-                    cardToRankTranslation[oldRanking.secondaryCard] <
-                    cardToRankTranslation[newRanking.secondaryCard]
+                    cardToRankTranslation[oldRanking.secondaryCard].numeric <
+                    cardToRankTranslation[newRanking.secondaryCard].numeric
                 );
             }
             return (
-                cardToRankTranslation[oldRanking.primaryCard] <
-                cardToRankTranslation[newRanking.primaryCard]
+                cardToRankTranslation[oldRanking.primaryCard].numeric <
+                cardToRankTranslation[newRanking.primaryCard].numeric
             );
         }
-        if (oldRanking.selectedRanking in ['Color']) {
+        if (['Color'].includes(oldRanking.selectedRanking)) {
             return (
                 colorHierarchy[oldRanking.selectedColor] <
                 colorHierarchy[newRanking.selectedColor]
             );
         }
-        if (oldRanking.selectedRanking in ['Street']) {
+        if (['Street'].includes(oldRanking.selectedRanking)) {
             return (
-                cardToRankTranslation[oldRanking.startingCard] <
-                cardToRankTranslation[newRanking.startingCard]
+                cardToRankTranslation[oldRanking.startingCard].numeric <
+                cardToRankTranslation[newRanking.startingCard].numeric
             );
         }
     }

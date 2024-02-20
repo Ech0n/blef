@@ -166,7 +166,7 @@
     No best has been made yet
 {/if}
 {#if showModal}
-    <CardModal on:close={() => showModal = false} on:select={handleBetSelection} />
+    <CardModal on:close={() => showModal = false} on:select={handleBetSelection} previousBet={game.previousBet} />
 {/if}
 
 <style>
