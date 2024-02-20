@@ -11,6 +11,7 @@ import {
     gameStartPayload,
     hitPayload,
 } from '../common/payloads';
+import { config } from '../config';
 
 declare module 'express-session' {
     interface SessionData {
@@ -25,7 +26,7 @@ declare module 'socket.io' {
     }
 }
 
-const port = process.env.PORT || 5678;
+const port = config.BACKENDSERVERPORT || 5678;
 
 let rooms = new Set<string>();
 let roomHosts = new Map<string, string>();
@@ -38,7 +39,11 @@ const server = http.createServer(app).listen(port, () => {
 
 const io = new SocketIOServer(server, {
     cors: {
-        origin: ['http://localhost:5173', 'http://localhost:5174'],
+        origin: [
+            'http://localhost:5173',
+            'http://localhost:5174',
+            config.FRONTEND_SERVER_ADDRESS,
+        ],
         methods: ['GET', 'POST'],
         allowedHeaders: ['my-custom-header'],
         credentials: true,

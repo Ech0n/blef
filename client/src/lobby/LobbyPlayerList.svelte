@@ -1,42 +1,43 @@
 <script lang="ts">
-    import type { Player } from "../../../common/player";
+    import { onMount } from 'svelte';
+    import type { Player } from '../../../common/player';
+    import { type Socket, io } from 'socket.io-client';
+    import { SocketEvents } from '../../../src/types/socketEvents';
+    import type { playerStatusPayload } from '../../../common/payloads';
 
-    export let players:Player[]
+    export let players: Player[];
 
     export let thisPlayer: Player;
-
-
 </script>
 
 <div class="playerList">
     {#each players as player}
         <div class="playerItem">
             {player.username}
-            {#if (player.isOnline || player.username === thisPlayer.username)}
-                🟢 
-                {:else}
+            {#if player.isOnline || player.username === thisPlayer.username}
+                🟢
+            {:else}
                 🔴
-                {/if}
+            {/if}
         </div>
     {/each}
 </div>
 
 <style>
-    .playerList{
+    .playerList {
         display: flex;
         flex-direction: column;
         align-items: center;
     }
 
     .playerItem {
-        background-color: #1e1e22;;
+        background-color: #1e1e22;
         border-radius: 20px;
         border-color: #07050f;
         border-style: solid;
         min-width: 300px;
         padding: 10px 20px 10px 20px;
         margin: 20px 0 15px 0;
-        white-space: nowrap; 
+        white-space: nowrap;
     }
 </style>
-

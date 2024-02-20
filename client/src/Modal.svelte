@@ -1,96 +1,106 @@
 <!-- Modal.svelte -->
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte';
+    import { createEventDispatcher, onMount } from 'svelte';
     import { is_empty } from 'svelte/internal';
 
-  const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-  export let showModal: boolean = false;
-  export let mode: 'join' | 'create' = 'join'; // Add a mode prop to determine which form to show
-  let gameId: string = '';
-  let username: string = "";
-  let errorMessage: string = ''; // Add an error message state
+    export let showModal: boolean = false;
+    export let mode: 'join' | 'create' = 'join'; // Add a mode prop to determine which form to show
+    let gameId: string = '';
+    let username: string = '';
+    let errorMessage: string = ''; // Add an error message state
 
-  onMount(()=>{
-    let usernameFromStorage = sessionStorage.getItem('username')
-    if(usernameFromStorage)
-    {
-      username = usernameFromStorage
+    onMount(() => {
+        let usernameFromStorage = sessionStorage.getItem('username');
+        if (usernameFromStorage) {
+            username = usernameFromStorage;
+        }
+    });
+
+    function closeModal() {
+        showModal = false;
+        dispatch('close');
     }
-  })
 
-  function closeModal() {
-      showModal = false;
-      dispatch('close');
-  }
-
-  function action() {
-      if (username.trim() === '') {
-          errorMessage = 'Please enter your name.';
-          return; // Stop the action if username is empty
-      }
-      sessionStorage.setItem("username",username)
-      if (mode === 'join') {
-          if (gameId.trim() === '') {
-              errorMessage = 'Please enter a game ID.';
-              return; // Stop the action if gameId is empty
-          }
-          dispatch('joinGame', { username, gameId });
-      } else {
-          dispatch('createGame', { username });
-      }
-      closeModal(); // Close the modal only if everything is correct
-  }
+    function action() {
+        if (username.trim() === '') {
+            errorMessage = 'Please enter your name.';
+            return; // Stop the action if username is empty
+        }
+        sessionStorage.setItem('username', username);
+        if (mode === 'join') {
+            if (gameId.trim() === '') {
+                errorMessage = 'Please enter a game ID.';
+                return; // Stop the action if gameId is empty
+            }
+            dispatch('joinGame', { username, gameId });
+        } else {
+            dispatch('createGame', { username });
+        }
+        closeModal(); // Close the modal only if everything is correct
+    }
 </script>
 
 {#if showModal}
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="modal-backdrop" on:click={closeModal}>
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <div class="modal" on:click|stopPropagation>
-      <div class="modal-header">
-          <h2>{mode === 'join' ? 'Provide game ID:' : 'Enter Your Name:'}</h2>
-      </div>
-      <div class="modal-body">
-          {#if errorMessage}
-              <p class="error">{errorMessage}</p>
-          {/if}
-          {#if mode === 'join'}
-          <input type="text" placeholder="Enter Game ID" bind:value={gameId} maxlength="10" />
-          {/if}
-          <input type="text" placeholder="Enter Your Name" bind:value={username} maxlength="14" />
-          <button class="start-close" on:click={action}>{mode === 'join' ? 'Join Game' : 'Create Game'}</button>
-          <button class="start-close" on:click={closeModal}>Close</button>
-      </div>
-  </div>
-</div>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div class="modal-backdrop" on:click={closeModal}>
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div class="modal" on:click|stopPropagation>
+            <div class="modal-header">
+                <h2>
+                    {mode === 'join' ? 'Provide game ID:' : 'Enter Your Name:'}
+                </h2>
+            </div>
+            <div class="modal-body">
+                {#if errorMessage}
+                    <p class="error">{errorMessage}</p>
+                {/if}
+                {#if mode === 'join'}
+                    <input
+                        type="text"
+                        placeholder="Enter Game ID"
+                        bind:value={gameId}
+                        maxlength="10"
+                    />
+                {/if}
+                <input
+                    type="text"
+                    placeholder="Enter Your Name"
+                    bind:value={username}
+                    maxlength="14"
+                />
+                <button class="start-close" on:click={action}
+                    >{mode === 'join' ? 'Join Game' : 'Create Game'}</button
+                >
+                <button class="start-close" on:click={closeModal}>Close</button>
+            </div>
+        </div>
+    </div>
 {/if}
 
-
-  
-  <style>
+<style>
     .modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.3);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.3);
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
-  
+
     .modal {
-      background-color: rgb(31, 31, 31);
-      padding: 20px;
-      border-radius: 5px;
-      border-radius: 20px;
-      border-width: 5px;
+        background-color: rgb(31, 31, 31);
+        padding: 20px;
+        border-radius: 5px;
+        border-radius: 20px;
+        border-width: 5px;
     }
 
     .start-close {
         color: aliceblue;
     }
-  </style>
-  
+</style>

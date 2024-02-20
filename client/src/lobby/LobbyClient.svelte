@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
-    import { io, type Socket } from "socket.io-client";
+    import { io, type Socket } from 'socket.io-client';
     import { createEventDispatcher } from 'svelte';
     import { playerStore } from '../game/stores';
     import { SocketEvents } from '../../../src/types/socketEvents';
@@ -8,8 +8,9 @@
     import type { gameStartPayload } from '../../../common/payloads';
     import type { CardCountTable } from '../model/Card';
     import LobbyPlayerList from './LobbyPlayerList.svelte';
+    import { config } from '../../../config';
 
-    export let usernameInput:string;
+    export let usernameInput: string;
     export let gameId: string;
     const dispatch = createEventDispatcher();
     let socket: Socket;
@@ -18,10 +19,10 @@
     let players: Player[] = [];
     let currentPlayer: Player;
     let gameStartData: gameStartPayload;
-    let thisPlayerId: string
+    let thisPlayerId: string;
     let _: CardCountTable; // This is completely useless and made to avoid errors
 
-    const unsubscribe = playerStore.subscribe(value => {
+    const unsubscribe = playerStore.subscribe((value) => {
         currentPlayer = value!;
     });
 
@@ -29,81 +30,100 @@
         unsubscribe();
     });
 
-
     onMount(() => {
-        const serverUrl: string = "http://localhost:5678";
+        const serverUrl: string =
+            config.BACKEND_SERVER_ADDRESS || 'http://localhost:5678';
         socket = io(serverUrl);
 
-        socket.emit(SocketEvents.joinGame, {gameId:gameId, username:usernameInput} );
+        socket.emit(SocketEvents.joinGame, {
+            gameId: gameId,
+            username: usernameInput,
+        });
 
         // Listen for messages from the server
-        socket.on(SocketEvents.joinGame,
-        (data: { players?: {uid: string, username: string, isOnline: boolean} []; thisPlayerId: string; thisPlayerName: string; }) => {
-            if (!data) {
-                dispatch('leave'); // Very scuffed way to force quit after joining wrong lobby by gameID
+        socket.on(
+            SocketEvents.joinGame,
+            (data: {
+                players?: {
+                    uid: string;
+                    username: string;
+                    isOnline: boolean;
+                }[];
+                thisPlayerId: string;
+                thisPlayerName: string;
+            }) => {
+                if (!data) {
+                    dispatch('leave'); // Very scuffed way to force quit after joining wrong lobby by gameID
+                }
+
+                if (data.players) {
+                    players = data.players.map((el) => {
+                        let newPlayer: Player = new Player(el.uid, el.username);
+                        newPlayer.isOnline = el.isOnline;
+                        return newPlayer;
+                    });
+                }
+
+                if (data.thisPlayerId && data.thisPlayerName) {
+                    // This if is wrong. If data does not exist error should be thrown // Then do it shaking my head
+                    players = [
+                        ...players,
+                        new Player(data.thisPlayerId, data.thisPlayerName),
+                    ];
+                    thisPlayerId = data.thisPlayerId;
+                }
             }
+        );
 
-            if (data.players) {
-                players = data.players.map((el) => {
-                    let newPlayer: Player = new Player(el.uid, el.username);
-                    newPlayer.isOnline = el.isOnline;
-                    return newPlayer
-                });
+        socket.on(
+            SocketEvents.newPlayerJoined,
+            (data: { username: string; uid: string }) => {
+                console.debug('New player in lobby name:', data.username);
+                let newPlayer = new Player(data.uid, data.username);
+                newPlayer.isOnline = true;
+                players = [...players, newPlayer];
             }
+        );
 
-            if (data.thisPlayerId && data.thisPlayerName) { // This if is wrong. If data does not exist error should be thrown // Then do it shaking my head
-                players = [...players, new Player(data.thisPlayerId,data.thisPlayerName)];
-                thisPlayerId = data.thisPlayerId
-            }
-        });
-
-        socket.on(SocketEvents.newPlayerJoined, (data: {username:string; uid:string} ) => {
-            console.debug("New player in lobby name:", data.username)
-            let newPlayer = new Player(data.uid, data.username);
-            newPlayer.isOnline = true;
-            players = [...players, newPlayer];
-        })
-
-        socket.on(SocketEvents.gameStarted, (data:gameStartPayload)  => {
-            console.debug("reveived game start message",data)
+        socket.on(SocketEvents.gameStarted, (data: gameStartPayload) => {
+            console.debug('reveived game start message', data);
             if (data && data.startingPlayerId) {
-                gameStartData = data
-                gameView = import("../game/GameView.svelte")
+                gameStartData = data;
+                gameView = import('../game/GameView.svelte');
             }
         });
 
-        socket.on(SocketEvents.gameClosed,()=>{
-            dispatch("gameClosed")
-        })
+        socket.on(SocketEvents.gameClosed, () => {
+            dispatch('gameClosed');
+        });
 
-        socket.on(SocketEvents.playerLeftGame, (data: { playerId: string }) => { // Players = Host and Clients
+        socket.on(SocketEvents.playerLeftGame, (data: { playerId: string }) => {
+            // Players = Host and Clients
             if (!data) {
                 return;
             }
 
             // Tag the disconnected player as not connected
-            players = players.map(player => {
+            players = players.map((player) => {
                 if (player.uid === data.playerId) {
                     return { ...player, isOnline: false };
                 }
                 return player;
             });
         });
-
     });
 
     function leaveGame(): void {
-        socket.emit(SocketEvents.playerLeftGame, currentPlayer.uid); 
+        socket.emit(SocketEvents.playerLeftGame, currentPlayer.uid);
         players = [];
 
-        dispatch("gameClosed"); // To parent
+        dispatch('gameClosed'); // To parent
     }
 
-    function showWinnner(winner: any): void
-    {
-        gameView = undefined
-        if(winner.detail && winner.detail.username) {
-            alert("Wygrał gracz: "+winner.detail.username)
+    function showWinnner(winner: any): void {
+        gameView = undefined;
+        if (winner.detail && winner.detail.username) {
+            alert('Wygrał gracz: ' + winner.detail.username);
         }
     }
 </script>
@@ -111,13 +131,25 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameClient }}
-            <GameClient on:leave={leaveGame} on:gameFinished={showWinnner} {gameId} {socket} initialPlayerList={players} {thisPlayerId} isHost={false} {gameStartData} cardCounts={_} />
+            <GameClient
+                on:leave={leaveGame}
+                on:gameFinished={showWinnner}
+                {gameId}
+                {socket}
+                initialPlayerList={players}
+                {thisPlayerId}
+                isHost={false}
+                {gameStartData}
+                cardCounts={_}
+            />
         {/await}
     {:else}
-        Game ID: {#if gameId} {gameId} {/if}
-        <br>
+        Game ID: {#if gameId}
+            {gameId}
+        {/if}
+        <br />
         <div>
-            <LobbyPlayerList {players} thisPlayer={currentPlayer}/>
+            <LobbyPlayerList {players} {socket} thisPlayer={currentPlayer} />
 
             <button class="start-close" on:click={leaveGame}>Leave</button>
         </div>

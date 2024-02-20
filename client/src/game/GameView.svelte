@@ -1,36 +1,59 @@
 <script lang="ts">
     import { onMount, createEventDispatcher } from 'svelte';
-    import { io } from "socket.io-client";
+    import { io } from 'socket.io-client';
     import type { Socket } from 'socket.io-client';
     import { GameServer } from './GameServer';
     import { SocketEvents } from '../../../src/types/socketEvents';
     import { Player } from '../../../common/player';
     import CardModal from './CardModals.svelte';
     import { Game } from './Game';
-    import type { checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
+    import type {
+        checkToPlayersPayload,
+        gameStartPayload,
+    } from '../../../common/payloads';
     import type { CardCountTable } from '../model/Card';
     import CardImageHandler from './CardImageHandler';
+    import { config } from '../../../config';
 
     export let gameId: string;
     export let socket: Socket;
     export let initialPlayerList: Player[];
+
     export let thisPlayerId: string;
-    export let isHost:boolean|undefined = false;
-    export let gameStartData: gameStartPayload
-    export let cardCounts: CardCountTable
+    export let isHost: boolean | undefined = false;
+    export let gameStartData: gameStartPayload;
+    export let cardCounts: CardCountTable;
 
     const dispatch = createEventDispatcher();
-    const serverUrl: string = "http://localhost:5678";
-    let game: Game = (isHost) ? new GameServer(initialPlayerList, gameStartData,thisPlayerId,cardCounts) : new Game(initialPlayerList, gameStartData,thisPlayerId);
-    let eliminated = false
+    const serverUrl: string = config.BACKEND_SERVER_ADDRESS;
+    let game: Game = isHost
+        ? new GameServer(
+              initialPlayerList,
+              gameStartData,
+              thisPlayerId,
+              cardCounts
+          )
+        : new Game(initialPlayerList, gameStartData, thisPlayerId);
+    let eliminated = false;
     let showModal: boolean = false;
     let betName: string = '';
     let selectedHand;
 
     const cardImageHandler = new CardImageHandler();
     const cardFullNames: { [key: string]: string } = {
-        '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six', '7': 'Seven', '8': 'Eight', 
-        '9': 'Nine', '10': 'Ten', 'J': 'Jack', 'Q': 'Queen', 'K': 'King', 'A': 'Ace'
+        '2': 'Two',
+        '3': 'Three',
+        '4': 'Four',
+        '5': 'Five',
+        '6': 'Six',
+        '7': 'Seven',
+        '8': 'Eight',
+        '9': 'Nine',
+        '10': 'Ten',
+        'J': 'Jack',
+        'Q': 'Queen',
+        'K': 'King',
+        'A': 'Ace',
     };
 
     onMount(() => {
@@ -50,40 +73,45 @@
         if (isHost) {
             socket.on(SocketEvents.checkToServer, (data) => {
                 let checkResult = game.validateCheck();
-                console.log("Valuidated check this is what goes further ",checkResult);
+                console.log(
+                    'Valuidated check this is what goes further ',
+                    checkResult
+                );
                 game = game;
-                socket.emit(SocketEvents.checkToPlayers,checkResult);
-                game.eliminatedPlayers.forEach((pl)=>{
-                    if(pl.uid == thisPlayerId)
-                    {
-                        eliminated = true
+                socket.emit(SocketEvents.checkToPlayers, checkResult);
+                game.eliminatedPlayers.forEach((pl) => {
+                    if (pl.uid == thisPlayerId) {
+                        eliminated = true;
                     }
-                })
-                if(game.players.length == 1)
-                {
-                    dispatch("gameFinished",game.players[0])
+                });
+                if (game.players.length == 1) {
+                    dispatch('gameFinished', game.players[0]);
                 }
             });
         } else {
-            socket.on(SocketEvents.checkToPlayers, (data:checkToPlayersPayload) => {
-                console.log("received check data!",data)
-                game.check(data);
-                game = game
-                game.eliminatedPlayers.forEach((pl)=>{
-                    if(pl.uid == thisPlayerId)
-                    {
-                        eliminated = true
+            socket.on(
+                SocketEvents.checkToPlayers,
+                (data: checkToPlayersPayload) => {
+                    console.log('received check data!', data);
+                    game.check(data);
+                    game = game;
+                    game.eliminatedPlayers.forEach((pl) => {
+                        if (pl.uid == thisPlayerId) {
+                            eliminated = true;
+                        }
+                    });
+                    if (game.players.length == 1) {
+                        dispatch('gameFinished', game.players[0]);
                     }
-                })
-                if(game.players.length == 1)
-                {
-                    dispatch("gameFinished",game.players[0])
                 }
+            );
+            socket.on(SocketEvents.kickPlayer, (playerId: string) => {
+                console.log('kick player ', playerId);
+                game.removePlayer(playerId);
+                game = game;
+                dispatch('playerLeft', playerId);
             });
         }
-            
-
-
     });
     //TODO: On finished game when new game is tarted players are not initalized properly
     // This function is called when the modal is closed and we have selected a bet
@@ -92,7 +120,7 @@
         selectedHand = detail;
         // console.log(selectedHand); // https://www.youtube.com/watch?v=-UGFq6jAlZg
         socket.emit(SocketEvents.hit, { move: selectedHand });
-        showModal = false; 
+        showModal = false;
     }
 
     function check(): void {
@@ -101,11 +129,18 @@
 
     function getBetName(): string {
         if (!game.previousBet) {
-            return "Error has occured.";
+            return 'Error has occured.';
         }
 
-        const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-        let { selectedRanking, primaryCard, secondaryCard, selectedColor, startingCard } = game.previousBet;
+        const capitalize = (str: string) =>
+            str.charAt(0).toUpperCase() + str.slice(1);
+        let {
+            selectedRanking,
+            primaryCard,
+            secondaryCard,
+            selectedColor,
+            startingCard,
+        } = game.previousBet;
         selectedRanking = capitalize(selectedRanking);
         primaryCard = capitalize(primaryCard);
         secondaryCard = capitalize(secondaryCard);
@@ -116,23 +151,41 @@
 
         if (['One', 'Pair', 'Three', 'Four'].includes(selectedRanking)) {
             let cardName = cardFullNames[primaryCard];
-            return (currentBet + " " + cardName + ((selectedRanking !== 'One') ? "s" : "")); 
+            return (
+                currentBet +
+                ' ' +
+                cardName +
+                (selectedRanking !== 'One' ? 's' : '')
+            );
         }
-
 
         if (['Double', 'Full'].includes(selectedRanking)) {
             let primaryCardName = cardFullNames[primaryCard];
-            let secondaryCardName = cardFullNames[secondaryCard]
-            return (currentBet + " of 3 " + primaryCardName + "s and 2 " + secondaryCardName + "s"); 
+            let secondaryCardName = cardFullNames[secondaryCard];
+            return (
+                currentBet +
+                ' of 3 ' +
+                primaryCardName +
+                's and 2 ' +
+                secondaryCardName +
+                's'
+            );
         }
 
         if (['Flush', 'Street'].includes(selectedRanking)) {
             let cardName = cardFullNames[startingCard];
-            return (currentBet + " starting from " + cardName + ((selectedRanking === 'Flush') ? (" in color " + selectedColor) : ""));
+            return (
+                currentBet +
+                ' starting from ' +
+                cardName +
+                (selectedRanking === 'Flush'
+                    ? ' in color ' + selectedColor
+                    : '')
+            );
         }
 
         if (selectedRanking === 'Royal') {
-            return selectedRanking + " Flush of " + selectedColor;
+            return selectedRanking + ' Flush of ' + selectedColor;
         }
 
         return selectedRanking;
@@ -142,39 +195,46 @@
     $: if (game.previousBet) {
         betName = getBetName();
     }
-
 </script>
 
-<h3>{#if gameId} Game ID: {gameId} {/if}</h3>
+<h3>
+    {#if gameId}
+        Game ID: {gameId}
+    {/if}
+</h3>
 <ul>
-    {#each game.players as {username, loses, uid}}
-    <div style="white-space: nowrap; font-size: 32px">
-        {#if uid === game.currentPlayer}
-            <strong> > {username}</strong>
-        {:else}
-            {username}
-        {/if}
-        | {1 + loses} Cards 🂠 
-    </div>
+    {#each game.players as { username, loses, uid }}
+        <div style="white-space: nowrap; font-size: 32px">
+            {#if uid === game.currentPlayer}
+                <strong> > {username}</strong>
+            {:else}
+                {username}
+            {/if}
+            | {1 + loses} Cards 🂠
+        </div>
     {/each}
-    {#each game.eliminatedPlayers as {username}}
+    {#each game.eliminatedPlayers as { username }}
         <p class="eliminated">{username}</p>
     {/each}
 </ul>
 <div>
     {#if !eliminated}
-    <p>Your cards:</p>
-    <div class="hand">
-        {#each game.hand as card}
-            <!-- svelte-ignore a11y-missing-attribute -->
-            <img src={cardImageHandler.getCardImage(card[0] + " " + card[1])}>
-        {/each}
-    </div>
+        <p>Your cards:</p>
+        <div class="hand">
+            {#each game.hand as card}
+                <!-- svelte-ignore a11y-missing-attribute -->
+                <img
+                    src={cardImageHandler.getCardImage(card[0] + ' ' + card[1])}
+                />
+            {/each}
+        </div>
     {/if}
 </div>
 {#if game.currentPlayer == thisPlayerId}
     <p>Your turn</p>
-    <button class="start-close" on:click={() => showModal = true}>Raise</button>
+    <button class="start-close" on:click={() => (showModal = true)}
+        >Raise</button
+    >
     <button class="start-close" on:click={check}>Check</button>
 {/if}
 
@@ -187,19 +247,23 @@
     {/if}
 </div>
 {#if showModal}
-    <CardModal on:close={() => showModal = false} on:select={handleBetSelection} previousBet={game.previousBet} />
+    <CardModal
+        on:close={() => (showModal = false)}
+        on:select={handleBetSelection}
+        previousBet={game.previousBet}
+    />
 {/if}
 
 <style>
-    .eliminated{
-        color:rgb(167, 167, 167);
+    .eliminated {
+        color: rgb(167, 167, 167);
     }
     .hand {
         display: flex;
         align-items: center;
         justify-content: center;
         flex-direction: row;
-        flex-wrap: wrap; 
+        flex-wrap: wrap;
         gap: 15px;
     }
     strong {

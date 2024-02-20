@@ -1,16 +1,38 @@
-<script >
+<script>
     import { createEventDispatcher } from 'svelte';
     import { compareRankings } from './Comparators';
 
     // @ts-ignore
-    export let previousBet 
-    
+    export let previousBet;
+
     const dispatch = createEventDispatcher();
     const handRankings = [
-        'Royal', 'Flush', 'Four', 'Full', 'Street',
-        'Color', 'Three', 'Double', 'Pair', 'One'
+        'Royal',
+        'Flush',
+        'Four',
+        'Full',
+        'Street',
+        'Color',
+        'Three',
+        'Double',
+        'Pair',
+        'One',
     ];
-    const cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+    const cards = [
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        '10',
+        'J',
+        'Q',
+        'K',
+        'A',
+    ];
     const colors = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
 
     let selectedRanking = '';
@@ -19,40 +41,59 @@
     let selectedColor = '';
     let startingCard = '';
 
-
     function closeModal() {
         dispatch('close');
     }
 
     function confirmSelection() {
-
         if (!selectedRanking) {
             alert('Please select a hand ranking.');
             return;
         }
-        
-        if (['Flush', 'Royal', 'Color'].includes(selectedRanking) && !selectedColor) {
+
+        if (
+            ['Flush', 'Royal', 'Color'].includes(selectedRanking) &&
+            !selectedColor
+        ) {
             alert('Please select a color ranking.');
             return;
         }
 
-        if (['Full', 'Double', 'Pair', 'One', 'Three', 'Four'].includes(selectedRanking) && !primaryCard) {
+        if (
+            ['Full', 'Double', 'Pair', 'One', 'Three', 'Four'].includes(
+                selectedRanking
+            ) &&
+            !primaryCard
+        ) {
             alert('Please select primary card.');
             return;
         }
 
-        if (['Full', 'Double'].includes(selectedRanking) && (!secondaryCard || !primaryCard || secondaryCard === primaryCard)) {
+        if (
+            ['Full', 'Double'].includes(selectedRanking) &&
+            (!secondaryCard || !primaryCard || secondaryCard === primaryCard)
+        ) {
             alert('Please select secondary card.');
             return;
         }
 
-        if (['Flush', 'Street'].includes(selectedRanking) && (!startingCard || ['10', 'J', 'Q', 'K', 'A'].includes(startingCard))) {
-            alert('Please select starting card and make sure it is not larger than 9.');
+        if (
+            ['Flush', 'Street'].includes(selectedRanking) &&
+            (!startingCard || ['10', 'J', 'Q', 'K', 'A'].includes(startingCard))
+        ) {
+            alert(
+                'Please select starting card and make sure it is not larger than 9.'
+            );
             return;
         }
 
-        if (['Flush', 'Street'].includes(selectedRanking) && (!startingCard || ['10', 'J', 'Q', 'K', 'A'].includes(startingCard))) {
-            alert('Please select starting card and make sure it is not larger than 9.');
+        if (
+            ['Flush', 'Street'].includes(selectedRanking) &&
+            (!startingCard || ['10', 'J', 'Q', 'K', 'A'].includes(startingCard))
+        ) {
+            alert(
+                'Please select starting card and make sure it is not larger than 9.'
+            );
             return;
         }
 
@@ -67,14 +108,14 @@
             primaryCard,
             secondaryCard,
             selectedColor,
-            startingCard
-        }
-        
+            startingCard,
+        };
+
         // @ts-ignore
         if (previousBet) {
             if (compareRankings(previousBet, newBet)) {
-                alert("New ranking must be higher than previous one")
-                return
+                alert('New ranking must be higher than previous one');
+                return;
             }
         }
 
@@ -162,8 +203,8 @@
         width: 100%;
         height: 100%;
         overflow: auto;
-        background-color: rgb(0,0,0);
-        background-color: rgba(0,0,0,0.4);
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
     }
     .modal-content {
         background-color: #3a3636;
@@ -185,8 +226,8 @@
         cursor: pointer;
     }
     .dropdowns > div {
-        display: inline-block; 
-        margin-right: 20px; 
+        display: inline-block;
+        margin-right: 20px;
     }
     select {
         width: 100%;

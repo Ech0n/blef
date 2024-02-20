@@ -32,6 +32,20 @@ export class Game {
         this.thisPlayerId = thisPlayerId;
     }
 
+    removePlayer(playerUid: string) {
+        this.players = this.players.filter((pl) => {
+            return pl.uid !== playerUid;
+        });
+        this.eliminatedPlayers = this.eliminatedPlayers.filter((pl) => {
+            return pl.uid !== playerUid;
+        });
+        this.playerCount -= 1;
+        if (this.currentPlayerIndx > this.playerCount) {
+            this.currentPlayerIndx = 0;
+            this.currentPlayer = this.players[0].uid;
+        }
+    }
+
     hit(bet: any): void {
         //TODO: consider validation if bet is possible?
         this.previousBet = bet;

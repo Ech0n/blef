@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import api from './api'; // Ensure this is exported correctly in the respective file
 import { notFound, errorHandler } from './middlewares/errors.middleware'; // Ensure these are exported correctly
+import { config } from '../config';
 
 const app = express();
 
@@ -18,6 +19,7 @@ if (process.env.NODE_ENV === 'production') {
 app.use(
     cors({
         origin: [
+            config.FRONTEND_SERVER_ADDRESS,
             'http://localhost:5173',
             'http://localhost:5174',
             'http://localhost:5175',
