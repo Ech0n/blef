@@ -133,7 +133,7 @@
     <div class="hand">
         {#each game.hand as card}
             <div class="card">
-                {card[0]} , {card[1]} 
+                {card[0]} {card[1]} 
             </div>
         {/each}
     </div>
@@ -160,6 +160,8 @@
         align-items: center;
         justify-content: center;
         flex-direction: row;
+        flex-wrap: wrap; 
+        gap: 15px;
     }
     .card{
         padding: 30px;

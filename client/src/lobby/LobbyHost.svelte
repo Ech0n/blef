@@ -6,6 +6,7 @@
     import { playerStore } from '../game/stores';
     import { initalizeGame } from '../model/Card';
     import type { gameStartPayload } from '../../../common/payloads';
+    import e from 'express';
 
     export let usernameInput:string;
     
@@ -91,6 +92,10 @@
         gameView = undefined; 
         players = [];
     }
+
+    function kickPlayer(id:string){
+        socket.emit(SocketEvents.kickPlayer,id)
+    }
 </script>
 
 <h1>
@@ -98,6 +103,24 @@
         {#await gameView then { default: GameView }}
             <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players}  {thisPlayerId} {gameStartData} isHost />
         {/await}
+        <p>host options:</p>
+        <p>kick player:</p>
+        <div class="hostPlayerToolContainer">
+            {#each players as player}
+                {#if player.uid != thisPlayerId}
+                    <div class= "playerItemForHost">
+                         {player.username} 
+                         {#if player.isOnline}
+                         🟢 
+                         {:else}
+                         🔴
+                         {/if}
+                         <button class="kick-button" on:click={()=>kickPlayer(player.uid)}>kick :)</button>
+                    </div>
+                {/if}
+            {/each}
+        </div>
+        
     {:else}
         Game ID: {#if gameId} {gameId} {/if}
         <br>
@@ -118,3 +141,21 @@
         </div>
     {/if}
 </h1>
+
+<style>
+    p{
+        font-size:15px;
+    }
+    .hostPlayerToolContainer{
+
+    }
+    .playerItemForHost{
+        font-size:13px;
+
+    }
+    .kick-button{
+        font-size:13px;
+        font-size: 1rem;
+        background-color: brown;
+    }
+</style>
