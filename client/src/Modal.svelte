@@ -58,7 +58,7 @@
           {#if mode === 'join'}
           <input type="text" placeholder="Enter Game ID" bind:value={gameId} maxlength="10" />
           {/if}
-          <input type="text" placeholder="Enter Your Name" bind:value={username} maxlength="20" />
+          <input type="text" placeholder="Enter Your Name" bind:value={username} maxlength="14" />
           <button class="start-close" on:click={action}>{mode === 'join' ? 'Join Game' : 'Create Game'}</button>
           <button class="start-close" on:click={closeModal}>Close</button>
       </div>

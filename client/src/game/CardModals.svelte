@@ -51,6 +51,18 @@
             return;
         }
 
+        selectedRanking = selectedRanking.toLowerCase();
+        primaryCard = primaryCard.toLowerCase();
+        secondaryCard = secondaryCard.toLowerCase();
+        selectedColor = selectedColor.toLowerCase();
+        startingCard = startingCard.toLowerCase();
+
+        selectedRanking = selectedRanking.toLowerCase();
+        primaryCard = primaryCard.toLowerCase();
+        secondaryCard = secondaryCard.toLowerCase();
+        selectedColor = selectedColor.toLowerCase();
+        startingCard = startingCard.toLowerCase();
+
         if (['Flush', 'Street'].includes(selectedRanking) && (!startingCard || ['10', 'J', 'Q', 'K', 'A'].includes(startingCard))) {
             alert('Please select starting card and make sure it is not larger than 9.');
             return;
@@ -64,11 +76,8 @@
             startingCard
         }
         // @ts-ignore
-        if(previousBet)
-        {
-            // @ts-ignore
-            if (  compareRankings(previousBet,newBet))
-            {
+        if (previousBet) {
+            if (compareRankings(previousBet, newBet)) {
                 alert("New ranking must be higher than previous one")
                 return
             }
@@ -162,10 +171,10 @@
         background-color: rgba(0,0,0,0.4);
     }
     .modal-content {
-        background-color: #fefefe;
+        background-color: #3a3636;
+        border-radius: 10px;
         margin: 15% auto;
         padding: 20px;
-        border: 1px solid #888;
         width: 50%;
     }
     .close {
@@ -196,5 +205,6 @@
     button {
         margin-left: 10px;
         padding: 5px 15px;
+        color: aliceblue;
     }
 </style>

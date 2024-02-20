@@ -152,14 +152,13 @@
     p {
         font-size:15px;
     }
-    .hostPlayerToolContainer{
+    .hostPlayerToolContainer {
 
     }
-    .playerItemForHost{
+    .playerItemForHost {
         font-size:13px;
-
     }
-    .kick-button{
+    .kick-button {
         font-size:13px;
         font-size: 1rem;
         background-color: brown;
