@@ -21,7 +21,7 @@ declare module 'express-session' {
 
 declare module 'socket.io' {
     interface Socket {
-        player: IPlayer;
+        player?: IPlayer;
     }
 }
 
@@ -122,7 +122,11 @@ io.on('connection', (socket) => {
             if (!clientSocket) {
                 throw 'Bruh';
             }
-            playersInRoom.push(createPlayerFromIPlayer(clientSocket.player));
+            if (clientSocket.player) {
+                playersInRoom.push(
+                    createPlayerFromIPlayer(clientSocket.player)
+                );
+            }
         }
 
         session.gameId = gameId;
@@ -203,10 +207,11 @@ io.on('connection', (socket) => {
         if (!clients) {
             return;
         }
+
         for (const clientId of clients) {
             const clientSocket = io.sockets.sockets.get(clientId);
 
-            if (clientSocket) {
+            if (clientSocket && clientSocket.player) {
                 let newPayload: checkToPlayersPayload = {
                     newHand: payload.newHands[clientSocket.player.uid],
                     players: payload.players,
@@ -216,6 +221,33 @@ io.on('connection', (socket) => {
                 clientSocket.emit(SocketEvents.checkToPlayers, newPayload);
             }
         }
+    });
+
+    socket.on(SocketEvents.gameClosed, () => {
+        if (roomHosts.get(session.gameId) != socket.id) {
+            socket.emit(SocketEvents.gameClosed, false);
+            console.log('Cannot Close server u are not a host');
+            return;
+        }
+
+        let roomToCloseId = session.gameId;
+
+        const clients = io.sockets.adapter.rooms.get(session.gameId);
+        if (!clients) {
+            return;
+        }
+        for (const clientId of clients) {
+            const clientSocket = io.sockets.sockets.get(clientId);
+
+            if (clientSocket) {
+                clientSocket.player = undefined;
+                clientSocket.emit(SocketEvents.gameClosed);
+                clientSocket.leave(roomToCloseId);
+                clientSocket.disconnect;
+            }
+        }
+        roomHosts.delete(roomToCloseId);
+        rooms.delete(roomToCloseId);
     });
 });
 //TODO: Go through every exception throw and remove them or create class for them so it can be caught later

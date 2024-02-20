@@ -72,6 +72,10 @@
             }
         });
 
+        socket.on(SocketEvents.gameClosed,()=>{
+            dispatch("gameClosed")
+        })
+
         socket.on(SocketEvents.playerLeftGame, (data: { playerId: string }) => { // Players = Host and Clients
             if (!data) {
                 return;
@@ -92,7 +96,7 @@
         socket.emit(SocketEvents.playerLeftGame, currentPlayer.uid); 
         players = [];
 
-        dispatch("leave"); // To parent
+        dispatch("gameClosed"); // To parent
     }
 
     function showWinnner(winner:any):void

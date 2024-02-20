@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onDestroy, onMount } from 'svelte';
+    import { createEventDispatcher, onDestroy, onMount } from 'svelte';
     import { io, Socket } from "socket.io-client";
     import { Player } from '../../../common/player';
     import {SocketEvents} from '../../../src/types/socketEvents'
@@ -22,6 +22,8 @@
 
     let cardCounts : CardCountTable = initalizeCountTable()
 
+
+    const dispatch = createEventDispatcher()
 
     const unsubscribe = playerStore.subscribe(value => {
         player = value;
@@ -81,6 +83,10 @@
                 gameView = import('../game/GameView.svelte');
             }
         });
+
+        socket.on(SocketEvents.gameClosed, ()=>{
+            dispatch("gameClosed")
+        })
     });
 
     function startGame(): void {
@@ -135,6 +141,7 @@
                 {/if}
             {/each}
         </div>
+        <button class="kick-button" on:click={closeGame}>Close Game</button>
         
     {:else}
         Game ID: {#if gameId} {gameId} {/if}

@@ -38,13 +38,14 @@
     player = null; // Reset player status or keep for reconnection purposes
     playerStore.set(null);
   }
+
 </script>
 
 
 <main>
   {#if gameView}
     {#await gameView then { default: LobbyView }}
-      <LobbyView {gameId} on:leave={leaveGame} usernameInput={username}/>
+      <LobbyView {gameId} usernameInput={username} on:gameClosed={leaveGame}/>
     {/await}
   {:else}
     <Menu on:joinGame={joinGame} on:createGame={hostGame}/>
