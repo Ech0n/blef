@@ -30,10 +30,10 @@ export enum CardColor {
 }
 
 export let ColorToIndex: { [key: string]: number } = {
-    'spade': 4,
-    'heart': 3,
-    'diamond': 2,
-    'club': 1,
+    'spades': 4,
+    'hearts': 3,
+    'diamonds': 2,
+    'clubs': 1,
     'colorless': 0,
 };
 

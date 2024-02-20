@@ -119,7 +119,6 @@
             return (currentBet + " " + cardName + ((selectedRanking !== 'One') ? "s" : "")); 
         }
 
-
         if (['Double', 'Full'].includes(selectedRanking)) {
             let primaryCardName = cardFullNames[primaryCard];
             let secondaryCardName = cardFullNames[secondaryCard]
@@ -131,9 +130,10 @@
             return (currentBet + " starting from " + cardName + ((selectedRanking === 'Flush') ? (" in color " + selectedColor) : ""));
         }
 
-        if (selectedRanking === 'Royal') {
-            return selectedRanking + " Flush of " + selectedColor;
+        if (['Royal', 'Color'].includes(selectedRanking)) {
+            return selectedRanking + (selectedRanking === 'Royal' ? " Flush of " : " ") + selectedColor;
         }
+
 
         return selectedRanking;
     }

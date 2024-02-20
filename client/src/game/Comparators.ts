@@ -28,7 +28,7 @@ export function compareRankings(oldRanking: hitPayload, newRanking: hitPayload):
         }
 
         if (['color'].includes(oldRanking.selectedRanking)) {
-            return (colorHierarchy[oldRanking.selectedColor] < colorHierarchy[newRanking.selectedColor]);
+            return (colorHierarchy[oldRanking.selectedColor] > colorHierarchy[newRanking.selectedColor]);
         }
 
         if (['street'].includes(oldRanking.selectedRanking)) {
@@ -52,8 +52,8 @@ let compareHierarchy: { [key: string]: number } = {
 };
 
 let colorHierarchy: { [key: string]: number } = {
-    'spade': 4,
-    'heart': 3,
-    'diamond': 2,
-    'club': 1,
+    'spades': 4,
+    'hearts': 3,
+    'diamonds': 2,
+    'clubs': 1,
 };
