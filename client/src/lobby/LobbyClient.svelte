@@ -95,12 +95,20 @@
         dispatch("leave"); // To parent
     }
 
+    function showWinnner(winner:any):void
+    {
+        gameView = undefined
+        if(winner.detail && winner.detail.username)
+        {
+            alert("Wygrał gracz: "+winner.detail.username)
+        }
+    }
 </script>
 
 <h1>
     {#if gameView}
         {#await gameView then { default: GameClient }}
-            <GameClient {gameId} {socket} on:leave={leaveGame} initialPlayerList={players}  {thisPlayerId} {gameStartData} />
+            <GameClient {gameId} {socket} on:leave={leaveGame} on:gameFinished={showWinnner} initialPlayerList={players}  {thisPlayerId} {gameStartData} />
         {/await}
 
     {:else}

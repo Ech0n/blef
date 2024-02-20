@@ -55,6 +55,10 @@
                         eliminated = true
                     }
                 })
+                if(game.players.length == 1)
+                {
+                    dispatch("gameFinished",game.players[0])
+                }
             });
         }else{
             socket.on(SocketEvents.checkToPlayers, (data:checkToPlayersPayload) => {
@@ -67,6 +71,10 @@
                         eliminated = true
                     }
                 })
+                if(game.players.length == 1)
+                {
+                    dispatch("gameFinished",game.players[0])
+                }
             });
         }
             

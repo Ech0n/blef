@@ -63,10 +63,10 @@
             selectedColor,
             startingCard
         }
-
         // @ts-ignore
-        if(!previousBet)
+        if(previousBet)
         {
+            // @ts-ignore
             if (  compareRankings(previousBet,newBet))
             {
                 alert("New ranking must be higher than previous one")

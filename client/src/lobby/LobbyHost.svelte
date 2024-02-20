@@ -97,12 +97,21 @@
     function kickPlayer(id:string){
         socket.emit(SocketEvents.kickPlayer,id)
     }
+
+    function showWinnner(winner:any):void
+    {
+        gameView = undefined
+        if(winner.detail && winner.detail.username)
+        {
+            alert("Wygrał gracz: "+winner.detail.username)
+        }
+    }
 </script>
 
 <h1>
     {#if gameView}
         {#await gameView then { default: GameView }}
-            <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players}  {thisPlayerId} {gameStartData} isHost />
+            <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players} on:gameFinished={showWinnner}  {thisPlayerId} {gameStartData} isHost />
         {/await}
         <p>host options:</p>
         <p>kick player:</p>
