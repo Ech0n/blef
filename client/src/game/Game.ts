@@ -51,6 +51,7 @@ export class Game {
 
         this.hand = data.newHand;
         this.players = data.players;
+        this.eliminatedPlayers = data.eliminatedPlayers;
         this.playerCount = this.players.length;
         this.currentPlayer = data.roundStartingPlayerId;
         this.currentPlayerIndx = this.players.findIndex((pl) => {

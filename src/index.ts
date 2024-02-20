@@ -6,6 +6,7 @@ import { SocketEvents } from './types/socketEvents';
 import { v4 as uuidv4 } from 'uuid';
 import { Player, IPlayer, createPlayerFromIPlayer } from '../common/player';
 import {
+    checkToPlayersPayload,
     checkToServerPayload,
     gameStartPayload,
     hitPayload,
@@ -206,10 +207,11 @@ io.on('connection', (socket) => {
             const clientSocket = io.sockets.sockets.get(clientId);
 
             if (clientSocket) {
-                let newPayload = {
+                let newPayload: checkToPlayersPayload = {
                     newHand: payload.newHands[clientSocket.player.uid],
                     players: payload.players,
                     roundStartingPlayerId: payload.roundStartingPlayerId,
+                    eliminatedPlayers: payload.eliminatedPlayers,
                 };
                 clientSocket.emit(SocketEvents.checkToPlayers, newPayload);
             }
