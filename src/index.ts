@@ -6,6 +6,7 @@ import { SocketEvents } from './types/socketEvents';
 import { v4 as uuidv4 } from 'uuid';
 import { IChecker } from './types/HandRankings';
 import { Player, IPlayer, createPlayerFromIPlayer } from '../common/player';
+import { gameStartPayload } from '../common/payloads';
 
 declare module 'express-session' {
     interface SessionData {
@@ -149,24 +150,18 @@ io.on('connection', (socket) => {
         socket.emit(SocketEvents.playerLeftGame, { uid: session.uid });
     });
 
-    socket.on(
-        SocketEvents.gameStarted,
-        (data: { startingPlayerId: string }) => {
-            if (!data || !data.startingPlayerId) {
-                throw 'No startin player id message!';
-            }
-            if (roomHosts.get(session.gameId) != socket.id) {
-                socket.emit(SocketEvents.gameStarted, false);
-                console.log('Could not start the game, (user is not a host)');
-                return;
-            }
-
-            let payload = {
-                startingPlayerId: data.startingPlayerId,
-            };
-            io.in(session.gameId).emit(SocketEvents.gameStarted, payload);
+    socket.on(SocketEvents.gameStarted, (data: gameStartPayload) => {
+        if (!data || !data.startingPlayerId || !data.newHands) {
+            throw 'No startin player id message!';
         }
-    );
+        if (roomHosts.get(session.gameId) != socket.id) {
+            socket.emit(SocketEvents.gameStarted, false);
+            console.log('Could not start the game, (user is not a host)');
+            return;
+        }
+
+        io.in(session.gameId).emit(SocketEvents.gameStarted, data);
+    });
     socket.on(SocketEvents.hit, (data: { move: IChecker }) => {
         if (!data || !data.move) {
             throw 'No move data passed';

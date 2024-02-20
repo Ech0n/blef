@@ -6,7 +6,9 @@ import { Player } from '../../../common/player';
 import type {
     checkToServerPayload,
     checkToPlayersPayload,
+    gameStartPayload,
 } from '../../../common/payloads';
+
 let deckInitialization: Card[] = [];
 
 for (let card in Rank) {
@@ -28,9 +30,13 @@ export class GameServer extends Game {
     deck: Card[];
     isFinished: boolean = false;
 
-    constructor(players: Player[], startingPlayerId: string) {
-        super(players, startingPlayerId);
-        this.hands = new Map<string, Card[]>();
+    constructor(
+        players: Player[],
+        gameStartData: gameStartPayload,
+        thisPlayerId: string
+    ) {
+        super(players, gameStartData, thisPlayerId);
+        this.hands = new Map(Object.entries(gameStartData.newHands));
         this.deck = deck.slice();
     }
 

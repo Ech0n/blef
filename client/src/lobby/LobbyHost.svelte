@@ -4,16 +4,17 @@
     import { Player } from '../../../common/player';
     import {SocketEvents} from '../../../src/types/socketEvents'
     import { playerStore } from '../game/stores';
+    import { initalizeGame } from '../model/Card';
 
     export let usernameInput:string;
     
     let socket: Socket;
     let gameId: string;
     let player: Player | null;
-    let startingPlayerId: string
     let host:Player
     let thisPlayerId: string;
     let gameView: Promise<typeof import('../game/GameView.svelte')> | undefined;
+    let gameStartData: gameStartPayload;
     let players: Player[] = [];
 
 
@@ -71,6 +72,7 @@
 
         socket.on(SocketEvents.gameStarted, (data: boolean) => {
             if (data) {
+                gameStartData = data
                 gameView = import('../game/GameView.svelte');
             }
         });
@@ -78,8 +80,8 @@
 
     function startGame(): void {
         //TODO: Randomize starting player?
-        startingPlayerId = players[0].uid
-        socket.emit(SocketEvents.gameStarted,{startingPlayerId: startingPlayerId});
+        let startPayload = initalizeGame(players)
+        socket.emit(SocketEvents.gameStarted,startPayload);
     }
 
     function closeGame(): void {
@@ -93,7 +95,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameView }}
-            <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players} {startingPlayerId} {thisPlayerId}  isHost />
+            <GameView {gameId} {socket} on:leave={closeGame} initialPlayerList={players}  {thisPlayerId} {gameStartData} isHost />
         {/await}
     {:else}
         Game ID: {#if gameId} {gameId} {/if}

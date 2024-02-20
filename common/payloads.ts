@@ -10,3 +10,8 @@ export interface checkToPlayersPayload {
     newHand: Card[];
     players: Player[];
 }
+
+export interface gameStartPayload {
+    startingPlayerId: string;
+    newHands: { [key: string]: Card[] };
+}

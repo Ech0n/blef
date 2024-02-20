@@ -5,6 +5,8 @@
     import { playerStore } from '../game/stores';
     import { SocketEvents } from '../../../src/types/socketEvents';
     import { Player } from '../../../common/player';
+    import type { gameStartPayload } from '../../../common/payloads';
+    import type { Card } from '../model/Card';
 
     export let usernameInput:string;
     export let gameId: string;
@@ -15,8 +17,8 @@
     let players: Player[] = [];
     let currentPlayer: Player;
     let startingPlayerId:string;
-    let thisPlayerId:string;
-
+    let gameStartData: gameStartPayload;
+    let thisPlayerId: string
 
     const unsubscribe = playerStore.subscribe(value => {
         currentPlayer = value!;
@@ -62,11 +64,11 @@
             players = [...players, newPlayer];
         })
 
-        socket.on(SocketEvents.gameStarted, (data)  => {
+        socket.on(SocketEvents.gameStarted, (data:gameStartPayload)  => {
             console.log("reveived game start message",data)
             if (data && data.startingPlayerId) {
                 console.log("game start good")
-                startingPlayerId = data.startingPlayerId;
+                gameStartData = data
                 gameView = import("../game/GameView.svelte")
             }
         });
@@ -101,7 +103,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameClient }}
-            <GameClient {gameId} {socket} on:leave={leaveGame} initialPlayerList={players} startingPlayerId={startingPlayerId} {thisPlayerId}  />
+            <GameClient {gameId} {socket} on:leave={leaveGame} initialPlayerList={players}  {thisPlayerId} {gameStartData} />
         {/await}
     {:else}
         Game ID: {#if gameId} {gameId} {/if}

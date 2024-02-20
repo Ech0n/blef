@@ -78,7 +78,11 @@ function doubleChecker(cards: CardDict, handInfo: HandInfo) {
 }
 
 function pairChecker(cards: CardDict, handInfo: HandInfo) {
-    return cards[handInfo.primaryCard][CardColor.colorless] >= 2;
+    return (
+        cards[cardToRankTranslation[handInfo.primaryCard].numeric][
+            CardColor.colorless
+        ] >= 2
+    );
 }
 
 function oneChecker(cards: CardDict, handInfo: HandInfo) {

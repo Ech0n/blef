@@ -3,6 +3,7 @@ import { Player } from '../../../common/player';
 import type {
     checkToServerPayload,
     checkToPlayersPayload,
+    gameStartPayload,
 } from '../../../common/payloads';
 
 export class Game {
@@ -14,14 +15,18 @@ export class Game {
     currentPlayerIndx: number;
     previousBet!: any;
 
-    constructor(players: Player[], startingPlayerId: string) {
+    constructor(
+        players: Player[],
+        gameStartData: gameStartPayload,
+        thisPlayerId: string
+    ) {
         this.playerCount = players.length;
         this.players = structuredClone(players);
-        this.hand = [];
-        this.currentPlayer = startingPlayerId;
+        this.hand = gameStartData.newHands[thisPlayerId];
+        this.currentPlayer = gameStartData.startingPlayerId;
         this.eliminatedPlayers = [];
         this.currentPlayerIndx = this.players.findIndex(
-            (el) => startingPlayerId == el.uid
+            (el) => gameStartData.startingPlayerId == el.uid
         );
     }
 
@@ -32,7 +37,8 @@ export class Game {
     }
 
     nextPlayer(): void {
-        this.currentPlayerIndx = (this.currentPlayerIndx + 1) % this.playerCount;
+        this.currentPlayerIndx =
+            (this.currentPlayerIndx + 1) % this.playerCount;
         this.currentPlayer = this.players[this.currentPlayerIndx].uid;
     }
 

@@ -7,17 +7,19 @@
     import { Player } from '../../../common/player';
     import CardModal from './CardModals.svelte';
     import { Game } from './Game';
+    import type {Card} from '../model/Card'
+    import type { gameStartPayload } from '../../../common/payloads';
 
     export let gameId: string;
     export let socket: Socket;
     export let initialPlayerList: Player[];
-    export let startingPlayerId: string;
     export let thisPlayerId: string;
     export let isHost:boolean|undefined = false;
+    export let gameStartData: gameStartPayload
 
     const dispatch = createEventDispatcher();
     const serverUrl: string = "http://localhost:5678";
-    let game: Game = (isHost) ? new GameServer(initialPlayerList, startingPlayerId) : new Game(initialPlayerList, startingPlayerId);
+    let game: Game = (isHost) ? new GameServer(initialPlayerList, gameStartData,thisPlayerId) : new Game(initialPlayerList, gameStartData,thisPlayerId);
 
     let showModal: boolean = false;
     let betName: string = '';
@@ -29,7 +31,7 @@
     };
 
     onMount(() => {
-        
+        console.log(game.hand)
         if (!socket) {
             socket = io(serverUrl);
         }
@@ -48,7 +50,6 @@
             socket.on(SocketEvents.checkToServer, (data) => {
                 let checkResult = game.validateCheck();
                 console.log("Valuidated check this is what goes further ",checkResult);
-
                 game = game;
                 socket.emit(SocketEvents.checkToPlayers,checkResult);
             });
@@ -130,6 +131,16 @@
         ❤️ {5 - loses} <br>
     {/each}
 </ul>
+<div>
+    <p>Your cards:</p>
+    <div>
+        {#each game.hand as card}
+            <div>
+                {card[0]} , {card[1]} 
+            </div>
+        {/each}
+    </div>
+</div>
 {#if game.currentPlayer == thisPlayerId}
     <p>Your turn</p>
     <button on:click={() => showModal = true}>Raise</button>
@@ -152,6 +163,6 @@
         color: rgb(3, 0, 0);
     }
     p {
-        font-size: 25px;
+        font-size: 20px;
     }
 </style>

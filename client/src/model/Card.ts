@@ -1,3 +1,6 @@
+import type { gameStartPayload } from '../../../common/payloads';
+import type { IPlayer } from '../../../common/player';
+
 export type Card = [string, string];
 export type CardList = Card[];
 export enum CardColor {
@@ -39,3 +42,37 @@ export const cardToRankTranslation: {
     'K': { numeric: 13, string: 'King' },
     'A': { numeric: 14, string: 'Ace' },
 };
+
+export function initalizeGame(players: IPlayer[]): gameStartPayload {
+    //select random player to start
+    let initialGameData: gameStartPayload;
+    let startingPlayerId = players[0].uid;
+
+    let deckInitialization: Card[] = [];
+
+    for (let card in Rank) {
+        if (isNaN(Number(card))) {
+            for (let color in CardColor) {
+                if (
+                    isNaN(Number(color)) &&
+                    color != CardColor[CardColor.colorless]
+                ) {
+                    deckInitialization.push([card, color]);
+                }
+            }
+        }
+    }
+
+    let hands: { [key: string]: Card[] } = {};
+
+    players.map((player) => {
+        let randomIndex: number = Math.floor(
+            Math.random() * deckInitialization.length
+        );
+        let randomCard = deckInitialization.splice(randomIndex, 1);
+        hands[player.uid] = randomCard;
+    });
+
+    initialGameData = { newHands: hands, startingPlayerId: startingPlayerId };
+    return initialGameData;
+}
