@@ -37,13 +37,7 @@
             mode = 'create';
         }}>Create Game</button
     >
-    <Modal
-        {showModal}
-        {mode}
-        on:close={() => (showModal = false)}
-        on:joinGame={joinGame}
-        on:createGame={createGame}
-    />
+    <Modal {showModal} {mode} on:close={() => (showModal = false)} on:joinGame={joinGame} on:createGame={createGame} />
 </div>
 
 <style>

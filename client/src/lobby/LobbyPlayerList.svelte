@@ -1,12 +1,7 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
     import type { Player } from '../../../common/player';
-    import { type Socket, io } from 'socket.io-client';
-    import { SocketEvents } from '../../../src/types/socketEvents';
-    import type { playerStatusPayload } from '../../../common/payloads';
 
     export let players: Player[];
-
     export let thisPlayer: Player;
 </script>
 

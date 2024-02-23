@@ -1,7 +1,5 @@
-<!-- Modal.svelte -->
 <script lang="ts">
     import { createEventDispatcher, onMount } from 'svelte';
-    import { is_empty } from 'svelte/internal';
 
     const dispatch = createEventDispatcher();
 
@@ -44,7 +42,7 @@
 
 {#if showModal}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div class="modal-backdrop" on:click={closeModal}>
+    <div class="modal-backdrop">
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div class="modal" on:click|stopPropagation>
             <div class="modal-header">
@@ -57,22 +55,10 @@
                     <p class="error">{errorMessage}</p>
                 {/if}
                 {#if mode === 'join'}
-                    <input
-                        type="text"
-                        placeholder="Enter Game ID"
-                        bind:value={gameId}
-                        maxlength="10"
-                    />
+                    <input type="text" placeholder="Enter Game ID" bind:value={gameId} maxlength="10" />
                 {/if}
-                <input
-                    type="text"
-                    placeholder="Enter Your Name"
-                    bind:value={username}
-                    maxlength="14"
-                />
-                <button class="start-close" on:click={action}
-                    >{mode === 'join' ? 'Join Game' : 'Create Game'}</button
-                >
+                <input type="text" placeholder="Enter Your Name" bind:value={username} maxlength="14" />
+                <button class="start-close" on:click={action}>{mode === 'join' ? 'Join Game' : 'Create Game'}</button>
                 <button class="start-close" on:click={closeModal}>Close</button>
             </div>
         </div>
@@ -102,5 +88,17 @@
 
     .start-close {
         color: aliceblue;
+    }
+
+    input {
+        padding: 15px 10px;
+        font-size: 20px;
+        background-color: whitesmoke;
+        border-radius: 5px;
+        margin-right: 10px;
+    }
+
+    h2 {
+        font-size: 30px;
     }
 </style>

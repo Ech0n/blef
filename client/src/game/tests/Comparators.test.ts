@@ -1,4 +1,4 @@
-import { compareRankings } from '../Comparators';
+import { compareRankingAGreaterThanB } from '../Comparators';
 
 interface hitPayload {
     selectedRanking: string;
@@ -15,18 +15,18 @@ let emptyHandInfo: hitPayload = {
     secondaryCard: '',
     startingCard: '',
 };
-let payload: hitPayload;
-let paylobd: hitPayload;
+let payloadA: hitPayload;
+let payloadB: hitPayload;
 
 beforeEach(() => {
-    payload = {
+    payloadA = {
         selectedColor: '',
         selectedRanking: '',
         primaryCard: '',
         secondaryCard: '',
         startingCard: '',
     };
-    paylobd = {
+    payloadB = {
         selectedColor: '',
         selectedRanking: '',
         primaryCard: '',
@@ -36,23 +36,23 @@ beforeEach(() => {
 });
 
 test('one and pair comparator', () => {
-    payload.selectedRanking = 'Pair';
-    paylobd.selectedRanking = 'One';
+    payloadA.selectedRanking = 'pair';
+    payloadB.selectedRanking = 'one';
 
-    payload.primaryCard = '2';
-    paylobd.primaryCard = '2';
+    payloadA.primaryCard = '2';
+    payloadB.primaryCard = '2';
 
-    expect(compareRankings(paylobd, payload)).toBe(true);
-    expect(compareRankings(payload, paylobd)).toBe(false);
+    expect(compareRankingAGreaterThanB(payloadA, payloadB)).toBe(true);
+    expect(compareRankingAGreaterThanB(payloadB, payloadA)).toBe(false);
 });
 
 test('one and one comparator', () => {
-    payload.selectedRanking = 'One';
-    paylobd.selectedRanking = 'One';
+    payloadA.selectedRanking = 'one';
+    payloadB.selectedRanking = 'one';
 
-    payload.primaryCard = '6';
-    paylobd.primaryCard = '3';
+    payloadA.primaryCard = '6';
+    payloadB.primaryCard = '3';
 
-    expect(compareRankings(paylobd, payload)).toBe(true);
-    expect(compareRankings(payload, paylobd)).toBe(false);
+    expect(compareRankingAGreaterThanB(payloadB, payloadA)).toBe(false);
+    expect(compareRankingAGreaterThanB(payloadA, payloadB)).toBe(true);
 });

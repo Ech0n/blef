@@ -1,10 +1,5 @@
 import { checkFunctionsMap, type HandInfo } from '../HandRankings';
-import {
-    Rank,
-    CardColor,
-    type CardCountTable,
-    cardToRankTranslation,
-} from '../../model/Card';
+import { Rank, CardColor, type CardCountTable, cardToRankTranslation } from '../../model/Card';
 
 let karty: CardCountTable = {};
 let karta = cardToRankTranslation['4'].numeric;
@@ -26,9 +21,10 @@ test('cardToRanktranslation test', () => {
 });
 
 test('One cardCheck', () => {
+    // TODO: old syntax, wont compile
     let thisHand = { ...emptyHandInfo };
     thisHand.primaryCard = '4';
-    thisHand.selectedRanking = 'One';
+    thisHand.selectedRanking = 'one';
     let checker = checkFunctionsMap[thisHand.selectedRanking](karty, thisHand);
     expect(checker).toBe(true);
 

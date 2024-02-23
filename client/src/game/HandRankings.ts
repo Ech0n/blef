@@ -1,7 +1,7 @@
 import { cardToRankTranslation, type CardCountTable, ColorToIndex } from '../model/Card';
 
 //TODO: Change this into somekind of predefined structure that can be easily initalized. Reconsider if this is even a correct way to count of carts
-export type CardDict = any; // Hell nah, I'm not using CardCountable 
+export type CardDict = any; // Hell nah, I'm not using CardCountable
 
 //TODO: Implement Checkers
 
@@ -19,8 +19,8 @@ export interface HandInfo {
 
 function royalFlushChecker(cards: CardDict, handInfo: HandInfo) {
     const selectedColor = handInfo.selectedColor;
-    let startingCard = cardToRankTranslation["10"].numeric;
-    
+    let startingCard = cardToRankTranslation['10'].numeric;
+
     for (let i = 0; i < 5; i++) {
         if (cards[startingCard - i][ColorToIndex[selectedColor]] == 0) {
             return false;
@@ -32,7 +32,7 @@ function royalFlushChecker(cards: CardDict, handInfo: HandInfo) {
 function flushChecker(cards: CardDict, handInfo: HandInfo) {
     const selectedColor = handInfo.selectedColor;
     let startingCard = cardToRankTranslation[handInfo.startingCard].numeric;
-    
+
     for (let i = 0; i < 5; i++) {
         if (cards[startingCard - i][ColorToIndex[selectedColor]] == 0) {
             return false;
@@ -79,7 +79,7 @@ function fullChecker(cards: CardDict, handInfo: HandInfo) {
         return false;
     }
 
-    return (cards[primCard][ColorToIndex['colorless']] >= 3 && cards[secCard][ColorToIndex['colorless']] >= 2);
+    return cards[primCard][ColorToIndex['colorless']] >= 3 && cards[secCard][ColorToIndex['colorless']] >= 2;
 }
 
 function streetChecker(cards: CardDict, handInfo: HandInfo) {
@@ -115,10 +115,7 @@ function doubleChecker(cards: CardDict, handInfo: HandInfo) {
     if (!cards[secCard]) {
         return false;
     }
-    return (
-        cards[primCard][ColorToIndex['colorless']] >= 2 &&
-        cards[secCard][ColorToIndex['colorless']] >= 2
-    );
+    return cards[primCard][ColorToIndex['colorless']] >= 2 && cards[secCard][ColorToIndex['colorless']] >= 2;
 }
 
 function pairChecker(cards: CardCountTable, handInfo: HandInfo) {

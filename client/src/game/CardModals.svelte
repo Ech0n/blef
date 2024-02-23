@@ -1,38 +1,13 @@
 <script>
     import { createEventDispatcher } from 'svelte';
-    import { compareRankings } from './Comparators';
+    import { compareRankingAGreaterThanB } from './Comparators';
 
     // @ts-ignore
     export let previousBet;
 
     const dispatch = createEventDispatcher();
-    const handRankings = [
-        'Royal',
-        'Flush',
-        'Four',
-        'Full',
-        'Street',
-        'Color',
-        'Three',
-        'Double',
-        'Pair',
-        'One',
-    ];
-    const cards = [
-        '2',
-        '3',
-        '4',
-        '5',
-        '6',
-        '7',
-        '8',
-        '9',
-        '10',
-        'J',
-        'Q',
-        'K',
-        'A',
-    ];
+    const handRankings = ['Royal', 'Flush', 'Four', 'Full', 'Street', 'Color', 'Three', 'Double', 'Pair', 'One'];
+    const cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
     const colors = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
 
     let selectedRanking = '';
@@ -51,49 +26,28 @@
             return;
         }
 
-        if (
-            ['Flush', 'Royal', 'Color'].includes(selectedRanking) &&
-            !selectedColor
-        ) {
+        if (['Flush', 'Royal', 'Color'].includes(selectedRanking) && !selectedColor) {
             alert('Please select a color ranking.');
             return;
         }
 
-        if (
-            ['Full', 'Double', 'Pair', 'One', 'Three', 'Four'].includes(
-                selectedRanking
-            ) &&
-            !primaryCard
-        ) {
+        if (['Full', 'Double', 'Pair', 'One', 'Three', 'Four'].includes(selectedRanking) && !primaryCard) {
             alert('Please select primary card.');
             return;
         }
 
-        if (
-            ['Full', 'Double'].includes(selectedRanking) &&
-            (!secondaryCard || !primaryCard || secondaryCard === primaryCard)
-        ) {
+        if (['Full', 'Double'].includes(selectedRanking) && (!secondaryCard || !primaryCard || secondaryCard === primaryCard)) {
             alert('Please select secondary card.');
             return;
         }
 
-        if (
-            ['Flush', 'Street'].includes(selectedRanking) &&
-            (!startingCard || ['10', 'J', 'Q', 'K', 'A'].includes(startingCard))
-        ) {
-            alert(
-                'Please select starting card and make sure it is not larger than 9.'
-            );
+        if (['Flush', 'Street'].includes(selectedRanking) && (!startingCard || ['10', 'J', 'Q', 'K', 'A'].includes(startingCard))) {
+            alert('Please select starting card and make sure it is not larger than 9.');
             return;
         }
 
-        if (
-            ['Flush', 'Street'].includes(selectedRanking) &&
-            (!startingCard || ['10', 'J', 'Q', 'K', 'A'].includes(startingCard))
-        ) {
-            alert(
-                'Please select starting card and make sure it is not larger than 9.'
-            );
+        if (['Flush', 'Street'].includes(selectedRanking) && (!startingCard || ['10', 'J', 'Q', 'K', 'A'].includes(startingCard))) {
+            alert('Please select starting card and make sure it is not larger than 9.');
             return;
         }
 
@@ -113,7 +67,7 @@
 
         // @ts-ignore
         if (previousBet) {
-            if (compareRankings(previousBet, newBet)) {
+            if (compareRankingAGreaterThanB(previousBet, newBet)) {
                 alert('New ranking must be higher than previous one');
                 return;
             }

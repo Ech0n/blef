@@ -31,8 +31,7 @@
     });
 
     onMount(() => {
-        const serverUrl: string =
-            config.BACKEND_SERVER_ADDRESS || 'http://localhost:5678';
+        const serverUrl: string = config.BACKEND_SERVER_ADDRESS || 'http://localhost:5678';
         socket = io(serverUrl);
 
         socket.emit(SocketEvents.joinGame, {
@@ -53,7 +52,7 @@
                 thisPlayerName: string;
             }) => {
                 if (!data) {
-                    dispatch('leave'); // Very scuffed way to force quit after joining wrong lobby by gameID
+                    dispatch('gameClosed'); // Very scuffed way to force quit after joining wrong lobby by gameID
                 }
 
                 if (data.players) {
@@ -66,24 +65,18 @@
 
                 if (data.thisPlayerId && data.thisPlayerName) {
                     // This if is wrong. If data does not exist error should be thrown // Then do it shaking my head
-                    players = [
-                        ...players,
-                        new Player(data.thisPlayerId, data.thisPlayerName),
-                    ];
+                    players = [...players, new Player(data.thisPlayerId, data.thisPlayerName)];
                     thisPlayerId = data.thisPlayerId;
                 }
             }
         );
 
-        socket.on(
-            SocketEvents.newPlayerJoined,
-            (data: { username: string; uid: string }) => {
-                console.debug('New player in lobby name:', data.username);
-                let newPlayer = new Player(data.uid, data.username);
-                newPlayer.isOnline = true;
-                players = [...players, newPlayer];
-            }
-        );
+        socket.on(SocketEvents.newPlayerJoined, (data: { username: string; uid: string }) => {
+            console.debug('New player in lobby name:', data.username);
+            let newPlayer = new Player(data.uid, data.username);
+            newPlayer.isOnline = true;
+            players = [...players, newPlayer];
+        });
 
         socket.on(SocketEvents.gameStarted, (data: gameStartPayload) => {
             console.debug('reveived game start message', data);
@@ -147,9 +140,8 @@
         Game ID: {#if gameId}
             {gameId}
         {/if}
-        <br />
         <div>
-            <LobbyPlayerList {players} {socket} thisPlayer={currentPlayer} />
+            <LobbyPlayerList {players} thisPlayer={currentPlayer} />
 
             <button class="start-close" on:click={leaveGame}>Leave</button>
         </div>
