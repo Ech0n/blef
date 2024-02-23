@@ -7,10 +7,7 @@
     import { Player } from '../../../common/player';
     import CardModal from './CardModals.svelte';
     import { Game } from './Game';
-    import type {
-        checkToPlayersPayload,
-        gameStartPayload,
-    } from '../../../common/payloads';
+    import type { checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
     import type { CardCountTable } from '../model/Card';
     import CardImageHandler from './CardImageHandler';
     import { config } from '../../../config';
@@ -26,14 +23,7 @@
 
     const dispatch = createEventDispatcher();
     const serverUrl: string = config.BACKEND_SERVER_ADDRESS;
-    let game: Game = isHost
-        ? new GameServer(
-              initialPlayerList,
-              gameStartData,
-              thisPlayerId,
-              cardCounts
-          )
-        : new Game(initialPlayerList, gameStartData, thisPlayerId);
+    let game: Game = isHost ? new GameServer(initialPlayerList, gameStartData, thisPlayerId, cardCounts) : new Game(initialPlayerList, gameStartData, thisPlayerId);
     let eliminated = false;
     let showModal: boolean = false;
     let betName: string = '';
@@ -73,10 +63,7 @@
         if (isHost) {
             socket.on(SocketEvents.checkToServer, (data) => {
                 let checkResult = game.validateCheck();
-                console.log(
-                    'Valuidated check this is what goes further ',
-                    checkResult
-                );
+                console.log('Valuidated check this is what goes further ', checkResult);
                 game = game;
                 socket.emit(SocketEvents.checkToPlayers, checkResult);
                 game.eliminatedPlayers.forEach((pl) => {
@@ -89,22 +76,19 @@
                 }
             });
         } else {
-            socket.on(
-                SocketEvents.checkToPlayers,
-                (data: checkToPlayersPayload) => {
-                    console.log('received check data!', data);
-                    game.check(data);
-                    game = game;
-                    game.eliminatedPlayers.forEach((pl) => {
-                        if (pl.uid == thisPlayerId) {
-                            eliminated = true;
-                        }
-                    });
-                    if (game.players.length == 1) {
-                        dispatch('gameFinished', game.players[0]);
+            socket.on(SocketEvents.checkToPlayers, (data: checkToPlayersPayload) => {
+                console.log('received check data!', data);
+                game.check(data);
+                game = game;
+                game.eliminatedPlayers.forEach((pl) => {
+                    if (pl.uid == thisPlayerId) {
+                        eliminated = true;
                     }
+                });
+                if (game.players.length == 1) {
+                    dispatch('gameFinished', game.players[0]);
                 }
-            );
+            });
             socket.on(SocketEvents.kickPlayer, (playerId: string) => {
                 console.log('kick player ', playerId);
                 game.removePlayer(playerId);
@@ -132,15 +116,8 @@
             return 'Error has occured.';
         }
 
-        const capitalize = (str: string) =>
-            str.charAt(0).toUpperCase() + str.slice(1);
-        let {
-            selectedRanking,
-            primaryCard,
-            secondaryCard,
-            selectedColor,
-            startingCard,
-        } = game.previousBet;
+        const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+        let { selectedRanking, primaryCard, secondaryCard, selectedColor, startingCard } = game.previousBet;
         selectedRanking = capitalize(selectedRanking);
         primaryCard = capitalize(primaryCard);
         secondaryCard = capitalize(secondaryCard);
@@ -151,37 +128,18 @@
 
         if (['One', 'Pair', 'Three', 'Four'].includes(selectedRanking)) {
             let cardName = cardFullNames[primaryCard];
-            return (
-                currentBet +
-                ' ' +
-                cardName +
-                (selectedRanking !== 'One' ? 's' : '')
-            );
+            return currentBet + ' ' + cardName + (selectedRanking !== 'One' ? 's' : '');
         }
 
         if (['Double', 'Full'].includes(selectedRanking)) {
             let primaryCardName = cardFullNames[primaryCard];
             let secondaryCardName = cardFullNames[secondaryCard];
-            return (
-                currentBet +
-                ' of 3 ' +
-                primaryCardName +
-                's and 2 ' +
-                secondaryCardName +
-                's'
-            );
+            return currentBet + ' of 3 ' + primaryCardName + 's and 2 ' + secondaryCardName + 's';
         }
 
         if (['Flush', 'Street'].includes(selectedRanking)) {
             let cardName = cardFullNames[startingCard];
-            return (
-                currentBet +
-                ' starting from ' +
-                cardName +
-                (selectedRanking === 'Flush'
-                    ? ' in color ' + selectedColor
-                    : '')
-            );
+            return currentBet + ' starting from ' + cardName + (selectedRanking === 'Flush' ? ' in color ' + selectedColor : '');
         }
 
         if (selectedRanking === 'Royal') {
@@ -223,18 +181,14 @@
         <div class="hand">
             {#each game.hand as card}
                 <!-- svelte-ignore a11y-missing-attribute -->
-                <img
-                    src={cardImageHandler.getCardImage(card[0] + ' ' + card[1])}
-                />
+                <img src={cardImageHandler.getCardImage(card[0] + ' ' + card[1])} />
             {/each}
         </div>
     {/if}
 </div>
 {#if game.currentPlayer == thisPlayerId}
     <p>Your turn</p>
-    <button class="start-close" on:click={() => (showModal = true)}
-        >Raise</button
-    >
+    <button class="start-close" on:click={() => (showModal = true)}>Raise</button>
     <button class="start-close" on:click={check}>Check</button>
 {/if}
 
@@ -247,11 +201,7 @@
     {/if}
 </div>
 {#if showModal}
-    <CardModal
-        on:close={() => (showModal = false)}
-        on:select={handleBetSelection}
-        previousBet={game.previousBet}
-    />
+    <CardModal on:close={() => (showModal = false)} on:select={handleBetSelection} previousBet={game.previousBet} />
 {/if}
 
 <style>
