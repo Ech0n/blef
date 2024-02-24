@@ -13,9 +13,11 @@ export interface HandInfo {
 }
 
 function royalFlushChecker(cards: CardCountTable, handInfo: HandInfo) {
+    console.log('cardDict: ', cards, 'handInfo:', handInfo);
+
     const selectedColor = handInfo.selectedColor;
     let startingCard: number = cardToRankTranslation['10'].numeric;
-
+    console.log(startingCard);
     for (let i = 0; i < 5; i++) {
         if (cards[startingCard + i][ColorToIndex[selectedColor]] === 0) {
             return false;

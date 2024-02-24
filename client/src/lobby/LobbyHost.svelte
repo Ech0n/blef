@@ -2,17 +2,10 @@
     import { createEventDispatcher, onDestroy, onMount } from 'svelte';
     import { io, Socket } from 'socket.io-client';
     import { Player } from '../../../common/player';
-    import { SocketEvents } from '../../../src/types/socketEvents';
+    import { SocketEventsCommon } from '../../../src/types/socketEvents';
     import { playerStore } from '../game/stores';
-    import {
-        initalizeGame,
-        type CardCountTable,
-        initalizeCountTable,
-    } from '../model/Card';
-    import type {
-        gameStartPayload,
-        playerStatusPayload,
-    } from '../../../common/payloads';
+    import { initalizeGame, type CardCountTable, initalizeCountTable } from '../model/Card';
+    import type { gameStartPayload, playerStatusPayload } from '../../../common/payloads';
     import e from 'express';
     import LobbyPlayerList from './LobbyPlayerList.svelte';
     import { config } from '../../../config';
@@ -43,36 +36,30 @@
     onMount(() => {
         socket = io(config.BACKEND_SERVER_ADDRESS || 'http://localhost:5678');
 
-        socket.emit(SocketEvents.createGame, { username: usernameInput });
+        socket.emit(SocketEventsCommon.createGame, { username: usernameInput });
 
-        socket.on(
-            SocketEvents.createGame,
-            (data: { gameId: string; hostId: string }) => {
-                console.log('User created a game, its id is:', data.gameId);
-                gameId = data.gameId;
-                host = new Player(data.hostId, usernameInput);
-                host.isOnline = true;
-                players = [...players, host];
-                thisPlayerId = data.hostId;
+        socket.on(SocketEventsCommon.createGame, (data: { gameId: string; hostId: string }) => {
+            console.log('User created a game, its id is:', data.gameId);
+            gameId = data.gameId;
+            host = new Player(data.hostId, usernameInput);
+            host.isOnline = true;
+            players = [...players, host];
+            thisPlayerId = data.hostId;
+        });
+
+        socket.on(SocketEventsCommon.newPlayerJoined, (data: { username: string; uid: string; isOnline: boolean }) => {
+            console.log('Join event', data.username);
+            if (!data) {
+                throw 'No data from server';
             }
-        );
 
-        socket.on(
-            SocketEvents.newPlayerJoined,
-            (data: { username: string; uid: string; isOnline: boolean }) => {
-                console.log('Join event', data.username);
-                if (!data) {
-                    throw 'No data from server';
-                }
+            let newPlayer: Player = new Player(data.uid, data.username);
+            newPlayer.isOnline = data.isOnline;
 
-                let newPlayer: Player = new Player(data.uid, data.username);
-                newPlayer.isOnline = data.isOnline;
+            players = [...players, newPlayer];
+        });
 
-                players = [...players, newPlayer];
-            }
-        );
-
-        socket.on(SocketEvents.playerLeftGame, (data: { playerId: string }) => {
+        socket.on(SocketEventsCommon.playerLeftGame, (data: { playerId: string }) => {
             console.log('player disconnected', data.playerId);
             if (!data) {
                 return;
@@ -87,30 +74,27 @@
             });
         });
 
-        socket.on(SocketEvents.gameStarted, (data: gameStartPayload) => {
+        socket.on(SocketEventsCommon.gameStarted, (data: gameStartPayload) => {
             if (data) {
                 gameStartData = data;
                 gameView = import('../game/GameView.svelte');
             }
         });
 
-        socket.on(SocketEvents.gameClosed, () => {
+        socket.on(SocketEventsCommon.gameClosed, () => {
             dispatch('gameClosed');
         });
 
-        socket.on(
-            SocketEvents.playerStatusChange,
-            (data: playerStatusPayload) => {
-                console.log('received event but did nathing wit it');
-                let player = players.find((pl) => {
-                    return data.playerUid === pl.uid;
-                });
-                if (player) {
-                    player.isOnline = data.isOnline;
-                }
-                players = players;
+        socket.on(SocketEventsCommon.playerStatusChange, (data: playerStatusPayload) => {
+            console.log('received event but did nathing wit it');
+            let player = players.find((pl) => {
+                return data.playerUid === pl.uid;
+            });
+            if (player) {
+                player.isOnline = data.isOnline;
             }
-        );
+            players = players;
+        });
     });
 
     function startGame(): void {
@@ -118,18 +102,18 @@
         let initializationData = initalizeGame(players);
         cardCounts = initializationData.cardCounts;
         let startPayload = initializationData.payload;
-        socket.emit(SocketEvents.gameStarted, startPayload);
+        socket.emit(SocketEventsCommon.gameStarted, startPayload);
     }
 
     function closeGame(): void {
-        socket.emit(SocketEvents.gameClosed, { gameId });
+        socket.emit(SocketEventsCommon.gameClosed, { gameId });
 
         gameView = undefined;
         players = [];
     }
 
     function kickPlayer(id: string) {
-        socket.emit(SocketEvents.kickPlayer, id);
+        socket.emit(SocketEventsCommon.kickPlayer, id);
     }
 
     function showWinnner(winner: any): void {
@@ -144,17 +128,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameView }}
-            <GameView
-                on:leave={closeGame}
-                on:gameFinished={showWinnner}
-                {gameId}
-                {socket}
-                initialPlayerList={players}
-                {thisPlayerId}
-                {gameStartData}
-                isHost
-                {cardCounts}
-            />
+            <GameView on:leave={closeGame} on:gameFinished={showWinnner} {gameId} {socket} initialPlayerList={players} {thisPlayerId} {gameStartData} isHost {cardCounts} />
         {/await}
         <p>host options:</p>
         <p>kick player:</p>
@@ -168,11 +142,7 @@
                         {:else}
                             🔴
                         {/if}
-                        <button
-                            class="kick-button"
-                            on:click={() => kickPlayer(player.uid)}
-                            >Kick player</button
-                        >
+                        <button class="kick-button" on:click={() => kickPlayer(player.uid)}>Kick player</button>
                     </div>
                 {/if}
             {/each}

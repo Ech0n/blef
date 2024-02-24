@@ -3,7 +3,7 @@
     import { io, type Socket } from 'socket.io-client';
     import { createEventDispatcher } from 'svelte';
     import { playerStore } from '../game/stores';
-    import { SocketEvents } from '../../../src/types/socketEvents';
+    import { SocketEventsCommon } from '../../../src/types/socketEvents';
     import { Player } from '../../../common/player';
     import type { gameStartPayload } from '../../../common/payloads';
     import type { CardCountTable } from '../model/Card';
@@ -34,14 +34,14 @@
         const serverUrl: string = config.BACKEND_SERVER_ADDRESS || 'http://localhost:5678';
         socket = io(serverUrl);
 
-        socket.emit(SocketEvents.joinGame, {
+        socket.emit(SocketEventsCommon.joinGame, {
             gameId: gameId,
             username: usernameInput,
         });
 
         // Listen for messages from the server
         socket.on(
-            SocketEvents.joinGame,
+            SocketEventsCommon.joinGame,
             (data: {
                 players?: {
                     uid: string;
@@ -71,14 +71,14 @@
             }
         );
 
-        socket.on(SocketEvents.newPlayerJoined, (data: { username: string; uid: string }) => {
+        socket.on(SocketEventsCommon.newPlayerJoined, (data: { username: string; uid: string }) => {
             console.debug('New player in lobby name:', data.username);
             let newPlayer = new Player(data.uid, data.username);
             newPlayer.isOnline = true;
             players = [...players, newPlayer];
         });
 
-        socket.on(SocketEvents.gameStarted, (data: gameStartPayload) => {
+        socket.on(SocketEventsCommon.gameStarted, (data: gameStartPayload) => {
             console.debug('reveived game start message', data);
             if (data && data.startingPlayerId) {
                 gameStartData = data;
@@ -86,11 +86,11 @@
             }
         });
 
-        socket.on(SocketEvents.gameClosed, () => {
+        socket.on(SocketEventsCommon.gameClosed, () => {
             dispatch('gameClosed');
         });
 
-        socket.on(SocketEvents.playerLeftGame, (data: { playerId: string }) => {
+        socket.on(SocketEventsCommon.playerLeftGame, (data: { playerId: string }) => {
             // Players = Host and Clients
             if (!data) {
                 return;
@@ -107,7 +107,7 @@
     });
 
     function leaveGame(): void {
-        socket.emit(SocketEvents.playerLeftGame, currentPlayer.uid);
+        socket.emit(SocketEventsCommon.playerLeftGame, currentPlayer.uid);
         players = [];
 
         dispatch('gameClosed'); // To parent

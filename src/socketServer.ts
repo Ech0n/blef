@@ -1,7 +1,7 @@
 import { Socket, Server as SocketIOServer } from 'socket.io';
 import http from 'http';
 import { SessionData } from 'express-session';
-import { SocketEvents } from './types/socketEvents';
+import { SocketEventsCommon } from './types/socketEvents';
 import { v4 as uuidv4 } from 'uuid';
 import { Player, IPlayer, createPlayerFromIPlayer } from '../common/player';
 import { checkToPlayersPayload, checkToServerPayload, gameStartPayload, hitPayload } from '../common/payloads';
@@ -41,7 +41,7 @@ export function socketApi(blefServer: BlefServer, clientSocket: SessionSocket) {
         session.uid = uuidv4();
     }
 
-    clientSocket.on(SocketEvents.createGame, (data) => {
+    clientSocket.on(SocketEventsCommon.createGame, (data) => {
         if (!data && !session.username) {
             console.log('No user name provided!', data);
             throw 'No user name';
@@ -62,15 +62,15 @@ export function socketApi(blefServer: BlefServer, clientSocket: SessionSocket) {
             isHost: true,
         };
 
-        clientSocket.emit(SocketEvents.createGame, {
+        clientSocket.emit(SocketEventsCommon.createGame, {
             gameId: gameId,
             hostId: session.uid,
         });
     });
 
-    clientSocket.on(SocketEvents.joinGame, (data) => {
+    clientSocket.on(SocketEventsCommon.joinGame, (data) => {
         if (!data || !data.gameId || !data.username) {
-            clientSocket.emit(SocketEvents.joinGame, {
+            clientSocket.emit(SocketEventsCommon.joinGame, {
                 err: 'Wrong or no payload provided',
             });
             return;
@@ -79,7 +79,7 @@ export function socketApi(blefServer: BlefServer, clientSocket: SessionSocket) {
         session.username = data.username;
 
         if (!rooms.has(gameId)) {
-            clientSocket.emit(SocketEvents.joinGame, false);
+            clientSocket.emit(SocketEventsCommon.joinGame, false);
             console.debug('room does not exist', rooms);
             clientSocket.disconnect(true);
             return;
@@ -108,13 +108,13 @@ export function socketApi(blefServer: BlefServer, clientSocket: SessionSocket) {
             isOnline: true,
             isHost: false,
         };
-        clientSocket.emit(SocketEvents.joinGame, {
+        clientSocket.emit(SocketEventsCommon.joinGame, {
             players: playersInRoom,
             thisPlayerId: session.uid,
             thisPlayerName: session.username,
         });
 
-        clientSocket.to(gameId).emit(SocketEvents.newPlayerJoined, {
+        clientSocket.to(gameId).emit(SocketEventsCommon.newPlayerJoined, {
             username: session.username,
             uid: session.uid,
             isOnline: true,
@@ -123,53 +123,53 @@ export function socketApi(blefServer: BlefServer, clientSocket: SessionSocket) {
         clientSocket.join(gameId);
     });
 
-    clientSocket.on(SocketEvents.playerLeftGame, (data: string) => {
+    clientSocket.on(SocketEventsCommon.playerLeftGame, (data: string) => {
         console.log('A user disconnected, player.id:' + data);
         if (roomHosts.get(session.gameId) != clientSocket.id) {
         }
         clientSocket.leave(session.gameId);
-        clientSocket.emit(SocketEvents.playerLeftGame, { uid: session.uid });
+        clientSocket.emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
     });
 
-    clientSocket.on(SocketEvents.gameStarted, (data: gameStartPayload) => {
+    clientSocket.on(SocketEventsCommon.gameStarted, (data: gameStartPayload) => {
         if (!data || !data.startingPlayerId || !data.newHands) {
             throw 'No startin player id message!';
         }
         if (roomHosts.get(session.gameId) != clientSocket.id) {
-            clientSocket.emit(SocketEvents.gameStarted, false);
+            clientSocket.emit(SocketEventsCommon.gameStarted, false);
             console.log('Could not start the game, (user is not a host)');
             return;
         }
 
-        io.in(session.gameId).emit(SocketEvents.gameStarted, data);
+        io.in(session.gameId).emit(SocketEventsCommon.gameStarted, data);
     });
-    clientSocket.on(SocketEvents.hit, (data: hitPayload) => {
+    clientSocket.on(SocketEventsCommon.hit, (data: hitPayload) => {
         if (!data || !data.move) {
             throw 'No move data passed';
         }
         // console.log('passing on hit data: ', data.move);
         //TODO: Some kidn of validation would be useful
 
-        io.in(session.gameId).emit(SocketEvents.hit, data);
+        io.in(session.gameId).emit(SocketEventsCommon.hit, data);
     });
-    clientSocket.on(SocketEvents.checkToServer, () => {
+    clientSocket.on(SocketEventsCommon.checkToServer, () => {
         let roomHostSocketId = roomHosts.get(session.gameId);
         let roomHostSocket;
         if (roomHostSocketId) {
             roomHostSocket = io.sockets.sockets.get(roomHostSocketId);
         } else {
-            clientSocket.emit(SocketEvents.checkToServer, {
+            clientSocket.emit(SocketEventsCommon.checkToServer, {
                 err: 'ur room does not have a host',
             });
         }
         if (roomHostSocket) {
-            roomHostSocket.emit(SocketEvents.checkToServer);
+            roomHostSocket.emit(SocketEventsCommon.checkToServer);
         }
     });
 
-    clientSocket.on(SocketEvents.checkToPlayers, (payload: checkToServerPayload) => {
+    clientSocket.on(SocketEventsCommon.checkToPlayers, (payload: checkToServerPayload) => {
         if (roomHosts.get(session.gameId) != clientSocket.id) {
-            clientSocket.emit(SocketEvents.gameStarted, false);
+            clientSocket.emit(SocketEventsCommon.gameStarted, false);
             console.log('Could not check, (user is not a host)');
             return;
         }
@@ -188,16 +188,16 @@ export function socketApi(blefServer: BlefServer, clientSocket: SessionSocket) {
                     roundStartingPlayerId: payload.roundStartingPlayerId,
                     eliminatedPlayers: payload.eliminatedPlayers,
                 };
-                clientSocket.emit(SocketEvents.checkToPlayers, newPayload);
+                clientSocket.emit(SocketEventsCommon.checkToPlayers, newPayload);
             }
         }
     });
 
-    clientSocket.on(SocketEvents.gameClosed, () => {
+    clientSocket.on(SocketEventsCommon.gameClosed, () => {
         console.log('Trying to close room');
 
         if (roomHosts.get(session.gameId) != clientSocket.id) {
-            clientSocket.emit(SocketEvents.gameClosed, false);
+            clientSocket.emit(SocketEventsCommon.gameClosed, false);
             console.log('Cannot Close server u are not a host');
             return;
         }
@@ -214,7 +214,7 @@ export function socketApi(blefServer: BlefServer, clientSocket: SessionSocket) {
 
             if (clientSocket) {
                 clientSocket.player = undefined;
-                clientSocket.emit(SocketEvents.gameClosed, true);
+                clientSocket.emit(SocketEventsCommon.gameClosed, true);
                 clientSocket.leave(roomToCloseId);
                 clientSocket.disconnect();
             }
