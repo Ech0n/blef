@@ -54,7 +54,7 @@
         selectedRanking = selectedRanking.toLowerCase();
         primaryCard = primaryCard.toLowerCase();
         secondaryCard = secondaryCard.toLowerCase();
-        selectedColor = selectedColor.toLowerCase();
+        selectedColor = selectedColor.toLowerCase().slice(0, -1);
         startingCard = startingCard.toLowerCase();
 
         let newBet = {
@@ -64,6 +64,8 @@
             selectedColor,
             startingCard,
         };
+
+        console.log(newBet);
 
         // @ts-ignore
         if (previousBet) {

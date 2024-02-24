@@ -17,10 +17,11 @@ function royalFlushChecker(cards: CardCountTable, handInfo: HandInfo) {
     let startingCard: number = cardToRankTranslation['10'].numeric;
 
     for (let i = 0; i < 5; i++) {
-        if (cards[startingCard + i][ColorToIndex[selectedColor]] == 0) {
+        if (cards[startingCard + i][ColorToIndex[selectedColor]] === 0) {
             return false;
         }
     }
+    console.log('wtf');
     return true;
 }
 
@@ -29,7 +30,7 @@ function flushChecker(cards: CardCountTable, handInfo: HandInfo) {
     let startingCard = cardToRankTranslation[handInfo.startingCard].numeric;
 
     for (let i = 0; i < 5; i++) {
-        if (cards[startingCard + i][ColorToIndex[selectedColor]] == 0) {
+        if (cards[startingCard + i][ColorToIndex[selectedColor]] === 0) {
             return false;
         }
     }
