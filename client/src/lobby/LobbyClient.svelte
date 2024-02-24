@@ -3,7 +3,7 @@
     import { io, type Socket } from 'socket.io-client';
     import { createEventDispatcher } from 'svelte';
     import { playerStore } from '../game/stores';
-    import { SocketEventsCommon } from '../../../src/types/socketEvents';
+    import { SocketEventsCommon, SocketEventsFromClient } from '../../../src/types/socketEvents';
     import { Player } from '../../../common/player';
     import type { gameStartPayload } from '../../../common/payloads';
     import type { CardCountTable } from '../model/Card';
@@ -90,27 +90,27 @@
             dispatch('gameClosed');
         });
 
-        socket.on(SocketEventsCommon.playerLeftGame, (data: { playerId: string }) => {
+        socket.on(SocketEventsCommon.playerLeftGame, (data: { uid: string }) => {
             // Players = Host and Clients
             if (!data) {
                 return;
             }
+            if (data.uid == thisPlayerId) {
+                players = [];
+                dispatch('gameClosed'); // To parent
+                return;
+            }
 
             // Tag the disconnected player as not connected
-            players = players.map((player) => {
-                if (player.uid === data.playerId) {
-                    return { ...player, isOnline: false };
-                }
-                return player;
+            players = players.filter((pl) => {
+                return pl.uid !== data.uid;
             });
+            players = players;
         });
     });
 
     function leaveGame(): void {
-        socket.emit(SocketEventsCommon.playerLeftGame, currentPlayer.uid);
-        players = [];
-
-        dispatch('gameClosed'); // To parent
+        socket.emit(SocketEventsFromClient.leaveGame);
     }
 
     function showWinnner(winner: any): void {

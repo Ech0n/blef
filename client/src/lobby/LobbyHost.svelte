@@ -59,19 +59,22 @@
             players = [...players, newPlayer];
         });
 
-        socket.on(SocketEventsCommon.playerLeftGame, (data: { playerId: string }) => {
-            console.log('player disconnected', data.playerId);
+        socket.on(SocketEventsCommon.playerLeftGame, (data: { uid: string }) => {
+            console.log('player disconnected', data.uid);
             if (!data) {
                 return;
             }
 
-            // Tag the disconnected player as not connected
-            players = players.map((player) => {
-                if (player.uid === data.playerId) {
-                    return { ...player, isOnline: false };
-                }
-                return player;
+            players = players.filter((pl) => {
+                return pl.uid !== data.uid;
             });
+            // Tag the disconnected player as not connected
+            // players = players.map((player) => {
+            //     if (player.uid === data.uid) {
+            //         return { ...player, isOnline: false };
+            //     }
+            //     return player;
+            // });
         });
 
         socket.on(SocketEventsCommon.gameStarted, (data: gameStartPayload) => {
@@ -85,16 +88,16 @@
             dispatch('gameClosed');
         });
 
-        socket.on(SocketEventsCommon.playerStatusChange, (data: playerStatusPayload) => {
-            console.log('received event but did nathing wit it');
-            let player = players.find((pl) => {
-                return data.playerUid === pl.uid;
-            });
-            if (player) {
-                player.isOnline = data.isOnline;
-            }
-            players = players;
-        });
+        // socket.on(SocketEventsCommon.playerStatusChange, (data: playerStatusPayload) => {
+        //     console.log('received event but did nathing wit it');
+        //     let player = players.find((pl) => {
+        //         return data.playerUid === pl.uid;
+        //     });
+        //     if (player) {
+        //         player.isOnline = data.isOnline;
+        //     }
+        //     players = players;
+        // });
     });
 
     function startGame(): void {
