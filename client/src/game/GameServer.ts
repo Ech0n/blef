@@ -1,31 +1,16 @@
 import type { IChecker } from './HandRankings';
 import { Game } from './Game';
-import {
-    CardColor,
-    type Card,
-    Rank,
-    type CardCountTable,
-    cardToRankTranslation,
-    initalizeCountTable,
-    ColorToIndex,
-} from '../model/Card';
+import { CardColor, type Card, Rank, type CardCountTable, cardToRankTranslation, initalizeCountTable, ColorToIndex } from '../model/Card';
 import { checkFunctionsMap } from './HandRankings';
 import { Player } from '../../../common/player';
-import type {
-    checkToServerPayload,
-    checkToPlayersPayload,
-    gameStartPayload,
-} from '../../../common/payloads';
+import type { checkToServerPayload, checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
 
 let deckInitialization: Card[] = [];
 
 for (let card in Rank) {
     if (isNaN(Number(card))) {
         for (let color in CardColor) {
-            if (
-                isNaN(Number(color)) &&
-                color != CardColor[CardColor.colorless]
-            ) {
+            if (isNaN(Number(color)) && color != CardColor[CardColor.colorless]) {
                 deckInitialization.push([card, color]);
             }
         }
@@ -38,12 +23,7 @@ export class GameServer extends Game {
     deck: Card[];
     isFinished: boolean = false;
     cardCounts: CardCountTable;
-    constructor(
-        players: Player[],
-        gameStartData: gameStartPayload,
-        thisPlayerId: string,
-        initialCardCounts: CardCountTable) {
-
+    constructor(players: Player[], gameStartData: gameStartPayload, thisPlayerId: string, initialCardCounts: CardCountTable) {
         super(players, gameStartData, thisPlayerId);
         this.hands = new Map(Object.entries(gameStartData.newHands));
         this.deck = deck.slice();
@@ -51,7 +31,7 @@ export class GameServer extends Game {
     }
 
     drawCards(numberOfCards: number): Card[] {
-        if (numberOfCards > 5) {
+        if (numberOfCards > 50) {
             throw 'Drawing more than 5 cards is not a possibility';
         }
         if (numberOfCards > this.deck.length) {
@@ -59,17 +39,11 @@ export class GameServer extends Game {
         }
         let drawnCards: Card[] = [];
         while (drawnCards.length < numberOfCards) {
-            let randomIndex: number = Math.floor(
-                Math.random() * this.deck.length
-            );
+            let randomIndex: number = Math.floor(Math.random() * this.deck.length);
             let card = this.deck.splice(randomIndex, 1)[0];
             drawnCards.push(card);
-            this.cardCounts[cardToRankTranslation[card[0]].numeric][
-                ColorToIndex[card[1]]
-            ] += 1;
-            this.cardCounts[cardToRankTranslation[card[0]].numeric][
-                ColorToIndex['colorless']
-            ] += 1;
+            this.cardCounts[cardToRankTranslation[card[0]].numeric][ColorToIndex[card[1]]] += 1;
+            this.cardCounts[cardToRankTranslation[card[0]].numeric][ColorToIndex['colorless']] += 1;
         }
         console.log('drawn cards ', drawnCards);
         return drawnCards;
@@ -84,7 +58,7 @@ export class GameServer extends Game {
         this.shuffleDeck();
         this.hands = new Map<string, Card[]>();
         this.players.forEach((player: Player) => {
-            this.hands.set(player.uid, this.drawCards(1 + player.loses));
+            this.hands.set(player.uid, this.drawCards(1 + player.loses * 20));
         });
     }
 
@@ -125,16 +99,11 @@ export class GameServer extends Game {
 
         // console.log(this.previousBet);
         console.log('Policzone karty: ', this.cardCounts);
-        let wasBetFound = checkFunctionsMap[this.previousBet.selectedRanking](
-            this.cardCounts,
-            this.previousBet
-        );
+        let wasBetFound = checkFunctionsMap[this.previousBet.selectedRanking](this.cardCounts, this.previousBet);
         //If cards were found than current player is set to previous one
         // next for the current player one lose is added
         if (!wasBetFound) {
-            const prevPlayer =
-                (this.currentPlayerIndx - 1 + this.playerCount) %
-                this.playerCount;
+            const prevPlayer = (this.currentPlayerIndx - 1 + this.playerCount) % this.playerCount;
             this.currentPlayerIndx = prevPlayer;
             this.currentPlayer = this.players[this.currentPlayerIndx].uid;
         }
@@ -157,11 +126,7 @@ export class GameServer extends Game {
 
     validateCheck(): checkToServerPayload {
         this.check();
-        console.log(
-            'PLAYER ',
-            this.players[this.currentPlayerIndx],
-            ' has lsot this round'
-        );
+        console.log('PLAYER ', this.players[this.currentPlayerIndx], ' has lsot this round');
 
         this.dealCards();
         console.log('this hands ', this.hands);

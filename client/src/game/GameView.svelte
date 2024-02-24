@@ -62,14 +62,14 @@
         });
 
         if (game.currentPlayer === thisPlayerId) {
-            startTimer();
+            // startTimer();
         }
 
         socket.on(SocketEvents.hit, (data: { move: any }) => {
             game.hit(data.move);
             game = game;
             if (game.currentPlayer === thisPlayerId) {
-                startTimer();
+                // startTimer();
             }
         });
 

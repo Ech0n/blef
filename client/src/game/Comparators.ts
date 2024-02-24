@@ -27,12 +27,21 @@ export function compareRankingAGreaterThanB(oldRanking: hitPayload, newRanking: 
             return cardToRankTranslation[oldRanking.primaryCard].numeric > cardToRankTranslation[newRanking.primaryCard].numeric;
         }
 
-        if (['color'].includes(oldRanking.selectedRanking)) {
+        if (['color', 'royal'].includes(oldRanking.selectedRanking)) {
             return colorHierarchy[oldRanking.selectedColor] > colorHierarchy[newRanking.selectedColor];
         }
 
         if (['street'].includes(oldRanking.selectedRanking)) {
             return cardToRankTranslation[oldRanking.startingCard].numeric > cardToRankTranslation[newRanking.startingCard].numeric;
+        }
+
+        if (['flush'].includes(oldRanking.selectedRanking)) {
+            if (cardToRankTranslation[oldRanking.startingCard].numeric > cardToRankTranslation[newRanking.startingCard].numeric) {
+                return true;
+            } else if (cardToRankTranslation[oldRanking.startingCard].numeric === cardToRankTranslation[newRanking.startingCard].numeric) {
+                return colorHierarchy[oldRanking.selectedColor] > colorHierarchy[newRanking.selectedColor];
+            }
+            return false;
         }
     }
     return compareHierarchy[oldRanking.selectedRanking] > compareHierarchy[newRanking.selectedRanking];
@@ -52,8 +61,8 @@ let compareHierarchy: { [key: string]: number } = {
 };
 
 let colorHierarchy: { [key: string]: number } = {
-    'spades': 4,
-    'hearts': 3,
-    'diamonds': 2,
-    'clubs': 1,
+    'spade': 4,
+    'heart': 3,
+    'club': 2,
+    'diamond': 1,
 };
