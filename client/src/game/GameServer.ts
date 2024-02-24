@@ -34,9 +34,11 @@ export class GameServer extends Game {
         if (numberOfCards > 5) {
             throw 'Drawing more than 5 cards is not a possibility';
         }
+
         if (numberOfCards > this.deck.length) {
             throw 'Not enough cards in deck to draw cards';
         }
+
         let drawnCards: Card[] = [];
         while (drawnCards.length < numberOfCards) {
             let randomIndex: number = Math.floor(Math.random() * this.deck.length);
@@ -44,7 +46,7 @@ export class GameServer extends Game {
             drawnCards.push(card);
             this.cardCounts[fullCardNameToNumeric[card[0]].numeric][ColorToIndex[card[1]]] += 1;
         }
-        console.log('drawn cards ', drawnCards);
+        // console.log('drawn cards ', drawnCards);
         return drawnCards;
     }
 
@@ -67,7 +69,9 @@ export class GameServer extends Game {
         }
 
         console.log('Policzone karty: ', this.cardCounts);
-        let wasBetFound = checkFunctionsMap[this.previousBet.selectedRanking](this.cardCounts, this.previousBet);
+        let wasBetFound: boolean = checkFunctionsMap[this.previousBet.selectedRanking](this.cardCounts, this.previousBet);
+
+        console.log(wasBetFound, ' SELECTED: ', this.previousBet);
         // If cards were found than current player is set to previous one
         // next for the current player one lose is added
         if (!wasBetFound) {
@@ -97,7 +101,7 @@ export class GameServer extends Game {
         console.log('PLAYER ', this.players[this.currentPlayerIndx], ' has lost this round');
 
         this.dealCards();
-        console.log('this hands ', this.hands);
+        // console.log('this hands ', this.hands);
         let newHand = this.hands.get(this.thisPlayerId);
         if (newHand) {
             this.hand = newHand;
@@ -108,7 +112,7 @@ export class GameServer extends Game {
             roundStartingPlayerId: this.currentPlayer,
             eliminatedPlayers: this.eliminatedPlayers,
         };
-        console.log('sending payload ', payload);
+        // console.log('sending payload ', payload);
         return payload;
     }
 }

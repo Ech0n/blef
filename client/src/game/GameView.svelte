@@ -76,7 +76,7 @@
         if (isHost) {
             socket.on(SocketEventsCommon.checkToServer, (data) => {
                 let checkResult = game.validateCheck();
-                console.log('Valuidated check this is what goes further ', checkResult);
+                // console.log('Validated check this is what goes further ', checkResult);
                 game = game;
                 socket.emit(SocketEventsCommon.checkToPlayers, checkResult);
                 game.eliminatedPlayers.forEach((pl) => {
@@ -90,7 +90,7 @@
             });
         } else {
             socket.on(SocketEventsCommon.checkToPlayers, (data: checkToPlayersPayload) => {
-                console.log('received check data!', data);
+                // console.log('Received check data!', data);
                 game.check(data);
                 game = game;
                 game.eliminatedPlayers.forEach((pl) => {
@@ -103,7 +103,7 @@
                 }
             });
             socket.on(SocketEventsCommon.kickPlayer, (playerId: string) => {
-                console.log('kick player ', playerId);
+                // console.log('Kick player ', playerId);
                 game.removePlayer(playerId);
                 game = game;
                 dispatch('playerLeft', playerId);
@@ -115,13 +115,13 @@
     function handleBetSelection(event: CustomEvent) {
         const { detail } = event;
         selectedHand = detail;
-        clearInterval(timerInterval);
+        // clearInterval(timerInterval);
         socket.emit(SocketEventsCommon.hit, { move: selectedHand });
         showModal = false;
     }
 
     function check(): void {
-        clearInterval(timerInterval);
+        // clearInterval(timerInterval);
         socket.emit(SocketEventsCommon.checkToServer);
     }
 

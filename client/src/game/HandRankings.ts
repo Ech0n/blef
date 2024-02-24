@@ -1,12 +1,7 @@
 import { cardToRankTranslation, type CardCountTable, ColorToIndex } from '../model/Card';
 
-//TODO: Change this into somekind of predefined structure that can be easily initalized. Reconsider if this is even a correct way to count of carts
-export type CardDict = any; // Hell nah, I'm not using CardCountable
-
-//TODO: Implement Checkers
-
 export interface IChecker {
-    check(cards: CardDict): boolean;
+    check(cards: CardCountTable): boolean;
 }
 
 export interface HandInfo {
@@ -17,32 +12,33 @@ export interface HandInfo {
     startingCard: string;
 }
 
-function royalFlushChecker(cards: CardDict, handInfo: HandInfo) {
-    console.log('cardDict: ', cards, 'handInfo:');
-    const selectedColor = handInfo.selectedColor;
-    let startingCard = cardToRankTranslation['10'].numeric;
+function royalFlushChecker(cards: CardCountTable, handInfo: HandInfo) {
+    console.log('cardDict: ', cards, 'handInfo:', handInfo);
 
+    const selectedColor = handInfo.selectedColor;
+    let startingCard: number = cardToRankTranslation['10'].numeric;
+    console.log(startingCard);
     for (let i = 0; i < 5; i++) {
-        if (cards[startingCard - i][ColorToIndex[selectedColor]] == 0) {
+        if (cards[startingCard + i][ColorToIndex[selectedColor]] == 0) {
             return false;
         }
     }
     return true;
 }
 
-function flushChecker(cards: CardDict, handInfo: HandInfo) {
+function flushChecker(cards: CardCountTable, handInfo: HandInfo) {
     const selectedColor = handInfo.selectedColor;
     let startingCard = cardToRankTranslation[handInfo.startingCard].numeric;
 
     for (let i = 0; i < 5; i++) {
-        if (cards[startingCard - i][ColorToIndex[selectedColor]] == 0) {
+        if (cards[startingCard + i][ColorToIndex[selectedColor]] == 0) {
             return false;
         }
     }
     return true;
 }
 
-function colorChecker(cards: CardDict, handInfo: HandInfo): boolean {
+function colorChecker(cards: CardCountTable, handInfo: HandInfo): boolean {
     const selectedColor = handInfo.selectedColor;
     let count: number = 0;
     let cardRanks: string[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'j', 'q', 'k', 'a'];
@@ -50,91 +46,136 @@ function colorChecker(cards: CardDict, handInfo: HandInfo): boolean {
     for (let i = 0; i < cardRanks.length; i++) {
         let rankValue: number = cardToRankTranslation[cardRanks[i]].numeric;
         count += cards[rankValue][ColorToIndex[selectedColor]];
-
-        if (count >= 5) {
-            return true;
-        }
     }
-    return false;
+
+    return count >= 5;
 }
 
-function fourChecker(cards: CardDict, handInfo: HandInfo) {
-    let primCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
-
-    if (!cards[primCard]) {
-        return false;
-    }
-    return cards[primCard][ColorToIndex['colorless']] >= 4;
-}
-
-function fullChecker(cards: CardDict, handInfo: HandInfo) {
+function fourChecker(cards: CardCountTable, handInfo: HandInfo) {
     let primCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
 
     if (!cards[primCard]) {
         return false;
     }
 
-    let secCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
+    let count: number = 0;
+    for (let colorIndex: number = 1; colorIndex <= 4; colorIndex++) {
+        count += cards[primCard][colorIndex];
+    }
+
+    return count == 4;
+}
+
+function fullChecker(cards: CardCountTable, handInfo: HandInfo) {
+    let primCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
+
+    if (!cards[primCard]) {
+        return false;
+    }
+
+    let secCard: number = cardToRankTranslation[handInfo.secondaryCard].numeric;
 
     if (!cards[secCard]) {
         return false;
     }
 
-    return cards[primCard][ColorToIndex['colorless']] >= 3 && cards[secCard][ColorToIndex['colorless']] >= 2;
+    let count: number[] = [0, 0];
+    for (let cardIndex of [primCard, secCard]) {
+        for (let colorIndex: number = 1; colorIndex <= 4; colorIndex++) {
+            let currentCard = cardIndex === primCard ? 0 : 1;
+            count[currentCard] += cards[cardIndex][colorIndex];
+        }
+    }
+
+    return count[0] >= 3 && count[1] >= 2;
 }
 
-function streetChecker(cards: CardDict, handInfo: HandInfo) {
+function streetChecker(cards: CardCountTable, handInfo: HandInfo) {
     let startingCard = cardToRankTranslation[handInfo.startingCard].numeric;
+    let count: number = 0;
+
     for (let i = 0; i < 5; i++) {
-        if (!cards[startingCard - i]) {
+        if (!cards[startingCard + i]) {
             return false;
         }
-        if (cards[startingCard - i][ColorToIndex['colorless']] == 0) {
-            return false;
+
+        for (let colorIndex: number = 1; colorIndex <= 4; colorIndex++) {
+            if (cards[startingCard + i][colorIndex] == 1) {
+                count++;
+                break;
+            }
         }
     }
-    return true;
+    return count == 5;
 }
 
-function threeChecker(cards: CardDict, handInfo: HandInfo) {
+function threeChecker(cards: CardCountTable, handInfo: HandInfo) {
     let primCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
 
     if (!cards[primCard]) {
         return false;
     }
-    return cards[primCard][ColorToIndex['colorless']] >= 3;
+
+    let count: number = 0;
+    for (let colorIndex: number = 1; colorIndex <= 4; colorIndex++) {
+        count += cards[primCard][colorIndex];
+    }
+
+    return count >= 3;
 }
 
-function doubleChecker(cards: CardDict, handInfo: HandInfo) {
+function doubleChecker(cards: CardCountTable, handInfo: HandInfo) {
     let primCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
 
     if (!cards[primCard]) {
         return false;
     }
-    let secCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
+
+    let secCard: number = cardToRankTranslation[handInfo.secondaryCard].numeric;
 
     if (!cards[secCard]) {
         return false;
     }
-    return cards[primCard][ColorToIndex['colorless']] >= 2 && cards[secCard][ColorToIndex['colorless']] >= 2;
+
+    let count: number[] = [0, 0];
+    for (let cardIndex of [primCard, secCard]) {
+        for (let colorIndex: number = 1; colorIndex <= 4; colorIndex++) {
+            let currentCard = cardIndex === primCard ? 0 : 1;
+            count[currentCard] += cards[cardIndex][colorIndex];
+        }
+    }
+
+    return count[0] >= 2 && count[1] >= 2;
 }
 
 function pairChecker(cards: CardCountTable, handInfo: HandInfo) {
     let primCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
+
     if (!cards[primCard]) {
         return false;
     }
-    return cards[primCard][ColorToIndex['colorless']] >= 2;
+
+    let count: number = 0;
+    for (let colorIndex: number = 1; colorIndex <= 4; colorIndex++) {
+        count += cards[primCard][colorIndex];
+    }
+
+    return count >= 2;
 }
 
 function oneChecker(cards: CardCountTable, handInfo: HandInfo) {
-    console.log('handInfo', handInfo);
     let primCard: number = cardToRankTranslation[handInfo.primaryCard].numeric;
 
     if (!cards[primCard]) {
         return false;
     }
-    return cards[primCard][ColorToIndex['colorless']] >= 1;
+
+    let count: number = 0;
+    for (let colorIndex: number = 1; colorIndex <= 4; colorIndex++) {
+        count += cards[primCard][colorIndex];
+    }
+
+    return count >= 1;
 }
 
 export const checkFunctionsMap: Record<string, (cards: CardCountTable, handInfo: HandInfo) => boolean> = {
