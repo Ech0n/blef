@@ -13,7 +13,9 @@ export enum SocketEventsCommon {
     gameClosed = 'gameClosed',
 }
 
-export enum SocketEventsFromServer {}
+export enum SocketEventsFromServer {
+    playerLeftGame = 'playerLeftGame',
+}
 
 export enum SocketEventsFromHostAndClient {}
 
@@ -22,4 +24,6 @@ export enum SocketEventsFromHost {
     kickPlayer = 'kickPlayer',
 }
 
-export enum SocketEventsFromClient {}
+export enum SocketEventsFromClient {
+    leaveGame = 'ClientLeaveGame',
+}

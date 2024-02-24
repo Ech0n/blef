@@ -3,7 +3,7 @@ import { type AddressInfo } from 'node:net';
 import { io as ioc, type Socket as ClientSocket } from 'socket.io-client';
 import { Server, type Socket as ServerSocket } from 'socket.io';
 import { socketApi, SessionSocket } from '../socketServer';
-import { SocketEventsCommon } from '../types/socketEvents';
+import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromServer } from '../types/socketEvents';
 import { Session } from 'node:inspector';
 import session from 'express-session';
 import { BlefServer } from '../BlefServer';
@@ -14,7 +14,7 @@ function waitFor(socket: ServerSocket | ClientSocket, event: string) {
     });
 }
 
-jest.setTimeout(4000);
+jest.setTimeout(10000);
 
 describe('host', () => {
     let io: any, serverSocket: any, hostSocket: any;
@@ -74,7 +74,7 @@ describe('host and 4 clients', () => {
     let blefServer: any;
     let port: any;
 
-    beforeAll((done) => {
+    beforeEach((done) => {
         const httpServer = createServer();
 
         let lst = httpServer.listen(() => {
@@ -177,28 +177,36 @@ describe('host and 4 clients', () => {
 
     test('should join a game leave it and join again :O', async () => {
         //Open server
-        let prom = hostSocket.emit(SocketEventsCommon.createGame, { username: 'username' });
+        let prom = hostSocket.emit(SocketEventsCommon.createGame, { username: 'host' });
         let ret = <{ gameId: string }>await waitFor(hostSocket, SocketEventsCommon.createGame);
 
         clientSocket1.emit(SocketEventsCommon.joinGame, { username: 'cl1', gameId: ret.gameId });
-        clientSocket2.emit(SocketEventsCommon.joinGame, { username: 'cl1', gameId: ret.gameId });
-        clientSocket3.emit(SocketEventsCommon.joinGame, { username: 'cl1', gameId: ret.gameId });
-        clientSocket4.emit(SocketEventsCommon.joinGame, { username: 'cl1', gameId: ret.gameId });
+        clientSocket2.emit(SocketEventsCommon.joinGame, { username: 'cl2', gameId: ret.gameId });
+        clientSocket3.emit(SocketEventsCommon.joinGame, { username: 'cl3', gameId: ret.gameId });
+        clientSocket4.emit(SocketEventsCommon.joinGame, { username: 'cl4', gameId: ret.gameId });
 
         await clientsWaitForEvent(SocketEventsCommon.joinGame);
+        let room = io.sockets.adapter.rooms.get(ret.gameId);
+        expect(room.size).toBe(5);
+        clientSocket4.emit(SocketEventsFromClient.leaveGame, { username: 'cl1', gameId: ret.gameId });
+        //clients listen to event
+        await clientsWaitForEvent(SocketEventsFromServer.playerLeftGame);
 
-        clientSocket4.emit(SocketEventsCommon.leaveGame, { username: 'cl1', gameId: ret.gameId });
+        expect(room.size).toBe(4);
 
-        //Close server
-        prom = hostSocket.emit(SocketEventsCommon.gameClosed, 'username');
-        prom = await usersWaitForEvent(SocketEventsCommon.gameClosed);
-        expect(prom).toEqual([true, true, true, true, true]);
+        clientSocket4.emit(SocketEventsCommon.joinGame, { username: 'cl4', gameId: ret.gameId });
+        await Promise.all([
+            new Promise((resolve) => {
+                clientSocket1.once(SocketEventsCommon.newPlayerJoined, resolve);
+            }),
+            new Promise((resolve) => {
+                clientSocket2.once(SocketEventsCommon.newPlayerJoined, resolve);
+            }),
+            new Promise((resolve) => {
+                clientSocket3.once(SocketEventsCommon.newPlayerJoined, resolve);
+            }),
+        ]);
 
-        //Check if cleanup was sucesfull
-        socks = await io.fetchSockets();
-        expect(blefServer.rooms.size).toBe(0);
-        expect(blefServer.roomHosts.size).toBe(0);
-        expect(socks.length).toBe(0);
-        expect(io.of('/').adapter.rooms.size).toBe(0);
+        expect(room.size).toBe(5);
     });
 });

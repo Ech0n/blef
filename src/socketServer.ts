@@ -1,7 +1,7 @@
 import { Socket, Server as SocketIOServer } from 'socket.io';
 import http from 'http';
 import { SessionData } from 'express-session';
-import { SocketEventsCommon } from './types/socketEvents';
+import { SocketEventsCommon, SocketEventsFromClient } from './types/socketEvents';
 import { v4 as uuidv4 } from 'uuid';
 import { Player, IPlayer, createPlayerFromIPlayer } from '../common/player';
 import { checkToPlayersPayload, checkToServerPayload, gameStartPayload, hitPayload } from '../common/payloads';
@@ -129,6 +129,14 @@ export function socketApi(blefServer: BlefServer, clientSocket: SessionSocket) {
         }
         clientSocket.leave(session.gameId);
         clientSocket.emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
+    });
+
+    clientSocket.on(SocketEventsFromClient.leaveGame, () => {
+        console.log('Player trying to leave a game: ', session.uid, session.gameId);
+        clientSocket.leave(session.gameId);
+        clientSocket.to(session.gameId).emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
+        clientSocket.emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
+        // clientSocket.disconnect();
     });
 
     clientSocket.on(SocketEventsCommon.gameStarted, (data: gameStartPayload) => {
