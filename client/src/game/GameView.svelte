@@ -11,6 +11,7 @@
     import type { CardCountTable } from '../model/Card';
     import CardImageHandler from './CardImageHandler';
     import { config } from '../../../config';
+    import { time } from 'console';
 
     export let gameId: string;
     export let socket: Socket;
@@ -28,8 +29,9 @@
     let showModal: boolean = false;
     let betName: string = '';
     let selectedHand;
-    let countdown: number = 45;
+    let countdown: number;
     let timerInterval: ReturnType<typeof setInterval>;
+    let gameCheckInterval: ReturnType<typeof setInterval>;
 
     const cardImageHandler = new CardImageHandler();
     const cardFullNames: { [key: string]: string } = {
@@ -57,19 +59,29 @@
             socket = io(serverUrl);
         }
 
+        gameCheckInterval = setInterval(() => {
+            // This can be used for internal checks
+            if (game && game.currentPlayer != thisPlayerId) {
+                clearInterval(timerInterval);
+                // console.log('STOP THE COUNT');
+            }
+        }, 500);
+
         socket.on('gameState', (data) => {
             dispatch('update', data);
         });
 
-        if (game.currentPlayer === thisPlayerId) {
-            // startTimer();
+        if (game.currentPlayer === thisPlayerId && isHost) {
+            console.log('Host timer started');
+            startTimer();
         }
 
         socket.on(SocketEvents.hit, (data: { move: any }) => {
             game.hit(data.move);
             game = game;
             if (game.currentPlayer === thisPlayerId) {
-                // startTimer();
+                console.log('After hit timer started');
+                startTimer();
             }
         });
 
@@ -84,8 +96,13 @@
                         eliminated = true;
                     }
                 });
+
                 if (game.players.length == 1) {
                     dispatch('gameFinished', game.players[0]);
+                }
+
+                if (game.currentPlayer == thisPlayerId && !game.previousBet) {
+                    // startTimer(); // I belive this one might cause insane glitches
                 }
             });
         } else {
@@ -99,9 +116,11 @@
                     }
                 });
                 if (game.players.length == 1) {
+                    clearInterval(timerInterval);
                     dispatch('gameFinished', game.players[0]);
                 }
             });
+
             socket.on(SocketEvents.kickPlayer, (playerId: string) => {
                 // console.log('Kick player ', playerId);
                 game.removePlayer(playerId);
@@ -115,17 +134,19 @@
     function handleBetSelection(event: CustomEvent) {
         const { detail } = event;
         selectedHand = detail;
-        // clearInterval(timerInterval);
         socket.emit(SocketEvents.hit, { move: selectedHand });
         showModal = false;
     }
 
     function check(): void {
-        // clearInterval(timerInterval);
+        if (game.previousBet) {
+            clearInterval(timerInterval);
+        }
         socket.emit(SocketEvents.checkToServer);
     }
 
     function startTimer() {
+        clearInterval(timerInterval); // Clear existing timer first (do not remove)
         countdown = 45;
         timerInterval = setInterval(() => {
             countdown -= 1;
@@ -174,19 +195,19 @@
         if (['Double', 'Full'].includes(selectedRanking)) {
             let primaryCardName = cardFullNames[primaryCard];
             let secondaryCardName = cardFullNames[secondaryCard];
-            return currentBet + ' of 3 ' + primaryCardName + 's and 2 ' + secondaryCardName + 's';
+            return currentBet + (selectedRanking === 'Full' ? ' of 3 ' : ' of 2 ') + primaryCardName + 's and 2 ' + secondaryCardName + 's';
         }
 
         if (['Flush', 'Street'].includes(selectedRanking)) {
             let cardName = cardFullNames[startingCard];
-            return currentBet + ' starting from ' + cardName + (selectedRanking === 'Flush' ? ' in color ' + selectedColor : '');
+            return currentBet + ' starting from ' + cardName + (selectedRanking === 'Flush' ? ' in color ' + selectedColor : 's');
         }
 
         if (selectedRanking === 'Royal') {
-            return selectedRanking + ' Flush of ' + selectedColor;
+            return selectedRanking + ' Flush of ' + selectedColor + 's';
         }
 
-        return selectedRanking + ' ' + selectedColor;
+        return selectedRanking + ' ' + selectedColor + 's';
     }
 
     // Reactive statements in Svelte btw :O

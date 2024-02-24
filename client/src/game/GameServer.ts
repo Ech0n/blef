@@ -1,6 +1,5 @@
-import type { IChecker } from './HandRankings';
 import { Game } from './Game';
-import { CardColor, type Card, Rank, type CardCountTable, cardToRankTranslation, initalizeCountTable, ColorToIndex, fullCardNameToNumeric } from '../model/Card';
+import { CardColor, type Card, Rank, type CardCountTable, initalizeCountTable, ColorToIndex, fullCardNameToNumeric } from '../model/Card';
 import { checkFunctionsMap } from './HandRankings';
 import { Player } from '../../../common/player';
 import type { checkToServerPayload, checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
@@ -68,10 +67,10 @@ export class GameServer extends Game {
             throw 'There is no bet';
         }
 
-        console.log('Policzone karty: ', this.cardCounts);
+        // console.log('Policzone karty: ', this.cardCounts);
         let wasBetFound: boolean = checkFunctionsMap[this.previousBet.selectedRanking](this.cardCounts, this.previousBet);
 
-        console.log(wasBetFound, ' SELECTED: ', this.previousBet);
+        // console.log(wasBetFound, ' SELECTED: ', this.previousBet);
         // If cards were found than current player is set to previous one
         // next for the current player one lose is added
         if (!wasBetFound) {
@@ -98,7 +97,7 @@ export class GameServer extends Game {
 
     validateCheck(): checkToServerPayload {
         this.check();
-        console.log('PLAYER ', this.players[this.currentPlayerIndx], ' has lost this round');
+        // console.log('PLAYER ', this.players[this.currentPlayerIndx], ' has lost this round');
 
         this.dealCards();
         // console.log('this hands ', this.hands);
