@@ -136,7 +136,7 @@ export function socketApi(blefServer: BlefServer, clientSocket: SessionSocket) {
         clientSocket.leave(session.gameId);
         clientSocket.to(session.gameId).emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
         clientSocket.emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
-        // clientSocket.disconnect();
+        clientSocket.disconnect();
     });
 
     clientSocket.on(SocketEventsCommon.gameStarted, (data: gameStartPayload) => {

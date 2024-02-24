@@ -194,6 +194,10 @@ describe('host and 4 clients', () => {
 
         expect(room.size).toBe(4);
 
+        //connect again
+        clientSocket4 = ioc(`http://localhost:${port}`);
+        await waitFor(clientSocket4, 'connect');
+
         clientSocket4.emit(SocketEventsCommon.joinGame, { username: 'cl4', gameId: ret.gameId });
         await Promise.all([
             new Promise((resolve) => {
@@ -206,6 +210,8 @@ describe('host and 4 clients', () => {
                 clientSocket3.once(SocketEventsCommon.newPlayerJoined, resolve);
             }),
         ]);
+
+        await waitFor(clientSocket4, SocketEventsCommon.joinGame);
 
         expect(room.size).toBe(5);
     });
