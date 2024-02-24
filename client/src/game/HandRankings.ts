@@ -18,6 +18,7 @@ export interface HandInfo {
 }
 
 function royalFlushChecker(cards: CardDict, handInfo: HandInfo) {
+    console.log('cardDict: ', cards, 'handInfo:');
     const selectedColor = handInfo.selectedColor;
     let startingCard = cardToRankTranslation['10'].numeric;
 

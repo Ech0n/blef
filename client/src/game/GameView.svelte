@@ -3,7 +3,7 @@
     import { io } from 'socket.io-client';
     import type { Socket } from 'socket.io-client';
     import { GameServer } from './GameServer';
-    import { SocketEvents } from '../../../src/types/socketEvents';
+    import { SocketEventsCommon } from '../../../src/types/socketEvents';
     import { Player } from '../../../common/player';
     import CardModal from './CardModals.svelte';
     import { Game } from './Game';
@@ -65,7 +65,7 @@
             // startTimer();
         }
 
-        socket.on(SocketEvents.hit, (data: { move: any }) => {
+        socket.on(SocketEventsCommon.hit, (data: { move: any }) => {
             game.hit(data.move);
             game = game;
             if (game.currentPlayer === thisPlayerId) {
@@ -74,11 +74,11 @@
         });
 
         if (isHost) {
-            socket.on(SocketEvents.checkToServer, (data) => {
+            socket.on(SocketEventsCommon.checkToServer, (data) => {
                 let checkResult = game.validateCheck();
                 console.log('Valuidated check this is what goes further ', checkResult);
                 game = game;
-                socket.emit(SocketEvents.checkToPlayers, checkResult);
+                socket.emit(SocketEventsCommon.checkToPlayers, checkResult);
                 game.eliminatedPlayers.forEach((pl) => {
                     if (pl.uid == thisPlayerId) {
                         eliminated = true;
@@ -89,7 +89,7 @@
                 }
             });
         } else {
-            socket.on(SocketEvents.checkToPlayers, (data: checkToPlayersPayload) => {
+            socket.on(SocketEventsCommon.checkToPlayers, (data: checkToPlayersPayload) => {
                 console.log('received check data!', data);
                 game.check(data);
                 game = game;
@@ -102,7 +102,7 @@
                     dispatch('gameFinished', game.players[0]);
                 }
             });
-            socket.on(SocketEvents.kickPlayer, (playerId: string) => {
+            socket.on(SocketEventsCommon.kickPlayer, (playerId: string) => {
                 console.log('kick player ', playerId);
                 game.removePlayer(playerId);
                 game = game;
@@ -116,13 +116,13 @@
         const { detail } = event;
         selectedHand = detail;
         clearInterval(timerInterval);
-        socket.emit(SocketEvents.hit, { move: selectedHand });
+        socket.emit(SocketEventsCommon.hit, { move: selectedHand });
         showModal = false;
     }
 
     function check(): void {
         clearInterval(timerInterval);
-        socket.emit(SocketEvents.checkToServer);
+        socket.emit(SocketEventsCommon.checkToServer);
     }
 
     function startTimer() {
@@ -140,7 +140,7 @@
                         selectedColor: 'spade', // Default value, change as needed
                         startingCard: '',
                     };
-                    const betEvent = new CustomEvent(SocketEvents.hit, { detail: forcedBet });
+                    const betEvent = new CustomEvent(SocketEventsCommon.hit, { detail: forcedBet });
                     console.log('Timer finished: Bet');
                     handleBetSelection(betEvent);
                 } else {

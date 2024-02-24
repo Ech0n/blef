@@ -1,4 +1,4 @@
-export enum SocketEvents {
+export enum SocketEventsCommon {
     joinGame = 'joinGame',
     createGame = 'createGame',
     newPlayerJoined = 'newPlayerJoined',
@@ -9,7 +9,17 @@ export enum SocketEvents {
     checkToServer = 'checkToServer',
 
     kickPlayer = 'kickPlayer',
-    dealCards = 'dealCards',
 
     gameClosed = 'gameClosed',
 }
+
+export enum SocketEventsFromServer {}
+
+export enum SocketEventsFromHostAndClient {}
+
+export enum SocketEventsFromHost {
+    closeGame = 'closeGame',
+    kickPlayer = 'kickPlayer',
+}
+
+export enum SocketEventsFromClient {}
