@@ -186,7 +186,7 @@
             return selectedRanking + ' Flush of ' + selectedColor;
         }
 
-        return selectedRanking;
+        return selectedRanking + ' ' + selectedColor;
     }
 
     // Reactive statements in Svelte btw :O
@@ -228,7 +228,7 @@
 </div>
 {#if game.currentPlayer == thisPlayerId}
     <p>Your turn</p>
-    <div style="display: flex">
+    <div style="display:flex; justify-content:center">
         <button class="start-close" on:click={() => (showModal = true)}>Raise</button>
         <button class="start-close" on:click={check}>Check</button>
         {#if countdown > 0}

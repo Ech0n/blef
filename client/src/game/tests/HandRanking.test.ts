@@ -1,10 +1,8 @@
 import { checkFunctionsMap, type HandInfo } from '../HandRankings';
-import { Rank, CardColor, type CardCountTable, cardToRankTranslation } from '../../model/Card';
+import { Rank, CardColor, type CardCountTable, cardToRankTranslation, initalizeCountTable, ColorToIndex } from '../../model/Card';
 
-let karty: CardCountTable = {};
-let karta = cardToRankTranslation['4'].numeric;
-karty[karta] = {};
-karty[karta][CardColor.colorless] = 3;
+let cards: CardCountTable;
+
 const emptyHandInfo: HandInfo = {
     selectedColor: '',
     selectedRanking: '',
@@ -21,18 +19,23 @@ test('cardToRanktranslation test', () => {
 });
 
 test('One cardCheck', () => {
-    // TODO: old syntax, wont compile
+    cards = initalizeCountTable();
+    cards[cardToRankTranslation['4'].numeric][ColorToIndex['diamond']] = 1;
+
     let thisHand = { ...emptyHandInfo };
     thisHand.primaryCard = '4';
     thisHand.selectedRanking = 'one';
-    let checker = checkFunctionsMap[thisHand.selectedRanking](karty, thisHand);
+
+    console.log(cards);
+
+    let checker = checkFunctionsMap[thisHand.selectedRanking](cards, thisHand);
     expect(checker).toBe(true);
 
     thisHand.primaryCard = '5';
-    checker = checkFunctionsMap[thisHand.selectedRanking](karty, thisHand);
+    checker = checkFunctionsMap[thisHand.selectedRanking](cards, thisHand);
     expect(checker).toBe(false);
 
     thisHand.primaryCard = '6';
-    checker = checkFunctionsMap[thisHand.selectedRanking](karty, thisHand);
+    checker = checkFunctionsMap[thisHand.selectedRanking](cards, thisHand);
     expect(checker).toBe(false);
 });
