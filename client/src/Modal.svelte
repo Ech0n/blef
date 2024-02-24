@@ -91,6 +91,7 @@
     }
 
     input {
+        color: rgb(15, 15, 15);
         padding: 15px 10px;
         font-size: 20px;
         background-color: whitesmoke;
