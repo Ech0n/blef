@@ -30,7 +30,6 @@
     let betName: string = '';
     let selectedHand;
     let countdown: number;
-    let timerInterval: ReturnType<typeof setInterval>;
     let gameCheckInterval: ReturnType<typeof setInterval>;
 
     const cardImageHandler = new CardImageHandler();
@@ -50,9 +49,7 @@
         'A': 'Ace',
     };
 
-    onDestroy(() => {
-        clearInterval(timerInterval);
-    });
+    onDestroy(() => {});
 
     onMount(() => {
         if (!socket) {
@@ -62,8 +59,7 @@
         gameCheckInterval = setInterval(() => {
             // This can be used for internal checks
             if (game && game.currentPlayer != thisPlayerId) {
-                clearInterval(timerInterval);
-                // console.log('STOP THE COUNT');
+                // empty for now
             }
         }, 500);
 
@@ -73,7 +69,6 @@
 
         if (game.currentPlayer === thisPlayerId && isHost) {
             console.log('Host timer started');
-            startTimer();
         }
 
         socket.on(SocketEventsCommon.hit, (data: { move: any }) => {
@@ -81,7 +76,6 @@
             game = game;
             if (game.currentPlayer === thisPlayerId) {
                 console.log('After hit timer started');
-                startTimer();
             }
         });
 
@@ -116,7 +110,6 @@
                     }
                 });
                 if (game.players.length == 1) {
-                    clearInterval(timerInterval);
                     dispatch('gameFinished', game.players[0]);
                 }
             });
@@ -133,41 +126,12 @@
     function handleBetSelection(event: CustomEvent) {
         const { detail } = event;
         selectedHand = detail;
-        // clearInterval(timerInterval);
         socket.emit(SocketEventsCommon.hit, { move: selectedHand });
         showModal = false;
     }
 
     function check(): void {
-        // clearInterval(timerInterval);
         socket.emit(SocketEventsCommon.checkToServer);
-    }
-
-    function startTimer() {
-        clearInterval(timerInterval); // Clear existing timer first (do not remove)
-        countdown = 45;
-        timerInterval = setInterval(() => {
-            countdown -= 1;
-            if (countdown <= 0) {
-                clearInterval(timerInterval);
-
-                if (!game.previousBet) {
-                    const forcedBet = {
-                        selectedRanking: 'royal', // Default value, change as needed
-                        primaryCard: '',
-                        secondaryCard: '',
-                        selectedColor: 'spade', // Default value, change as needed
-                        startingCard: '',
-                    };
-                    const betEvent = new CustomEvent(SocketEventsCommon.hit, { detail: forcedBet });
-                    console.log('Timer finished: Bet');
-                    handleBetSelection(betEvent);
-                } else {
-                    console.log('Timer finished: Check');
-                    check();
-                }
-            }
-        }, 1000);
     }
 
     function getBetName(): string {
@@ -187,7 +151,7 @@
 
         if (['One', 'Pair', 'Three', 'Four'].includes(selectedRanking)) {
             let cardName = cardFullNames[primaryCard];
-            return currentBet + ' ' + cardName + (selectedRanking !== 'One' ? 's' : '');
+            return currentBet + (selectedRanking === 'Pair' ? ' of ' : ' ') + cardName + (selectedRanking !== 'One' ? 's' : '');
         }
 
         if (['Double', 'Full'].includes(selectedRanking)) {

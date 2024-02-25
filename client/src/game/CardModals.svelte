@@ -1,20 +1,43 @@
-<script>
+<script lang="ts">
     import { createEventDispatcher } from 'svelte';
     import { compareRankingAGreaterThanB } from './Comparators';
+    import CardImageHandler from './CardImageHandler';
+    import SelectionModal from './SelectionModal.svelte';
 
     // @ts-ignore
     export let previousBet;
 
+    const cardImageHandler = new CardImageHandler();
     const dispatch = createEventDispatcher();
-    const handRankings = ['Royal', 'Flush', 'Four', 'Full', 'Street', 'Color', 'Three', 'Double', 'Pair', 'One'];
+    const handRankings = [
+        { name: 'Royal', imageUrl: cardImageHandler.getCardImage('royal') },
+        { name: 'Flush', imageUrl: cardImageHandler.getCardImage('flush') },
+        { name: 'Four', imageUrl: cardImageHandler.getCardImage('four') },
+        { name: 'Full', imageUrl: cardImageHandler.getCardImage('full') },
+        { name: 'Street', imageUrl: cardImageHandler.getCardImage('street') },
+        { name: 'Color', imageUrl: cardImageHandler.getCardImage('color') },
+        { name: 'Three', imageUrl: cardImageHandler.getCardImage('three') },
+        { name: 'Double', imageUrl: cardImageHandler.getCardImage('double') },
+        { name: 'Pair', imageUrl: cardImageHandler.getCardImage('pair') },
+        { name: 'One', imageUrl: cardImageHandler.getCardImage('one') },
+    ];
     const cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
     const colors = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
 
-    let selectedRanking = '';
-    let primaryCard = '';
-    let secondaryCard = '';
-    let selectedColor = '';
-    let startingCard = '';
+    let selectedRanking: string = '';
+    let primaryCard: string = '';
+    let secondaryCard: string = '';
+    let selectedColor: string = '';
+    let startingCard: string = '';
+
+    let showModal: boolean = false;
+    let onSelect = (selectedValues: { primaryCardModal: string; secondaryCardModal: string; selectedColorModal: string; startingCardModal: string }) => {
+        const { primaryCardModal, secondaryCardModal, selectedColorModal, startingCardModal } = selectedValues;
+        selectedColor = selectedColorModal;
+        primaryCard = primaryCardModal;
+        secondaryCard = secondaryCardModal;
+        startingCard = startingCardModal;
+    };
 
     function closeModal() {
         dispatch('close');
@@ -78,69 +101,38 @@
         dispatch('select', newBet);
         closeModal();
     }
+
+    $: options = // Damn auto formatter goes kinda crazy here
+        ['Royal', 'Color'].includes(selectedRanking) ? colors
+        : ['Street', 'Full', 'Double', 'Pair', 'One', 'Three', 'Four'].includes(selectedRanking) ? cards
+        : ['Flush'].includes(selectedRanking) ? colors.concat(cards)
+        : [];
+
+    $: if (options.length > 1) {
+        openModal();
+    }
+
+    function openModal(): void {
+        showModal = true;
+    }
 </script>
+
+<SelectionModal bind:showModal {options} {selectedRanking} {onSelect} />
 
 <div class="modal">
     <div class="modal-content">
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <span class="close" on:click={closeModal}>&times;</span>
-        <h2>Select Hand Ranking</h2>
-
-        <select bind:value={selectedRanking}>
-            <option value="">-- Select Hand Ranking --</option>
-            {#each handRankings as ranking}
-                <option value={ranking}>{ranking}</option>
+        <h2 style="font-size: 55px">Select Hand Ranking</h2>
+        <div class="hands-container">
+            {#each handRankings as { name, imageUrl }}
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <div on:click={() => (selectedRanking = name)} class="hand-ranking-image {selectedRanking === name ? 'selected' : ''}">
+                    <h3 style="margin: 10px;">{name}</h3>
+                    <!-- svelte-ignore a11y-missing-attribute -->
+                    <img src={imageUrl} class="auto-scale-image" />
+                </div>
             {/each}
-        </select>
-
-        <div class="dropdowns">
-            {#if ['Flush', 'Royal', 'Color'].includes(selectedRanking)}
-                <div>
-                    <h3>Select Color</h3>
-                    <select bind:value={selectedColor}>
-                        <option value="">-- Select Color --</option>
-                        {#each colors as color}
-                            <option value={color}>{color}</option>
-                        {/each}
-                    </select>
-                </div>
-            {/if}
-
-            {#if ['Flush', 'Street'].includes(selectedRanking)}
-                <div>
-                    <h3>Select Starting Card</h3>
-                    <select bind:value={startingCard}>
-                        <option value="">-- Select Starting Card --</option>
-                        {#each cards as card}
-                            <option value={card}>{card}</option>
-                        {/each}
-                    </select>
-                </div>
-            {/if}
-
-            {#if ['Full', 'Double', 'Pair', 'One', 'Three', 'Four'].includes(selectedRanking)}
-                <div>
-                    <h3>Select Primary Card</h3>
-                    <select bind:value={primaryCard}>
-                        <option value="">-- Select Primary Card --</option>
-                        {#each cards as card}
-                            <option value={card}>{card}</option>
-                        {/each}
-                    </select>
-                </div>
-            {/if}
-
-            {#if ['Full', 'Double'].includes(selectedRanking)}
-                <div>
-                    <h3>Select Secondary Card</h3>
-                    <select bind:value={secondaryCard}>
-                        <option value="">-- Select Secondary Card --</option>
-                        {#each cards as card}
-                            <option value={card}>{card}</option>
-                        {/each}
-                    </select>
-                </div>
-            {/if}
         </div>
         <div class="modal-footer">
             <button on:click={closeModal}>Cancel</button>
@@ -165,9 +157,9 @@
     .modal-content {
         background-color: #3a3636;
         border-radius: 10px;
-        margin: 15% auto;
+        margin: 8% auto;
         padding: 20px;
-        width: 50%;
+        width: 80%;
     }
     .close {
         color: #aaa;
@@ -181,15 +173,6 @@
         text-decoration: none;
         cursor: pointer;
     }
-    .dropdowns > div {
-        display: inline-block;
-        margin-right: 20px;
-    }
-    select {
-        width: 100%;
-        padding: 10px;
-        margin-top: 10px;
-    }
     .modal-footer {
         margin-top: 20px;
         text-align: right;
@@ -198,5 +181,41 @@
         margin-left: 10px;
         padding: 5px 15px;
         color: aliceblue;
+    }
+    .hand-ranking-image {
+        width: 46%;
+        margin: 3% 1%;
+        padding: 1%;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .hand-ranking-image:hover,
+    .hand-ranking-image.selected {
+        background-color: #1d1a1a;
+        border-radius: 10px;
+        transform: scale(1.05);
+        margin: 0;
+    }
+    .hands-container {
+        widows: 100%;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: center;
+    }
+    .auto-scale-image {
+        max-height: 200px;
+        max-width: 100%;
+    }
+    h3 {
+        font-size: 30px;
+    }
+
+    @media (max-width: 800px) {
+        .hand-ranking-image {
+            width: 97%;
+            margin: 3.5% auto;
+        }
     }
 </style>
