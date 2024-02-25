@@ -4,6 +4,7 @@ import http from 'http';
 import { config } from '../config';
 import { socketApi, SessionSocket } from './socketServer';
 import session from 'express-session';
+import { SocketEventsCommon } from './types/socketEvents';
 
 export class BlefServer {
     io: Server;
@@ -33,5 +34,10 @@ export class BlefServer {
             this.serverSocket = socket;
             socketApi(this, <SessionSocket>socket);
         });
+    }
+
+    disconnectPlayer(playerUid: string, playerSocket: Socket) {
+        playerSocket.leave(playerUid);
+        playerSocket.to(playerUid).emit(SocketEventsCommon.playerLeftGame, { uid: playerUid });
     }
 }

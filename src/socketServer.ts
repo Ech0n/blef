@@ -40,7 +40,9 @@ export function socketApi(blefServer: BlefServer, clientSocket: SessionSocket) {
     if (!session.uid) {
         session.uid = uuidv4();
     }
-
+    clientSocket.on('disconnect', () => {
+        blefServer.disconnectPlayer(session.uid, clientSocket);
+    });
     clientSocket.on(SocketEventsCommon.createGame, (data) => {
         if (!data && !session.username) {
             console.log('No user name provided!', data);
@@ -123,19 +125,21 @@ export function socketApi(blefServer: BlefServer, clientSocket: SessionSocket) {
         clientSocket.join(gameId);
     });
 
-    clientSocket.on(SocketEventsCommon.playerLeftGame, (data: string) => {
-        console.log('A user disconnected, player.id:' + data);
-        if (roomHosts.get(session.gameId) != clientSocket.id) {
-        }
-        clientSocket.leave(session.gameId);
-        clientSocket.emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
-    });
+    // clientSocket.on(SocketEventsCommon.playerLeftGame, (data: string) => {
+    //     console.log('A user disconnected, player.id:' + data);
+    //     if (roomHosts.get(session.gameId) != clientSocket.id) {
+    //     }
+    //     clientSocket.leave(session.gameId);
+    //     clientSocket.emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
+    // });
 
     clientSocket.on(SocketEventsFromClient.leaveGame, () => {
         console.log('Player trying to leave a game: ', session.uid, session.gameId);
-        clientSocket.leave(session.gameId);
-        clientSocket.to(session.gameId).emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
         clientSocket.emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
+
+        // clientSocket.leave(session.gameId);
+        // clientSocket.to(session.gameId).emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
+        // clientSocket.emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
         clientSocket.disconnect();
     });
 

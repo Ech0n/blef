@@ -14,7 +14,7 @@ function waitFor(socket: ServerSocket | ClientSocket, event: string) {
     });
 }
 
-jest.setTimeout(10000);
+jest.setTimeout(2000);
 
 describe('host', () => {
     let io: any, serverSocket: any, hostSocket: any;
