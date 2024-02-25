@@ -194,14 +194,13 @@
         background-color: #1d1a1a;
         border-radius: 10px;
         transform: scale(1.05);
-        margin: 0;
     }
     .hands-container {
         widows: 100%;
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
-        justify-content: flex-start;
+        justify-content: space-around;
         align-items: center;
     }
     .auto-scale-image {

@@ -146,13 +146,11 @@
         max-width: 7%;
         cursor: pointer;
         transition: transform 0.2s;
-        margin-bottom: 20px;
     }
     .color-option-container {
-        width: 24.5%;
+        width: 24%;
         cursor: pointer;
         transition: transform 0.2s;
-        margin-bottom: 20px;
     }
     .card-option-container:hover,
     .card-option-container.selected,
@@ -161,6 +159,9 @@
         background-color: #0a0909;
         border-radius: 10px;
         transform: scale(1.05);
+    }
+    .card-option-container:hover,
+    .card-option-container.selected {
         padding: 1%;
     }
     .auto-scale-image {
