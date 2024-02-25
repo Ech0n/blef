@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 import http from 'http';
 import { config } from '../config';
 import { socketApi, SessionSocket } from './socketServer';
-import session from 'express-session';
+import session, { SessionData } from 'express-session';
 import { SocketEventsCommon } from './types/socketEvents';
 
 export class BlefServer {
@@ -36,8 +36,8 @@ export class BlefServer {
         });
     }
 
-    disconnectPlayer(playerUid: string, playerSocket: Socket) {
-        playerSocket.leave(playerUid);
-        playerSocket.to(playerUid).emit(SocketEventsCommon.playerLeftGame, { uid: playerUid });
+    disconnectPlayer(session: SessionData, playerSocket: Socket) {
+        playerSocket.leave(session.gameId);
+        playerSocket.to(session.gameId).emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
     }
 }

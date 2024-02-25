@@ -41,7 +41,7 @@ export function socketApi(blefServer: BlefServer, clientSocket: SessionSocket) {
         session.uid = uuidv4();
     }
     clientSocket.on('disconnect', () => {
-        blefServer.disconnectPlayer(session.uid, clientSocket);
+        blefServer.disconnectPlayer(session, clientSocket);
     });
     clientSocket.on(SocketEventsCommon.createGame, (data) => {
         if (!data && !session.username) {
@@ -135,11 +135,8 @@ export function socketApi(blefServer: BlefServer, clientSocket: SessionSocket) {
 
     clientSocket.on(SocketEventsFromClient.leaveGame, () => {
         console.log('Player trying to leave a game: ', session.uid, session.gameId);
-        clientSocket.emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
 
-        // clientSocket.leave(session.gameId);
-        // clientSocket.to(session.gameId).emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
-        // clientSocket.emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
+        clientSocket.emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
         clientSocket.disconnect();
     });
 
