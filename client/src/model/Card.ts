@@ -109,12 +109,10 @@ export function initalizeGame(players: IPlayer[]): { cardCounts: CardCountTable;
     players.map((player) => {
         let randomIndex: number = Math.floor(Math.random() * deckInitialization.length);
         let randomCard = deckInitialization.splice(randomIndex, 1);
-        console.log(randomCard);
         cardCounts[fullCardNameToNumeric[randomCard[0][0]].numeric][ColorToIndex[randomCard[0][1]]] += 1;
         hands[player.uid] = randomCard;
     });
 
-    console.log('inital cards coutns: ', cardCounts);
     initialGameData = { newHands: hands, startingPlayerId: startingPlayerId };
     return { cardCounts: cardCounts, payload: initialGameData };
 }

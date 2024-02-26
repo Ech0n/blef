@@ -50,8 +50,6 @@
         'A': 'Ace',
     };
 
-    onDestroy(() => {});
-
     onMount(() => {
         if (!socket) {
             socket = io(serverUrl);
@@ -84,6 +82,7 @@
                     socket.emit(SocketEventsFromHost.timerUpdate, countdown - 1);
                     countdown = timeData;
                 }
+                endOfTimerHandler();
             }, 1000); // Yes we need 2 timers, one here, one inside game.
 
             socket.on(SocketEventsCommon.checkToServer, (data) => {
@@ -98,6 +97,7 @@
                 });
 
                 if (game.players.length == 1) {
+                    game.stopRoundTimer();
                     dispatch('gameFinished', game.players[0]);
                 }
 
@@ -133,34 +133,38 @@
 
             socket.on(SocketEventsCommon.updateTimerToPlayers, (update: number) => {
                 // console.log('TIME: ' + countdown + ' | ' + game.currentPlayer + ' ' + thisPlayerId);
-                if (countdown <= 0 && game.currentPlayer == thisPlayerId) {
-                    sleep(2000).then(() => {
-                        // console.log('TIME: ' + countdown); the race condition log lmao
-                        if (countdown <= 0) {
-                            if (game.previousBet) {
-                                check();
-                            } else {
-                                const forcedBet = {
-                                    selectedRanking: 'royal',
-                                    primaryCard: '',
-                                    secondaryCard: '',
-                                    selectedColor: 'spade',
-                                    startingCard: '',
-                                };
-
-                                const forcedBetEvent = new CustomEvent('forcedBetEvent', {
-                                    detail: forcedBet,
-                                });
-
-                                handleBetSelection(forcedBetEvent);
-                            }
-                        }
-                    });
-                }
+                endOfTimerHandler();
                 countdown = update;
             });
         }
     });
+
+    function endOfTimerHandler() {
+        if (countdown <= 0 && game.currentPlayer == thisPlayerId) {
+            sleep(3000).then(() => {
+                // console.log('TIME: ' + countdown);
+                if (countdown <= 0 && game.currentPlayer == thisPlayerId) {
+                    if (game.previousBet) {
+                        check();
+                    } else {
+                        const forcedBet = {
+                            selectedRanking: 'royal',
+                            primaryCard: '',
+                            secondaryCard: '',
+                            selectedColor: 'spade',
+                            startingCard: '',
+                        };
+
+                        const forcedBetEvent = new CustomEvent('forcedBetEvent', {
+                            detail: forcedBet,
+                        });
+
+                        handleBetSelection(forcedBetEvent);
+                    }
+                }
+            });
+        }
+    }
 
     // TODO: On finished game when new game is tarted players are not initalized properly
     // This function is called when the modal is closed and we have selected a bet

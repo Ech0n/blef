@@ -138,9 +138,11 @@
     }
     button {
         margin-left: 10px;
+        margin-top: 20px;
         padding: 5px 15px;
         color: aliceblue;
         background-color: rgb(20, 20, 20);
+        font-size: 45px;
     }
     .card-option-container {
         max-width: 7%;

@@ -58,8 +58,10 @@
                     <input type="text" placeholder="Enter Game ID" bind:value={gameId} maxlength="10" />
                 {/if}
                 <input type="text" placeholder="Enter Your Name" bind:value={username} maxlength="14" />
-                <button class="start-close" on:click={action}>{mode === 'join' ? 'Join Game' : 'Create Game'}</button>
-                <button class="start-close" on:click={closeModal}>Close</button>
+                <div>
+                    <button class="start-close" on:click={action}>{mode === 'join' ? 'Join Game' : 'Create Game'}</button>
+                    <button class="start-close" on:click={closeModal}>Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -87,6 +89,7 @@
     }
 
     .start-close {
+        margin: 15px 5px;
         color: aliceblue;
     }
 

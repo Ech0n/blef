@@ -9,13 +9,13 @@ interface hitPayload {
 }
 
 export function compareRankingAGreaterThanB(oldRanking: hitPayload, newRanking: hitPayload): boolean {
-    console.log(compareHierarchy[oldRanking.selectedRanking], compareHierarchy[newRanking.selectedRanking]);
+    // console.log(compareHierarchy[oldRanking.selectedRanking], compareHierarchy[newRanking.selectedRanking]);
 
     if (compareHierarchy[oldRanking.selectedRanking] === compareHierarchy[newRanking.selectedRanking]) {
-        console.log('Ranks are equal, checking cards ');
+        // console.log('Ranks are equal, checking cards ');
 
         if (['one', 'pair', 'three', 'four'].includes(oldRanking.selectedRanking)) {
-            console.log('Rank is One, Two, Three, Four');
+            // console.log('Rank is One, Two, Three, Four');
             return cardToRankTranslation[oldRanking.primaryCard].numeric > cardToRankTranslation[newRanking.primaryCard].numeric;
         }
 
