@@ -2,9 +2,10 @@ import { Socket, Server } from 'socket.io';
 import { io } from 'socket.io-client';
 import http from 'http';
 import { config } from '../config';
-import { socketApi, SessionSocket } from './socketServer';
+import { socketEventsListeners, SessionSocket } from './socketEventListeners';
 import session, { SessionData } from 'express-session';
 import { SocketEventsCommon } from './types/socketEvents';
+import { v4 as uuidv4 } from 'uuid';
 
 export class BlefServer {
     io: Server;
@@ -31,9 +32,19 @@ export class BlefServer {
         this.io.engine.use(sessionConfig);
 
         this.io.on('connection', (socket) => {
-            this.serverSocket = socket;
-            socketApi(this, <SessionSocket>socket);
+            console.log('A user connected');
+
+            this.setupConnection(socket);
+            socketEventsListeners(this, <SessionSocket>socket);
         });
+    }
+
+    setupConnection(socket: Socket) {
+        const req: any = socket.request;
+        const session = req.session;
+        if (!session.uid) {
+            session.uid = uuidv4();
+        }
     }
 
     disconnectPlayer(session: SessionData, playerSocket: Socket) {

@@ -2,7 +2,6 @@ import { Socket, Server as SocketIOServer } from 'socket.io';
 import http from 'http';
 import { SessionData } from 'express-session';
 import { SocketEventsCommon, SocketEventsFromClient } from './types/socketEvents';
-import { v4 as uuidv4 } from 'uuid';
 import { Player, IPlayer, createPlayerFromIPlayer } from '../common/player';
 import { checkToPlayersPayload, checkToServerPayload, gameStartPayload, hitPayload } from '../common/payloads';
 import { BlefServer } from './BlefServer';
@@ -29,17 +28,14 @@ export interface SessionSocket extends Socket {
     request: IncomingMessageWithSession;
 }
 
-export function socketApi(blefServer: BlefServer, clientSocket: SessionSocket) {
-    let io = blefServer.io;
-    let rooms = blefServer.rooms;
-    let roomHosts = blefServer.roomHosts;
-    console.log('A user connected');
+export function socketEventsListeners(blefServer: BlefServer, clientSocket: SessionSocket) {
     const req: any = clientSocket.request;
     const session = req.session;
     const sessionId = req.sessionID;
-    if (!session.uid) {
-        session.uid = uuidv4();
-    }
+
+    let io = blefServer.io;
+    let rooms = blefServer.rooms;
+    let roomHosts = blefServer.roomHosts;
     clientSocket.on('disconnect', () => {
         blefServer.disconnectPlayer(session, clientSocket);
     });

@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { Player, IPlayer, createPlayerFromIPlayer } from '../common/player';
 import { checkToPlayersPayload, checkToServerPayload, gameStartPayload, hitPayload } from '../common/payloads';
 import { config } from '../config';
-import { socketApi, SessionSocket } from './socketServer';
 import { BlefServer } from './BlefServer';
 const port = config.BACKENDSERVERPORT || 5678;
 

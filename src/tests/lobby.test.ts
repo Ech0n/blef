@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { type AddressInfo } from 'node:net';
 import { io as ioc, type Socket as ClientSocket } from 'socket.io-client';
 import { Server, type Socket as ServerSocket } from 'socket.io';
-import { socketApi, SessionSocket } from '../socketServer';
+import { socketEventsListeners, SessionSocket } from '../socketEventListeners';
 import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromServer } from '../types/socketEvents';
 import { Session } from 'node:inspector';
 import session from 'express-session';
