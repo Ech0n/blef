@@ -5,8 +5,7 @@
     import { SocketEventsCommon } from '../../../src/types/socketEvents';
     import { playerStore } from '../game/stores';
     import { initalizeGame, type CardCountTable, initalizeCountTable } from '../model/Card';
-    import type { gameStartPayload, playerStatusPayload } from '../../../common/payloads';
-    import e from 'express';
+    import type { gameStartPayload } from '../../../common/payloads';
     import LobbyPlayerList from './LobbyPlayerList.svelte';
     import { config } from '../../../config';
 
@@ -68,13 +67,6 @@
             players = players.filter((pl) => {
                 return pl.uid !== data.uid;
             });
-            // Tag the disconnected player as not connected
-            // players = players.map((player) => {
-            //     if (player.uid === data.uid) {
-            //         return { ...player, isOnline: false };
-            //     }
-            //     return player;
-            // });
         });
 
         socket.on(SocketEventsCommon.gameStarted, (data: gameStartPayload) => {
@@ -87,17 +79,6 @@
         socket.on(SocketEventsCommon.gameClosed, () => {
             dispatch('gameClosed');
         });
-
-        // socket.on(SocketEventsCommon.playerStatusChange, (data: playerStatusPayload) => {
-        //     console.log('received event but did nathing wit it');
-        //     let player = players.find((pl) => {
-        //         return data.playerUid === pl.uid;
-        //     });
-        //     if (player) {
-        //         player.isOnline = data.isOnline;
-        //     }
-        //     players = players;
-        // });
     });
 
     function startGame(): void {
@@ -157,7 +138,7 @@
         {/if}
         <br />
         Players:
-        <LobbyPlayerList {players} {socket} thisPlayer={host} />
+        <LobbyPlayerList {players} thisPlayer={host} />
         <div>
             <button class="start-close" on:click={startGame}>Start Game</button>
             <button class="start-close" on:click={closeGame}>Close Game</button>

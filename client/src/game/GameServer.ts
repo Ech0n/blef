@@ -22,11 +22,14 @@ export class GameServer extends Game {
     deck: Card[];
     isFinished: boolean = false;
     cardCounts: CardCountTable;
+    timeLeft: number;
+    roundTimer: ReturnType<typeof setInterval> | undefined;
     constructor(players: Player[], gameStartData: gameStartPayload, thisPlayerId: string, initialCardCounts: CardCountTable) {
         super(players, gameStartData, thisPlayerId);
         this.hands = new Map(Object.entries(gameStartData.newHands));
         this.deck = deck.slice();
         this.cardCounts = initialCardCounts;
+        this.timeLeft = 30;
     }
 
     drawCards(numberOfCards: number): Card[] {
@@ -45,7 +48,6 @@ export class GameServer extends Game {
             drawnCards.push(card);
             this.cardCounts[fullCardNameToNumeric[card[0]].numeric][ColorToIndex[card[1]]] += 1;
         }
-        // console.log('drawn cards ', drawnCards);
         return drawnCards;
     }
 
@@ -67,10 +69,8 @@ export class GameServer extends Game {
             throw 'There is no bet';
         }
 
-        // console.log('Policzone karty: ', this.cardCounts);
         let wasBetFound: boolean = checkFunctionsMap[this.previousBet.selectedRanking](this.cardCounts, this.previousBet);
 
-        // console.log(wasBetFound, ' SELECTED: ', this.previousBet);
         // If cards were found than current player is set to previous one
         // next for the current player one lose is added
         if (!wasBetFound) {
@@ -97,21 +97,48 @@ export class GameServer extends Game {
 
     validateCheck(): checkToServerPayload {
         this.check();
-        // console.log('PLAYER ', this.players[this.currentPlayerIndx], ' has lost this round');
 
         this.dealCards();
-        // console.log('this hands ', this.hands);
+
         let newHand = this.hands.get(this.thisPlayerId);
         if (newHand) {
             this.hand = newHand;
         }
+
         let payload = {
             newHands: Object.fromEntries(this.hands),
             players: this.players,
             roundStartingPlayerId: this.currentPlayer,
             eliminatedPlayers: this.eliminatedPlayers,
         };
-        // console.log('sending payload ', payload);
+
         return payload;
+    }
+
+    startRoundTimer(): void {
+        this.timeLeft = 30; // Reset timer for each round
+        this.roundTimer = setInterval(() => {
+            if (this.timeLeft >= 0) {
+                this.timeLeft--;
+            } else {
+                clearInterval(this.roundTimer);
+                this.roundTimer = undefined; // Handle end of round due to timeout
+            }
+        }, 1000); // 1000 Milliseconds
+    }
+
+    stopRoundTimer(): void {
+        if (this.roundTimer) {
+            clearInterval(this.roundTimer);
+            this.roundTimer = undefined;
+        }
+    }
+
+    getRoundTimer(): number {
+        return this.timeLeft;
+    }
+
+    setRoundTimer(newTime: number): void {
+        this.timeLeft = newTime;
     }
 }

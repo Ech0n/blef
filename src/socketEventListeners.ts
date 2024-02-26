@@ -1,7 +1,7 @@
 import { Socket, Server as SocketIOServer } from 'socket.io';
 import http from 'http';
 import { SessionData } from 'express-session';
-import { SocketEventsCommon, SocketEventsFromClient } from './types/socketEvents';
+import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost } from './types/socketEvents';
 import { Player, IPlayer, createPlayerFromIPlayer } from '../common/player';
 import { checkToPlayersPayload, checkToServerPayload, gameStartPayload, hitPayload } from '../common/payloads';
 import { BlefServer } from './BlefServer';
@@ -19,6 +19,7 @@ declare module 'socket.io' {
         player?: IPlayer;
     }
 }
+
 interface IncomingMessageWithSession extends http.IncomingMessage {
     session: SessionData;
     sessionID: string;
@@ -39,6 +40,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
     clientSocket.on('disconnect', () => {
         blefServer.disconnectPlayer(session, clientSocket);
     });
+
     clientSocket.on(SocketEventsCommon.createGame, (data) => {
         if (!data && !session.username) {
             console.log('No user name provided!', data);
@@ -121,14 +123,6 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
         clientSocket.join(gameId);
     });
 
-    // clientSocket.on(SocketEventsCommon.playerLeftGame, (data: string) => {
-    //     console.log('A user disconnected, player.id:' + data);
-    //     if (roomHosts.get(session.gameId) != clientSocket.id) {
-    //     }
-    //     clientSocket.leave(session.gameId);
-    //     clientSocket.emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
-    // });
-
     clientSocket.on(SocketEventsFromClient.leaveGame, () => {
         console.log('Player trying to leave a game: ', session.uid, session.gameId);
 
@@ -138,8 +132,9 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
 
     clientSocket.on(SocketEventsCommon.gameStarted, (data: gameStartPayload) => {
         if (!data || !data.startingPlayerId || !data.newHands) {
-            throw 'No startin player id message!';
+            throw 'No starting player id message!';
         }
+
         if (roomHosts.get(session.gameId) != clientSocket.id) {
             clientSocket.emit(SocketEventsCommon.gameStarted, false);
             console.log('Could not start the game, (user is not a host)');
@@ -148,6 +143,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
 
         io.in(session.gameId).emit(SocketEventsCommon.gameStarted, data);
     });
+
     clientSocket.on(SocketEventsCommon.hit, (data: hitPayload) => {
         if (!data || !data.move) {
             throw 'No move data passed';
@@ -157,6 +153,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
 
         io.in(session.gameId).emit(SocketEventsCommon.hit, data);
     });
+
     clientSocket.on(SocketEventsCommon.checkToServer, () => {
         let roomHostSocketId = roomHosts.get(session.gameId);
         let roomHostSocket;
@@ -178,6 +175,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
             console.log('Could not check, (user is not a host)');
             return;
         }
+
         const clients = io.sockets.adapter.rooms.get(session.gameId);
         if (!clients) {
             return;
@@ -222,6 +220,27 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
                 clientSocket.emit(SocketEventsCommon.gameClosed, true);
                 clientSocket.leave(roomToCloseId);
                 clientSocket.disconnect();
+            }
+        }
+    });
+
+    clientSocket.on(SocketEventsFromHost.timerUpdate, (update: number) => {
+        if (roomHosts.get(session.gameId) != clientSocket.id) {
+            // clientSocket.emit(SocketEventsCommon.gameStarted, false);
+            console.log('Could not update timer, (user is not a host)');
+            return;
+        }
+
+        const clients = io.sockets.adapter.rooms.get(session.gameId);
+        if (!clients) {
+            return;
+        }
+
+        for (const clientId of clients) {
+            const clientSocket = io.sockets.sockets.get(clientId);
+
+            if (clientSocket && clientSocket.player) {
+                clientSocket.emit(SocketEventsCommon.updateTimerToPlayers, update);
             }
         }
     });

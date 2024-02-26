@@ -3,7 +3,7 @@
     import { io } from 'socket.io-client';
     import type { Socket } from 'socket.io-client';
     import { GameServer } from './GameServer';
-    import { SocketEventsCommon } from '../../../src/types/socketEvents';
+    import { SocketEventsCommon, SocketEventsFromHost } from '../../../src/types/socketEvents';
     import { Player } from '../../../common/player';
     import CardModal from './CardModals.svelte';
     import { Game } from './Game';
@@ -11,7 +11,8 @@
     import type { CardCountTable } from '../model/Card';
     import CardImageHandler from './CardImageHandler';
     import { config } from '../../../config';
-    import { time } from 'console';
+    import { count, time } from 'console';
+    import { select_option } from 'svelte/internal';
 
     export let gameId: string;
     export let socket: Socket;
@@ -29,7 +30,7 @@
     let showModal: boolean = false;
     let betName: string = '';
     let selectedHand;
-    let countdown: number;
+    let countdown: number = 30;
     let gameCheckInterval: ReturnType<typeof setInterval>;
 
     const cardImageHandler = new CardImageHandler();
@@ -49,40 +50,44 @@
         'A': 'Ace',
     };
 
-    onDestroy(() => {});
-
     onMount(() => {
         if (!socket) {
             socket = io(serverUrl);
         }
 
-        gameCheckInterval = setInterval(() => {
-            // This can be used for internal checks
-            if (game && game.currentPlayer != thisPlayerId) {
-                // empty for now
-            }
-        }, 500);
-
         socket.on('gameState', (data) => {
             dispatch('update', data);
         });
 
-        if (game.currentPlayer === thisPlayerId && isHost) {
-            console.log('Host timer started');
-        }
-
         socket.on(SocketEventsCommon.hit, (data: { move: any }) => {
+            if (!isHost) {
+                countdown = 30;
+            } else {
+                game.stopRoundTimer();
+                sleep(2000).then(() => {
+                    game.startRoundTimer();
+                });
+            }
+
             game.hit(data.move);
             game = game;
-            if (game.currentPlayer === thisPlayerId) {
-                console.log('After hit timer started');
-            }
         });
 
         if (isHost) {
+            game.startRoundTimer();
+
+            gameCheckInterval = setInterval(() => {
+                let timeData = game.getRoundTimer();
+                if (countdown !== timeData) {
+                    socket.emit(SocketEventsFromHost.timerUpdate, countdown - 1);
+                    countdown = timeData;
+                }
+                endOfTimerHandler();
+            }, 1000); // Yes we need 2 timers, one here, one inside game.
+
             socket.on(SocketEventsCommon.checkToServer, (data) => {
+                game.stopRoundTimer();
                 let checkResult = game.validateCheck();
-                // console.log('Validated check this is what goes further ', checkResult);
                 game = game;
                 socket.emit(SocketEventsCommon.checkToPlayers, checkResult);
                 game.eliminatedPlayers.forEach((pl) => {
@@ -92,35 +97,75 @@
                 });
 
                 if (game.players.length == 1) {
+                    game.stopRoundTimer();
                     dispatch('gameFinished', game.players[0]);
                 }
 
-                if (game.currentPlayer == thisPlayerId && !game.previousBet) {
-                    // startTimer(); // I belive this one might cause insane glitches
-                }
+                sleep(2000).then(() => {
+                    game.startRoundTimer();
+                });
             });
         } else {
+            // ********************************************
+            // |      NON-HOST SOCKET FUNCTIONALITY       |
+            // ********************************************
             socket.on(SocketEventsCommon.checkToPlayers, (data: checkToPlayersPayload) => {
-                // console.log('Received check data!', data);
                 game.check(data);
-                game = game;
+                game = game; // I dont think it changes anything
                 game.eliminatedPlayers.forEach((pl) => {
                     if (pl.uid == thisPlayerId) {
                         eliminated = true;
                     }
                 });
+
                 if (game.players.length == 1) {
                     dispatch('gameFinished', game.players[0]);
                 }
+
+                countdown = 30; // Not necessary but let it stay
             });
+
             socket.on(SocketEventsCommon.kickPlayer, (playerId: string) => {
-                // console.log('Kick player ', playerId);
                 game.removePlayer(playerId);
-                game = game;
+                game = game; // I dont think it changes anything
                 dispatch('playerLeft', playerId);
+            });
+
+            socket.on(SocketEventsCommon.updateTimerToPlayers, (update: number) => {
+                // console.log('TIME: ' + countdown + ' | ' + game.currentPlayer + ' ' + thisPlayerId);
+                endOfTimerHandler();
+                countdown = update;
             });
         }
     });
+
+    function endOfTimerHandler() {
+        if (countdown <= 0 && game.currentPlayer == thisPlayerId) {
+            sleep(3000).then(() => {
+                // console.log('TIME: ' + countdown);
+                if (countdown <= 0 && game.currentPlayer == thisPlayerId) {
+                    if (game.previousBet) {
+                        check();
+                    } else {
+                        const forcedBet = {
+                            selectedRanking: 'royal',
+                            primaryCard: '',
+                            secondaryCard: '',
+                            selectedColor: 'spade',
+                            startingCard: '',
+                        };
+
+                        const forcedBetEvent = new CustomEvent('forcedBetEvent', {
+                            detail: forcedBet,
+                        });
+
+                        handleBetSelection(forcedBetEvent);
+                    }
+                }
+            });
+        }
+    }
+
     // TODO: On finished game when new game is tarted players are not initalized properly
     // This function is called when the modal is closed and we have selected a bet
     function handleBetSelection(event: CustomEvent) {
@@ -172,7 +217,10 @@
         return selectedRanking + ' ' + selectedColor + 's';
     }
 
-    // Reactive statements in Svelte btw :O
+    function sleep(ms: number) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
     $: if (game.previousBet) {
         betName = getBetName();
     }
@@ -214,19 +262,25 @@
     <div style="display:flex; justify-content:center">
         <button class="start-close" on:click={() => (showModal = true)}>Raise</button>
         <button class="start-close" on:click={check}>Check</button>
-        {#if countdown > 0}
-            <p class="timer-container">{countdown}</p>
-        {/if}
     </div>
 {/if}
 
 <div class="bet-container">
-    <p>Current bet:</p>
-    {#if game.previousBet}
-        {betName}
-    {:else}
-        No bet has been made yet
-    {/if}
+    <div>
+        <p>Current bet:</p>
+        {#if game.previousBet}
+            {betName}
+        {:else}
+            No bet has been made yet
+        {/if}
+    </div>
+    <div class="timer-container">
+        0:{countdown < 10 ?
+            countdown < 0 ?
+                '00'
+            :   '0' + countdown
+        :   countdown}
+    </div>
 </div>
 {#if showModal}
     <CardModal on:close={() => (showModal = false)} on:select={handleBetSelection} previousBet={game.previousBet} />
@@ -268,14 +322,20 @@
         padding: 5px 15px 15px 15px;
         margin: 15px 0;
         border-radius: 10px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
     }
 
     .timer-container {
-        margin: 0 0 5px 20px;
         color: aliceblue;
         font-size: 50px;
-        background-color: rgb(26, 25, 25);
+        background-color: rgb(27, 23, 23);
         padding: 15px 20px;
+        border: 2px solid rgb(32, 32, 32);
         border-radius: 15px;
+        margin: 25px 0 0 20px;
+        max-height: 100px;
     }
 </style>

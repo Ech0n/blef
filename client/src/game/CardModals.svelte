@@ -88,7 +88,7 @@
             startingCard,
         };
 
-        console.log(newBet);
+        // console.log(newBet);
 
         // @ts-ignore
         if (previousBet) {
@@ -160,6 +160,7 @@
         margin: 8% auto;
         padding: 20px;
         width: 80%;
+        box-shadow: 10px 10px 5px 12px rgb(18, 18, 19);
     }
     .close {
         color: #aaa;
@@ -181,6 +182,7 @@
         margin-left: 10px;
         padding: 5px 15px;
         color: aliceblue;
+        font-size: 45px;
     }
     .hand-ranking-image {
         width: 46%;
@@ -194,14 +196,13 @@
         background-color: #1d1a1a;
         border-radius: 10px;
         transform: scale(1.05);
-        margin: 0;
     }
     .hands-container {
         widows: 100%;
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
-        justify-content: flex-start;
+        justify-content: space-around;
         align-items: center;
     }
     .auto-scale-image {

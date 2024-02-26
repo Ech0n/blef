@@ -1,10 +1,6 @@
 import type { Card } from '../model/Card';
 import { Player } from '../../../common/player';
-import type {
-    checkToServerPayload,
-    checkToPlayersPayload,
-    gameStartPayload,
-} from '../../../common/payloads';
+import type { checkToServerPayload, checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
 
 export class Game {
     playerCount: number;
@@ -16,18 +12,13 @@ export class Game {
     previousBet!: any;
     thisPlayerId: string;
 
-    constructor(
-        players: Player[],
-        gameStartData: gameStartPayload,
-        thisPlayerId: string) {
+    constructor(players: Player[], gameStartData: gameStartPayload, thisPlayerId: string) {
         this.playerCount = players.length;
         this.players = structuredClone(players);
         this.hand = gameStartData.newHands[thisPlayerId];
         this.currentPlayer = gameStartData.startingPlayerId;
         this.eliminatedPlayers = [];
-        this.currentPlayerIndx = this.players.findIndex(
-            (el) => gameStartData.startingPlayerId == el.uid
-        );
+        this.currentPlayerIndx = this.players.findIndex((el) => gameStartData.startingPlayerId == el.uid);
         this.thisPlayerId = thisPlayerId;
     }
 
@@ -52,8 +43,7 @@ export class Game {
     }
 
     nextPlayer(): void {
-        this.currentPlayerIndx =
-            (this.currentPlayerIndx + 1) % this.playerCount;
+        this.currentPlayerIndx = (this.currentPlayerIndx + 1) % this.playerCount;
         this.currentPlayer = this.players[this.currentPlayerIndx].uid;
     }
 
@@ -72,7 +62,28 @@ export class Game {
         });
         this.previousBet = undefined;
     }
+
     validateCheck(): checkToServerPayload | undefined {
+        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
+        return;
+    }
+
+    startRoundTimer(): void {
+        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
+        return;
+    }
+
+    stopRoundTimer(): void {
+        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
+        return;
+    }
+
+    getRoundTimer(): number {
+        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
+        return -1;
+    }
+
+    setRoundTimer(_: number) {
         console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
         return;
     }

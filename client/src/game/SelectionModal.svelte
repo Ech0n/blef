@@ -138,21 +138,21 @@
     }
     button {
         margin-left: 10px;
+        margin-top: 20px;
         padding: 5px 15px;
         color: aliceblue;
         background-color: rgb(20, 20, 20);
+        font-size: 45px;
     }
     .card-option-container {
         max-width: 7%;
         cursor: pointer;
         transition: transform 0.2s;
-        margin-bottom: 20px;
     }
     .color-option-container {
-        width: 24.5%;
+        width: 24%;
         cursor: pointer;
         transition: transform 0.2s;
-        margin-bottom: 20px;
     }
     .card-option-container:hover,
     .card-option-container.selected,
@@ -161,6 +161,9 @@
         background-color: #0a0909;
         border-radius: 10px;
         transform: scale(1.05);
+    }
+    .card-option-container:hover,
+    .card-option-container.selected {
         padding: 1%;
     }
     .auto-scale-image {
