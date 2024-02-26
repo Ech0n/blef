@@ -15,6 +15,7 @@ export enum SocketEventsCommon {
 }
 
 export enum SocketEventsFromServer {
+    reconnectionInfo = 'reconnectionInfo',
     playerLeftGame = 'playerLeftGame',
 }
 
@@ -28,4 +29,5 @@ export enum SocketEventsFromHost {
 
 export enum SocketEventsFromClient {
     leaveGame = 'ClientLeaveGame',
+    reconnectToGame = 'reconnectToGame',
 }

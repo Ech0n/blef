@@ -3,14 +3,14 @@ import http from 'http';
 import { SessionData } from 'express-session';
 import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost } from './types/socketEvents';
 import { Player, IPlayer, createPlayerFromIPlayer } from '../common/player';
-import { checkToPlayersPayload, checkToServerPayload, gameStartPayload, hitPayload } from '../common/payloads';
+import { checkToPlayersPayload, checkToServerPayload, gameStartPayload, hitPayload, joinGameResponsePayload } from '../common/payloads';
 import { BlefServer } from './BlefServer';
 
 declare module 'express-session' {
     interface SessionData {
         uid: string;
         username: string;
-        gameId: string;
+        gameId: string | null;
     }
 }
 
@@ -41,6 +41,10 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
         blefServer.disconnectPlayer(session, clientSocket);
     });
 
+    clientSocket.on(SocketEventsFromClient.reconnectToGame, () => {
+        blefServer.handleReconnection(clientSocket);
+    });
+
     clientSocket.on(SocketEventsCommon.createGame, (data) => {
         if (!data && !session.username) {
             console.log('No user name provided!', data);
@@ -69,58 +73,14 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
     });
 
     clientSocket.on(SocketEventsCommon.joinGame, (data) => {
-        if (!data || !data.gameId || !data.username) {
-            clientSocket.emit(SocketEventsCommon.joinGame, {
-                err: 'Wrong or no payload provided',
-            });
+        if (!data) {
+            const responsePayload: joinGameResponsePayload = {
+                didJoin: false,
+            };
+            clientSocket.emit(SocketEventsCommon.joinGame, responsePayload);
             return;
         }
-        let gameId = data.gameId;
-        session.username = data.username;
-
-        if (!rooms.has(gameId)) {
-            clientSocket.emit(SocketEventsCommon.joinGame, false);
-            console.debug('room does not exist', rooms);
-            clientSocket.disconnect(true);
-            return;
-        }
-
-        let clientsInRoom = io.sockets.adapter.rooms.get(gameId);
-        if (!clientsInRoom) {
-            throw 'Huh!?';
-        }
-        let playersInRoom: Player[] = [];
-        for (const clientId of clientsInRoom) {
-            const clientSocket = io.sockets.sockets.get(clientId);
-            if (!clientSocket) {
-                throw 'Bruh';
-            }
-            if (clientSocket.player) {
-                playersInRoom.push(createPlayerFromIPlayer(clientSocket.player));
-            }
-        }
-
-        session.gameId = gameId;
-
-        clientSocket.player = {
-            username: session.username,
-            uid: session.uid,
-            isOnline: true,
-            isHost: false,
-        };
-        clientSocket.emit(SocketEventsCommon.joinGame, {
-            players: playersInRoom,
-            thisPlayerId: session.uid,
-            thisPlayerName: session.username,
-        });
-
-        clientSocket.to(gameId).emit(SocketEventsCommon.newPlayerJoined, {
-            username: session.username,
-            uid: session.uid,
-            isOnline: true,
-        });
-
-        clientSocket.join(gameId);
+        blefServer.handlePlayerJoinRequest(clientSocket, session, data.gameId, data.username);
     });
 
     clientSocket.on(SocketEventsFromClient.leaveGame, () => {

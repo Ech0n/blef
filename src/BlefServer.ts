@@ -1,11 +1,18 @@
 import { Socket, Server } from 'socket.io';
 import { io } from 'socket.io-client';
-import http from 'http';
+import http, { IncomingMessage } from 'http';
 import { config } from '../config';
 import { socketEventsListeners, SessionSocket } from './socketEventListeners';
 import session, { SessionData } from 'express-session';
-import { SocketEventsCommon } from './types/socketEvents';
+import { SocketEventsCommon, SocketEventsFromServer } from './types/socketEvents';
 import { v4 as uuidv4 } from 'uuid';
+import { Player, createPlayerFromIPlayer } from '../common/player';
+
+declare module 'http' {
+    interface IncomingMessage {
+        session: SessionData;
+    }
+}
 
 export class BlefServer {
     io: Server;
@@ -33,22 +40,90 @@ export class BlefServer {
 
         this.io.on('connection', (socket) => {
             console.log('A user connected');
-
             this.setupConnection(socket);
             socketEventsListeners(this, <SessionSocket>socket);
         });
     }
 
     setupConnection(socket: Socket) {
-        const req: any = socket.request;
+        const req: IncomingMessage = socket.request;
         const session = req.session;
         if (!session.uid) {
             session.uid = uuidv4();
         }
     }
 
+    handleReconnection(socket: Socket) {
+        //Send data about previous game to client
+        const req: IncomingMessage = socket.request;
+        if (!req.session || !req.session.gameId) {
+            console.debug('Reconnection failed');
+            socket.emit(SocketEventsFromServer.reconnectionInfo, false);
+            socket.disconnect();
+            return;
+        }
+        socket.emit(SocketEventsFromServer.reconnectionInfo, true);
+    }
+
+    handlePlayerJoinRequest(socket: Socket, session: SessionData, gameId: string, username: string) {
+        if (!gameId || !username) {
+            socket.emit(SocketEventsCommon.joinGame, {
+                err: 'Wrong or no payload provided',
+            });
+            return;
+        }
+        session.username = username;
+
+        if (!this.rooms.has(gameId)) {
+            socket.emit(SocketEventsCommon.joinGame, false);
+            console.debug('room does not exist', this.rooms);
+            socket.disconnect(true);
+            return;
+        }
+
+        let clientsInRoom = this.io.sockets.adapter.rooms.get(gameId);
+        if (!clientsInRoom) {
+            throw 'Huh!?';
+        }
+        let playersInRoom: Player[] = [];
+        for (const clientId of clientsInRoom) {
+            const clientSocket = this.io.sockets.sockets.get(clientId);
+            if (!clientSocket) {
+                throw 'Bruh';
+            }
+            if (clientSocket.player) {
+                playersInRoom.push(createPlayerFromIPlayer(clientSocket.player));
+            }
+        }
+
+        session.gameId = gameId;
+
+        socket.player = {
+            username: session.username,
+            uid: session.uid,
+            isOnline: true,
+            isHost: false,
+        };
+        socket.emit(SocketEventsCommon.joinGame, {
+            players: playersInRoom,
+            thisPlayerId: session.uid,
+            thisPlayerName: session.username,
+        });
+
+        socket.to(gameId).emit(SocketEventsCommon.newPlayerJoined, {
+            username: session.username,
+            uid: session.uid,
+            isOnline: true,
+        });
+
+        socket.join(gameId);
+    }
+
     disconnectPlayer(session: SessionData, playerSocket: Socket) {
-        playerSocket.leave(session.gameId);
-        playerSocket.to(session.gameId).emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
+        if (session.gameId) {
+            playerSocket.leave(session.gameId);
+            playerSocket.to(session.gameId).emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
+            session.gameId = null;
+        }
     }
 }

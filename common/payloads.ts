@@ -1,5 +1,6 @@
 import type { Player } from './player';
 import type { Card } from '../client/src/model/Card';
+import { HandInfo } from '../client/src/game/HandRankings';
 
 export interface checkToServerPayload {
     newHands: { [key: string]: Card[] };
@@ -21,5 +22,27 @@ export interface gameStartPayload {
 }
 
 export interface hitPayload {
-    move: any;
+    move: HandInfo;
+}
+
+export interface gameInfo {
+    players: Player[];
+    thisPlayerId: string;
+    thisPlayerName: string;
+    gameStarted: boolean;
+    startedGameInfo?: {
+        currentPlayer: string;
+        currentBet: HandInfo;
+        newHand: Card[];
+    };
+}
+
+export interface joinGameResponsePayload {
+    didJoin: boolean;
+    gameInfo?: gameInfo;
+}
+
+export interface reconnectPayload {
+    didReconnect: boolean;
+    gameInfo?: gameInfo;
 }
