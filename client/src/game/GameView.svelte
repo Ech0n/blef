@@ -32,6 +32,7 @@
     let selectedHand;
     let countdown: number = 30;
     let gameCheckInterval: ReturnType<typeof setInterval>;
+    let showButtons: boolean = true;
 
     const cardImageHandler = new CardImageHandler();
     const cardFullNames: { [key: string]: string } = {
@@ -65,15 +66,28 @@
             } else {
                 game.stopRoundTimer();
                 sleep(2000).then(() => {
-                    game.startRoundTimer();
+                    if (!game.gameClosed) {
+                        game.startRoundTimer();
+                    }
                 });
             }
 
-            game.hit(data.move);
-            game = game;
+            if (!game.gameClosed) {
+                console.log(game.players);
+                game.hit(data.move);
+                game = game;
+
+                showButtons = false; // This is necessary to avoid spamming check
+                sleep(3000).then(() => {
+                    showButtons = true;
+                });
+            } else {
+                game.stopRoundTimer();
+            }
         });
 
         if (isHost) {
+            game.gameClosed = false;
             game.startRoundTimer();
 
             gameCheckInterval = setInterval(() => {
@@ -81,12 +95,12 @@
                 if (countdown !== timeData) {
                     socket.emit(SocketEventsFromHost.timerUpdate, countdown - 1);
                     countdown = timeData;
+                } else {
+                    endOfTimerHandler();
                 }
-                endOfTimerHandler();
             }, 1000); // Yes we need 2 timers, one here, one inside game.
 
             socket.on(SocketEventsCommon.checkToServer, (data) => {
-                game.stopRoundTimer();
                 let checkResult = game.validateCheck();
                 game = game;
                 socket.emit(SocketEventsCommon.checkToPlayers, checkResult);
@@ -98,12 +112,13 @@
 
                 if (game.players.length == 1) {
                     game.stopRoundTimer();
+                    game.gameClosed = true;
                     dispatch('gameFinished', game.players[0]);
+                } else {
+                    sleep(2000).then(() => {
+                        game.startRoundTimer();
+                    });
                 }
-
-                sleep(2000).then(() => {
-                    game.startRoundTimer();
-                });
             });
         } else {
             // ********************************************
@@ -119,6 +134,7 @@
                 });
 
                 if (game.players.length == 1) {
+                    game.stopRoundTimer();
                     dispatch('gameFinished', game.players[0]);
                 }
 
@@ -132,18 +148,16 @@
             });
 
             socket.on(SocketEventsCommon.updateTimerToPlayers, (update: number) => {
-                // console.log('TIME: ' + countdown + ' | ' + game.currentPlayer + ' ' + thisPlayerId);
-                endOfTimerHandler();
                 countdown = update;
             });
         }
     });
 
     function endOfTimerHandler() {
-        if (countdown <= 0 && game.currentPlayer == thisPlayerId) {
+        if (countdown <= 0) {
+            let tmpPlayer = game.currentPlayer;
             sleep(3000).then(() => {
-                // console.log('TIME: ' + countdown);
-                if (countdown <= 0 && game.currentPlayer == thisPlayerId) {
+                if (countdown <= 0 && game.currentPlayer == tmpPlayer) {
                     if (game.previousBet) {
                         check();
                     } else {
@@ -257,11 +271,11 @@
         </div>
     {/if}
 </div>
-{#if game.currentPlayer == thisPlayerId}
+{#if game.currentPlayer == thisPlayerId && showButtons}
     <p>Your turn</p>
     <div style="display:flex; justify-content:center">
         <button class="start-close" on:click={() => (showModal = true)}>Raise</button>
-        <button class="start-close" on:click={check}>Check</button>
+        <button id="check-button" class="start-close" on:click={check}>Check</button>
     </div>
 {/if}
 

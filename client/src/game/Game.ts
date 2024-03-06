@@ -11,6 +11,7 @@ export class Game {
     currentPlayerIndx: number;
     previousBet!: any;
     thisPlayerId: string;
+    gameClosed: boolean;
 
     constructor(players: Player[], gameStartData: gameStartPayload, thisPlayerId: string) {
         this.playerCount = players.length;
@@ -20,6 +21,7 @@ export class Game {
         this.eliminatedPlayers = [];
         this.currentPlayerIndx = this.players.findIndex((el) => gameStartData.startingPlayerId == el.uid);
         this.thisPlayerId = thisPlayerId;
+        this.gameClosed = false;
     }
 
     removePlayer(playerUid: string) {
@@ -83,7 +85,12 @@ export class Game {
         return -1;
     }
 
-    setRoundTimer(_: number) {
+    setRoundTimer(_: number): void {
+        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
+        return;
+    }
+
+    forceEndRound(): void {
         console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
         return;
     }

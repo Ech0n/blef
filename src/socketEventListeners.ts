@@ -109,7 +109,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
             throw 'No move data passed';
         }
         // console.log('passing on hit data: ', data.move);
-        //TODO: Some kidn of validation would be useful
+        // TODO: Some kidn of validation would be useful
 
         io.in(session.gameId).emit(SocketEventsCommon.hit, data);
     });

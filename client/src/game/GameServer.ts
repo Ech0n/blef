@@ -69,6 +69,7 @@ export class GameServer extends Game {
             throw 'There is no bet';
         }
 
+        this.stopRoundTimer();
         let wasBetFound: boolean = checkFunctionsMap[this.previousBet.selectedRanking](this.cardCounts, this.previousBet);
 
         // If cards were found than current player is set to previous one
@@ -116,6 +117,9 @@ export class GameServer extends Game {
     }
 
     startRoundTimer(): void {
+        if (this.roundTimer) {
+            return;
+        }
         this.timeLeft = 30; // Reset timer for each round
         this.roundTimer = setInterval(() => {
             if (this.timeLeft >= 0) {
@@ -124,14 +128,14 @@ export class GameServer extends Game {
                 clearInterval(this.roundTimer);
                 this.roundTimer = undefined; // Handle end of round due to timeout
             }
-        }, 1000); // 1000 Milliseconds
+        }, 1000);
     }
 
     stopRoundTimer(): void {
         if (this.roundTimer) {
             clearInterval(this.roundTimer);
-            this.roundTimer = undefined;
         }
+        this.roundTimer = undefined;
     }
 
     getRoundTimer(): number {

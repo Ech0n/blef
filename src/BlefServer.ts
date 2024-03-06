@@ -54,7 +54,7 @@ export class BlefServer {
     }
 
     handleReconnection(socket: Socket) {
-        //Send data about previous game to client
+        // Send data about previous game to client
         const req: IncomingMessage = socket.request;
         if (!req.session || !req.session.gameId) {
             console.debug('Reconnection failed');
@@ -85,6 +85,7 @@ export class BlefServer {
         if (!clientsInRoom) {
             throw 'Huh!?';
         }
+
         let playersInRoom: Player[] = [];
         for (const clientId of clientsInRoom) {
             const clientSocket = this.io.sockets.sockets.get(clientId);
