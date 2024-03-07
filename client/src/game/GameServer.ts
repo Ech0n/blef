@@ -22,14 +22,11 @@ export class GameServer extends Game {
     deck: Card[];
     isFinished: boolean = false;
     cardCounts: CardCountTable;
-    timeLeft: number;
-    roundTimer: ReturnType<typeof setInterval> | undefined;
     constructor(players: Player[], gameStartData: gameStartPayload, thisPlayerId: string, initialCardCounts: CardCountTable) {
         super(players, gameStartData, thisPlayerId);
         this.hands = new Map(Object.entries(gameStartData.newHands));
         this.deck = deck.slice();
         this.cardCounts = initialCardCounts;
-        this.timeLeft = 30;
     }
 
     drawCards(numberOfCards: number): Card[] {
@@ -69,7 +66,6 @@ export class GameServer extends Game {
             throw 'There is no bet';
         }
 
-        this.stopRoundTimer();
         let wasBetFound: boolean = checkFunctionsMap[this.previousBet.selectedRanking](this.cardCounts, this.previousBet);
 
         // If cards were found than current player is set to previous one
@@ -114,35 +110,5 @@ export class GameServer extends Game {
         };
 
         return payload;
-    }
-
-    startRoundTimer(): void {
-        if (this.roundTimer) {
-            return;
-        }
-        this.timeLeft = 30; // Reset timer for each round
-        this.roundTimer = setInterval(() => {
-            if (this.timeLeft >= 0) {
-                this.timeLeft--;
-            } else {
-                clearInterval(this.roundTimer);
-                this.roundTimer = undefined; // Handle end of round due to timeout
-            }
-        }, 1000);
-    }
-
-    stopRoundTimer(): void {
-        if (this.roundTimer) {
-            clearInterval(this.roundTimer);
-        }
-        this.roundTimer = undefined;
-    }
-
-    getRoundTimer(): number {
-        return this.timeLeft;
-    }
-
-    setRoundTimer(newTime: number): void {
-        this.timeLeft = newTime;
     }
 }

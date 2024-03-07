@@ -69,29 +69,4 @@ export class Game {
         console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
         return;
     }
-
-    startRoundTimer(): void {
-        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
-        return;
-    }
-
-    stopRoundTimer(): void {
-        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
-        return;
-    }
-
-    getRoundTimer(): number {
-        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
-        return -1;
-    }
-
-    setRoundTimer(_: number): void {
-        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
-        return;
-    }
-
-    forceEndRound(): void {
-        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
-        return;
-    }
 }

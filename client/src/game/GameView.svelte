@@ -13,6 +13,7 @@
     import { config } from '../../../config';
     import { count, time } from 'console';
     import { select_option } from 'svelte/internal';
+    import { start } from 'repl';
 
     export let gameId: string;
     export let socket: Socket;
@@ -31,7 +32,7 @@
     let betName: string = '';
     let selectedHand;
     let countdown: number = 30;
-    let gameCheckInterval: ReturnType<typeof setInterval>;
+    let roundTimer: ReturnType<typeof setInterval> | undefined;
     let showButtons: boolean = true;
 
     const cardImageHandler = new CardImageHandler();
@@ -61,19 +62,17 @@
         });
 
         socket.on(SocketEventsCommon.hit, (data: { move: any }) => {
-            if (!isHost) {
-                countdown = 30;
-            } else {
-                game.stopRoundTimer();
+            countdown = 30;
+            if (isHost) {
+                stopRoundTimer();
                 sleep(2000).then(() => {
                     if (!game.gameClosed) {
-                        game.startRoundTimer();
+                        startRoundTimer();
                     }
                 });
             }
 
             if (!game.gameClosed) {
-                console.log(game.players);
                 game.hit(data.move);
                 game = game;
 
@@ -82,23 +81,13 @@
                     showButtons = true;
                 });
             } else {
-                game.stopRoundTimer();
+                stopRoundTimer();
             }
         });
 
         if (isHost) {
             game.gameClosed = false;
-            game.startRoundTimer();
-
-            gameCheckInterval = setInterval(() => {
-                let timeData = game.getRoundTimer();
-                if (countdown !== timeData) {
-                    socket.emit(SocketEventsFromHost.timerUpdate, countdown - 1);
-                    countdown = timeData;
-                } else {
-                    endOfTimerHandler();
-                }
-            }, 1000); // Yes we need 2 timers, one here, one inside game.
+            startRoundTimer();
 
             socket.on(SocketEventsCommon.checkToServer, (data) => {
                 let checkResult = game.validateCheck();
@@ -111,13 +100,14 @@
                 });
 
                 if (game.players.length == 1) {
-                    game.stopRoundTimer();
                     game.gameClosed = true;
+                    stopRoundTimer();
                     dispatch('gameFinished', game.players[0]);
-                } else {
-                    sleep(2000).then(() => {
-                        game.startRoundTimer();
-                    });
+                }
+
+                if (!game.gameClosed) {
+                    stopRoundTimer();
+                    startRoundTimer();
                 }
             });
         } else {
@@ -134,7 +124,6 @@
                 });
 
                 if (game.players.length == 1) {
-                    game.stopRoundTimer();
                     dispatch('gameFinished', game.players[0]);
                 }
 
@@ -155,9 +144,8 @@
 
     function endOfTimerHandler() {
         if (countdown <= 0) {
-            let tmpPlayer = game.currentPlayer;
-            sleep(3000).then(() => {
-                if (countdown <= 0 && game.currentPlayer == tmpPlayer) {
+            sleep(2000).then(() => {
+                if (countdown <= 0) {
                     if (game.previousBet) {
                         check();
                     } else {
@@ -229,6 +217,30 @@
         }
 
         return selectedRanking + ' ' + selectedColor + 's';
+    }
+
+    function startRoundTimer(): void {
+        if (roundTimer) {
+            return;
+        }
+        countdown = 30;
+        roundTimer = setInterval(() => {
+            if (countdown > 0) {
+                countdown--;
+            } else {
+                endOfTimerHandler();
+                clearInterval(roundTimer);
+                roundTimer = undefined;
+            }
+            socket.emit(SocketEventsFromHost.timerUpdate, countdown);
+        }, 1000);
+    }
+
+    function stopRoundTimer(): void {
+        if (roundTimer) {
+            clearInterval(roundTimer);
+        }
+        roundTimer = undefined;
     }
 
     function sleep(ms: number) {
