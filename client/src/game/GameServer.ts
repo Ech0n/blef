@@ -111,4 +111,8 @@ export class GameServer extends Game {
 
         return payload;
     }
+
+    getCardCount(): CardCountTable {
+        return this.cardCounts;
+    }
 }

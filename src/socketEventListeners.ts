@@ -5,6 +5,7 @@ import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost } from
 import { Player, IPlayer, createPlayerFromIPlayer } from '../common/player';
 import { checkToPlayersPayload, checkToServerPayload, gameStartPayload, hitPayload, joinGameResponsePayload } from '../common/payloads';
 import { BlefServer } from './BlefServer';
+import { CardCountTable } from '../client/src/model/Card';
 
 declare module 'express-session' {
     interface SessionData {
@@ -186,7 +187,6 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
 
     clientSocket.on(SocketEventsFromHost.timerUpdate, (update: number) => {
         if (roomHosts.get(session.gameId) != clientSocket.id) {
-            // clientSocket.emit(SocketEventsCommon.gameStarted, false);
             console.log('Could not update timer, (user is not a host)');
             return;
         }
@@ -201,6 +201,26 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
 
             if (clientSocket && clientSocket.player) {
                 clientSocket.emit(SocketEventsCommon.updateTimerToPlayers, update);
+            }
+        }
+    });
+
+    clientSocket.on(SocketEventsFromHost.cardListToPlayers, (cardCount: CardCountTable) => {
+        if (roomHosts.get(session.gameId) != clientSocket.id) {
+            console.log('Could not send cardCountTable, (user is not a host)');
+            return;
+        }
+
+        const clients = io.sockets.adapter.rooms.get(session.gameId);
+        if (!clients) {
+            return;
+        }
+
+        for (const clientId of clients) {
+            const clientSocket = io.sockets.sockets.get(clientId);
+
+            if (clientSocket && clientSocket.player) {
+                clientSocket.emit(SocketEventsCommon.updateCardCountToPlayers, cardCount);
             }
         }
     });

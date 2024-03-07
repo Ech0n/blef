@@ -1,4 +1,4 @@
-import type { Card } from '../model/Card';
+import type { Card, CardCountTable } from '../model/Card';
 import { Player } from '../../../common/player';
 import type { checkToServerPayload, checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
 
@@ -68,5 +68,10 @@ export class Game {
     validateCheck(): checkToServerPayload | undefined {
         console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
         return;
+    }
+
+    getCardCount(): CardCountTable {
+        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
+        return {};
     }
 }
