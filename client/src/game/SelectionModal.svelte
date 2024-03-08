@@ -51,6 +51,7 @@
                 <div class="options-container">
                     {#each colors as color}
                         <!-- svelte-ignore a11y-click-events-have-key-events -->
+                        <!-- svelte-ignore a11y-no-static-element-interactions -->
                         <div on:click={() => (selectedColorModal = color)} class="color-option-container {selectedColorModal === color ? 'selected' : ''}">
                             <h3>{color}</h3>
                             <!-- svelte-ignore a11y-missing-attribute -->
@@ -65,6 +66,7 @@
                 <div class="options-container">
                     {#each cards as card}
                         <!-- svelte-ignore a11y-click-events-have-key-events -->
+                        <!-- svelte-ignore a11y-no-static-element-interactions -->
                         <div on:click={() => (primaryCardModal = card)} class="card-option-container {primaryCardModal === card ? 'selected' : ''}">
                             <!-- svelte-ignore a11y-missing-attribute -->
                             <img src={cardImageHandler.getCardImage(card)} class="auto-scale-image" />
@@ -78,6 +80,7 @@
                 <div class="options-container">
                     {#each cards as card}
                         <!-- svelte-ignore a11y-click-events-have-key-events -->
+                        <!-- svelte-ignore a11y-no-static-element-interactions -->
                         <div on:click={() => (secondaryCardModal = card)} class="card-option-container {secondaryCardModal === card ? 'selected' : ''}">
                             <!-- svelte-ignore a11y-missing-attribute -->
                             <img src={cardImageHandler.getCardImage(card)} class="auto-scale-image" />
@@ -91,6 +94,7 @@
                 <div class="options-container">
                     {#each cards as card}
                         <!-- svelte-ignore a11y-click-events-have-key-events -->
+                        <!-- svelte-ignore a11y-no-static-element-interactions -->
                         <div on:click={() => (startingCardModal = card)} class="card-option-container {startingCardModal === card ? 'selected' : ''}">
                             <!-- svelte-ignore a11y-missing-attribute -->
                             <img src={cardImageHandler.getCardImage(card)} class="auto-scale-image" />

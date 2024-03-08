@@ -44,6 +44,7 @@
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div class="modal-backdrop">
         <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div class="modal" on:click|stopPropagation>
             <div class="modal-header">
                 <h2>
@@ -82,7 +83,7 @@
 
     .modal {
         background-color: rgb(31, 31, 31);
-        padding: 20px;
+        padding: 25px;
         border-radius: 5px;
         border-radius: 20px;
         border-width: 5px;
