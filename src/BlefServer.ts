@@ -153,7 +153,7 @@ export class BlefServer {
         responsePayload.didJoin = true;
         responsePayload.gameInfo = gameInfoPayload;
 
-        socket.emit(SocketEventsCommon.joinGame, gameInfoPayload);
+        socket.emit(SocketEventsCommon.joinGame, responsePayload);
 
         socket.to(gameId).emit(SocketEventsCommon.newPlayerJoined, {
             username: session.username,

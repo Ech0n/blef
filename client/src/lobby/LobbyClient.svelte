@@ -11,16 +11,15 @@
     import { config } from '../../../config';
     import WinnerModal from './WinnerModal.svelte';
 
-    export let usernameInput: string;
     export let gameId: string;
+    export let socket: Socket;
+    export let players: Player[] = [];
+    export let thisPlayerId: string;
     const dispatch = createEventDispatcher();
-    let socket: Socket;
 
     let gameView: Promise<typeof import('../game/GameView.svelte')> | undefined;
-    let players: Player[] = [];
     let currentPlayer: Player;
     let gameStartData: gameStartPayload;
-    let thisPlayerId: string;
     let showModal: boolean = false;
     let winnerUsername: string = '';
     let _: CardCountTable; // This is completely useless and made to avoid errors
@@ -34,46 +33,6 @@
     });
 
     onMount(() => {
-        const serverUrl: string = config.BACKEND_SERVER_ADDRESS || 'http://localhost:5678';
-        socket = io(serverUrl);
-
-        socket.emit(SocketEventsCommon.joinGame, {
-            gameId: gameId,
-            username: usernameInput,
-        });
-
-        // Listen for messages from the server
-        socket.on(
-            SocketEventsCommon.joinGame,
-            (data: {
-                players?: {
-                    uid: string;
-                    username: string;
-                    isOnline: boolean;
-                }[];
-                thisPlayerId: string;
-                thisPlayerName: string;
-            }) => {
-                if (!data) {
-                    dispatch('gameClosed'); // Very scuffed way to force quit after joining wrong lobby by gameID
-                }
-
-                if (data.players) {
-                    players = data.players.map((el) => {
-                        let newPlayer: Player = new Player(el.uid, el.username);
-                        newPlayer.isOnline = el.isOnline;
-                        return newPlayer;
-                    });
-                }
-
-                if (data.thisPlayerId && data.thisPlayerName) {
-                    // This if is wrong. If data does not exist error should be thrown // Then do it shaking my head
-                    players = [...players, new Player(data.thisPlayerId, data.thisPlayerName)];
-                    thisPlayerId = data.thisPlayerId;
-                }
-            }
-        );
-
         socket.on(SocketEventsCommon.newPlayerJoined, (data: { username: string; uid: string }) => {
             console.debug('New player in lobby name:', data.username);
             let newPlayer = new Player(data.uid, data.username);

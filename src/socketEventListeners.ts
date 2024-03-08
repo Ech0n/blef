@@ -38,6 +38,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
     let io = blefServer.io;
     let rooms = blefServer.rooms;
     let roomHosts = blefServer.roomHosts;
+
     clientSocket.on('disconnect', () => {
         blefServer.disconnectPlayer(session, clientSocket);
     });

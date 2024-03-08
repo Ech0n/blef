@@ -2,14 +2,14 @@
     import type { Player } from '../../../common/player';
 
     export let players: Player[];
-    export let thisPlayer: Player;
+    export let thisPlayerId: string;
 </script>
 
 <div class="playerList">
     {#each players as player}
         <div class="playerItem">
             {player.username}
-            {#if player.isOnline || player.username === thisPlayer.username}
+            {#if player.isOnline || player.uid !== thisPlayerId}
                 🟢
             {:else}
                 🔴

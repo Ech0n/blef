@@ -10,16 +10,15 @@
     import { config } from '../../../config';
     import WinnerModal from './WinnerModal.svelte';
 
-    export let usernameInput: string;
+    export let gameId: string;
+    export let socket: Socket;
+    export let players: Player[] = [];
+    export let thisPlayerId: string;
 
-    let socket: Socket;
-    let gameId: string;
     let player: Player | null;
     let host: Player;
-    let thisPlayerId: string;
     let gameView: Promise<typeof import('../game/GameView.svelte')> | undefined;
     let gameStartData: gameStartPayload;
-    let players: Player[] = [];
     let showModal: boolean = false;
     let winnerUsername: string = '';
 
@@ -36,19 +35,6 @@
     });
 
     onMount(() => {
-        socket = io(config.BACKEND_SERVER_ADDRESS || 'http://localhost:5678');
-
-        socket.emit(SocketEventsCommon.createGame, { username: usernameInput });
-
-        socket.on(SocketEventsCommon.createGame, (data: { gameId: string; hostId: string }) => {
-            console.log('User created a game, its id is:', data.gameId);
-            gameId = data.gameId;
-            host = new Player(data.hostId, usernameInput);
-            host.isOnline = true;
-            players = [...players, host];
-            thisPlayerId = data.hostId;
-        });
-
         socket.on(SocketEventsCommon.newPlayerJoined, (data: { username: string; uid: string; isOnline: boolean }) => {
             console.log('Join event', data.username);
             if (!data) {
@@ -140,7 +126,7 @@
         {/if}
         <br />
         Players:
-        <LobbyPlayerList {players} thisPlayer={host} />
+        <LobbyPlayerList {players} {thisPlayerId} />
         <div>
             <button class="start-close" on:click={startGame}>Start Game</button>
             <button class="start-close" on:click={closeGame}>Close Game</button>
