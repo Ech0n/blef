@@ -61,6 +61,13 @@
     }
 
     function hostGame(event: CustomEvent): void {
+        console.log(event.detail.username);
+        if (!player) {
+            const newId = Date.now().toString(); // Placeholder ID generation TODO
+            username = event.detail.username;
+            player = new Player(newId, event.detail.username);
+            player.isOnline = true; // Set the player as online upon game creation
+        }
         socket = io(serverUrl);
         socket.emit(SocketEventsCommon.createGame, { username: username });
 
@@ -72,13 +79,6 @@
             players = [host];
             thisPlayerId = data.hostId;
         });
-        console.log(event.detail.username);
-        if (!player) {
-            const newId = Date.now().toString(); // Placeholder ID generation TODO
-            username = event.detail.username;
-            player = new Player(newId, event.detail.username);
-            player.isOnline = true; // Set the player as online upon game creation
-        }
         playerStore.set(player);
         gameView = import('./lobby/LobbyHost.svelte');
     }
@@ -101,6 +101,23 @@
     }
 </script>
 
+<main>
+    <Navbar on:viewChange={handleViewChange} {activeView} />
+    <div class="main-content">
+        {#if gameView}
+            {#await gameView then { default: LobbyView }}
+                <LobbyView {gameId} usernameInput={username} on:gameClosed={leaveGame} {socket} {thisPlayerId} {players} />
+            {/await}
+        {:else if activeView === 'menu'}
+            <Menu on:joinGame={joinGame} on:createGame={hostGame} />
+        {:else if activeView === 'settings'}
+            <!-- Currently its called settings but It would more likely be account in near future -->
+        {:else if activeView === 'info'}
+            <Home />
+        {/if}
+    </div>
+</main>
+
 <style>
     .main-content {
         height: calc(100% - 70px);
@@ -110,22 +127,3 @@
         justify-content: center;
     }
 </style>
-
-<main>
-    <Navbar on:viewChange={handleViewChange} {activeView} />
-    <div class="main-content">
-        {#if gameView}
-            {#await gameView then { default: LobbyView }}
-            <LobbyView {gameId} usernameInput={username} on:gameClosed={leaveGame} {socket} {thisPlayerId} {players} />
-            {/await}
-        {:else}
-            {#if activeView === 'menu'}
-                <Menu on:joinGame={joinGame} on:createGame={hostGame} />
-            {:else if activeView === 'settings'}
-                <!-- Currently its called settings but It would more likely be account in near future -->
-            {:else if activeView === 'info'}
-                <Home/>
-            {/if}
-        {/if}
-    </div>
-</main>

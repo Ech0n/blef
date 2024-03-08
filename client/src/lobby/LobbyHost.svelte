@@ -100,7 +100,18 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameView }}
-            <GameView on:leave={closeGame} on:gameFinished={showWinner} {gameId} {socket} initialPlayerList={players} {thisPlayerId} {gameStartData} isHost {cardCounts} kickPlayer={kickPlayer} />
+            <GameView
+                on:leave={closeGame}
+                on:gameFinished={showWinner}
+                {gameId}
+                {socket}
+                initialPlayerList={players}
+                {thisPlayerId}
+                {gameStartData}
+                isHost
+                {cardCounts}
+                {kickPlayer}
+            />
         {/await}
     {:else}
         Game ID: {#if gameId}
@@ -127,14 +138,6 @@
 <style>
     p {
         font-size: 15px;
-    }
-    .playerItemForHost {
-        font-size: 13px;
-    }
-    .kick-button {
-        font-size: 13px;
-        font-size: 1rem;
-        background-color: brown;
     }
     .start-close {
         color: aliceblue;

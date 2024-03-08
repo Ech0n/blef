@@ -96,6 +96,7 @@
                 isHost={false}
                 {gameStartData}
                 cardCounts={_}
+                kickPlayer={() => {}}
             />
         {/await}
     {:else}
@@ -103,7 +104,7 @@
             {gameId}
         {/if}
         <div>
-            <LobbyPlayerList {players} thisPlayer={currentPlayer} />
+            <LobbyPlayerList {players} {thisPlayerId} />
 
             <button class="start-close" on:click={leaveGame}>Leave</button>
         </div>
