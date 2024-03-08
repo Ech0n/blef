@@ -9,6 +9,7 @@
     import type { CardCountTable } from '../model/Card';
     import LobbyPlayerList from './LobbyPlayerList.svelte';
     import { config } from '../../../config';
+    import WinnerModal from './WinnerModal.svelte';
 
     export let usernameInput: string;
     export let gameId: string;
@@ -20,6 +21,8 @@
     let currentPlayer: Player;
     let gameStartData: gameStartPayload;
     let thisPlayerId: string;
+    let showModal: boolean = false;
+    let winnerUsername: string = '';
     let _: CardCountTable; // This is completely useless and made to avoid errors
 
     const unsubscribe = playerStore.subscribe((value) => {
@@ -113,10 +116,10 @@
         socket.emit(SocketEventsFromClient.leaveGame);
     }
 
-    function showWinnner(winner: any): void {
-        gameView = undefined;
+    function showWinner(winner: any): void {
         if (winner.detail && winner.detail.username) {
-            alert('Wygrał gracz: ' + winner.detail.username);
+            winnerUsername = winner.detail.username;
+            showModal = true;
         }
     }
 </script>
@@ -126,7 +129,7 @@
         {#await gameView then { default: GameClient }}
             <GameClient
                 on:leave={leaveGame}
-                on:gameFinished={showWinnner}
+                on:gameFinished={showWinner}
                 {gameId}
                 {socket}
                 initialPlayerList={players}
@@ -147,6 +150,14 @@
         </div>
     {/if}
 </h1>
+<WinnerModal
+    {showModal}
+    {winnerUsername}
+    close={() => {
+        showModal = false;
+        gameView = undefined;
+    }}
+/>
 
 <style>
     .start-close {

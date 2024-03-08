@@ -116,3 +116,21 @@ export function initalizeGame(players: IPlayer[]): { cardCounts: CardCountTable;
     initialGameData = { newHands: hands, startingPlayerId: startingPlayerId };
     return { cardCounts: cardCounts, payload: initialGameData };
 }
+
+export function cardCountTableToIterableArray(cardCountTable: CardCountTable): Array<[number, Array<[number, number]>]> {
+    const iterableArray: Array<[number, Array<[number, number]>]> = [];
+
+    for (const [cardKey, colorCounts] of Object.entries(cardCountTable)) {
+        const cardNum = parseInt(cardKey, 10);
+        const colorsArray: Array<[number, number]> = [];
+
+        for (const [colorKey, count] of Object.entries(colorCounts)) {
+            const colorNum = parseInt(colorKey, 10);
+            colorsArray.push([colorNum, count]);
+        }
+
+        iterableArray.push([cardNum, colorsArray]);
+    }
+
+    return iterableArray;
+}

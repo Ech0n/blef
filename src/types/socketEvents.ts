@@ -12,6 +12,7 @@ export enum SocketEventsCommon {
 
     gameClosed = 'gameClosed',
     updateTimerToPlayers = 'updateTimerToPlayers',
+    updateCardCountToPlayers = 'updateCardCountToPlayers',
 }
 
 export enum SocketEventsFromServer {
@@ -27,6 +28,7 @@ export enum SocketEventsFromHost {
     requestReconnectResponse = 'requestReconnectResponse',
     kickPlayer = 'kickPlayer',
     timerUpdate = 'timerUpdate',
+    cardListToPlayers = 'cardListToPlayers',
 }
 
 export enum SocketEventsFromClient {

@@ -8,6 +8,7 @@
     import type { gameStartPayload } from '../../../common/payloads';
     import LobbyPlayerList from './LobbyPlayerList.svelte';
     import { config } from '../../../config';
+    import WinnerModal from './WinnerModal.svelte';
 
     export let usernameInput: string;
 
@@ -19,6 +20,8 @@
     let gameView: Promise<typeof import('../game/GameView.svelte')> | undefined;
     let gameStartData: gameStartPayload;
     let players: Player[] = [];
+    let showModal: boolean = false;
+    let winnerUsername: string = '';
 
     let cardCounts: CardCountTable = initalizeCountTable();
 
@@ -100,11 +103,10 @@
         socket.emit(SocketEventsCommon.kickPlayer, id);
     }
 
-    function showWinnner(winner: any): void {
-        gameView = undefined;
-
+    function showWinner(winner: any): void {
         if (winner.detail && winner.detail.username) {
-            alert('Wygrał gracz: ' + winner.detail.username);
+            winnerUsername = winner.detail.username;
+            showModal = true;
         }
     }
 </script>
@@ -112,7 +114,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameView }}
-            <GameView on:leave={closeGame} on:gameFinished={showWinnner} {gameId} {socket} initialPlayerList={players} {thisPlayerId} {gameStartData} isHost {cardCounts} />
+            <GameView on:leave={closeGame} on:gameFinished={showWinner} {gameId} {socket} initialPlayerList={players} {thisPlayerId} {gameStartData} isHost {cardCounts} />
         {/await}
         <p>host options:</p>
         <p>kick player:</p>
@@ -145,6 +147,14 @@
         </div>
     {/if}
 </h1>
+<WinnerModal
+    {showModal}
+    {winnerUsername}
+    close={() => {
+        showModal = false;
+        gameView = undefined;
+    }}
+/>
 
 <style>
     p {

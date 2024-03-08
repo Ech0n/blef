@@ -22,14 +22,11 @@ export class GameServer extends Game {
     deck: Card[];
     isFinished: boolean = false;
     cardCounts: CardCountTable;
-    timeLeft: number;
-    roundTimer: ReturnType<typeof setInterval> | undefined;
     constructor(players: Player[], gameStartData: gameStartPayload, thisPlayerId: string, initialCardCounts: CardCountTable) {
         super(players, gameStartData, thisPlayerId);
         this.hands = new Map(Object.entries(gameStartData.newHands));
         this.deck = deck.slice();
         this.cardCounts = initialCardCounts;
-        this.timeLeft = 30;
     }
 
     drawCards(numberOfCards: number): Card[] {
@@ -115,30 +112,7 @@ export class GameServer extends Game {
         return payload;
     }
 
-    startRoundTimer(): void {
-        this.timeLeft = 30; // Reset timer for each round
-        this.roundTimer = setInterval(() => {
-            if (this.timeLeft >= 0) {
-                this.timeLeft--;
-            } else {
-                clearInterval(this.roundTimer);
-                this.roundTimer = undefined; // Handle end of round due to timeout
-            }
-        }, 1000); // 1000 Milliseconds
-    }
-
-    stopRoundTimer(): void {
-        if (this.roundTimer) {
-            clearInterval(this.roundTimer);
-            this.roundTimer = undefined;
-        }
-    }
-
-    getRoundTimer(): number {
-        return this.timeLeft;
-    }
-
-    setRoundTimer(newTime: number): void {
-        this.timeLeft = newTime;
+    getCardCount(): CardCountTable {
+        return this.cardCounts;
     }
 }

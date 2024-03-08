@@ -8,11 +8,9 @@
     import CardModal from './CardModals.svelte';
     import { Game } from './Game';
     import type { checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
-    import type { CardCountTable } from '../model/Card';
+    import { cardCountTableToIterableArray, type CardCountTable, cardToRankTranslation } from '../model/Card';
     import CardImageHandler from './CardImageHandler';
     import { config } from '../../../config';
-    import { count, time } from 'console';
-    import { select_option } from 'svelte/internal';
 
     export let gameId: string;
     export let socket: Socket;
@@ -31,7 +29,10 @@
     let betName: string = '';
     let selectedHand;
     let countdown: number = 30;
-    let gameCheckInterval: ReturnType<typeof setInterval>;
+    let roundTimer: ReturnType<typeof setInterval> | undefined;
+    let showButtons: boolean = true;
+    let previousCards: CardCountTable;
+    let readyPreviousCards: any = [];
 
     const cardImageHandler = new CardImageHandler();
     const cardFullNames: { [key: string]: string } = {
@@ -60,36 +61,45 @@
         });
 
         socket.on(SocketEventsCommon.hit, (data: { move: any }) => {
-            if (!isHost) {
-                countdown = 30;
-            } else {
-                game.stopRoundTimer();
+            countdown = 30;
+            if (isHost) {
+                stopRoundTimer();
                 sleep(2000).then(() => {
-                    game.startRoundTimer();
+                    if (!game.gameClosed) {
+                        startRoundTimer();
+                    }
                 });
             }
 
-            game.hit(data.move);
-            game = game;
+            if (!game.gameClosed) {
+                game.hit(data.move);
+                game = game;
+
+                showButtons = false; // This is necessary to avoid spamming check
+                sleep(3000).then(() => {
+                    showButtons = true;
+                });
+            } else {
+                stopRoundTimer();
+            }
         });
 
         if (isHost) {
-            game.startRoundTimer();
-
-            gameCheckInterval = setInterval(() => {
-                let timeData = game.getRoundTimer();
-                if (countdown !== timeData) {
-                    socket.emit(SocketEventsFromHost.timerUpdate, countdown - 1);
-                    countdown = timeData;
-                }
-                endOfTimerHandler();
-            }, 1000); // Yes we need 2 timers, one here, one inside game.
+            // ********************************************
+            // |         HOST SOCKET FUNCTIONALITY        |
+            // ********************************************
+            game.gameClosed = false;
+            startRoundTimer();
 
             socket.on(SocketEventsCommon.checkToServer, (data) => {
-                game.stopRoundTimer();
+                previousCards = game.getCardCount();
+                constructReadyCards();
+
                 let checkResult = game.validateCheck();
                 game = game;
                 socket.emit(SocketEventsCommon.checkToPlayers, checkResult);
+                // console.log(previousCards);
+                socket.emit(SocketEventsFromHost.cardListToPlayers, previousCards);
                 game.eliminatedPlayers.forEach((pl) => {
                     if (pl.uid == thisPlayerId) {
                         eliminated = true;
@@ -97,13 +107,15 @@
                 });
 
                 if (game.players.length == 1) {
-                    game.stopRoundTimer();
+                    game.gameClosed = true;
+                    stopRoundTimer();
                     dispatch('gameFinished', game.players[0]);
                 }
 
-                sleep(2000).then(() => {
-                    game.startRoundTimer();
-                });
+                if (!game.gameClosed) {
+                    stopRoundTimer();
+                    startRoundTimer();
+                }
             });
         } else {
             // ********************************************
@@ -132,18 +144,20 @@
             });
 
             socket.on(SocketEventsCommon.updateTimerToPlayers, (update: number) => {
-                // console.log('TIME: ' + countdown + ' | ' + game.currentPlayer + ' ' + thisPlayerId);
-                endOfTimerHandler();
                 countdown = update;
+            });
+
+            socket.on(SocketEventsCommon.updateCardCountToPlayers, (oldCards: CardCountTable) => {
+                previousCards = oldCards;
+                constructReadyCards();
             });
         }
     });
 
     function endOfTimerHandler() {
-        if (countdown <= 0 && game.currentPlayer == thisPlayerId) {
-            sleep(3000).then(() => {
-                // console.log('TIME: ' + countdown);
-                if (countdown <= 0 && game.currentPlayer == thisPlayerId) {
+        if (countdown <= 0) {
+            sleep(2000).then(() => {
+                if (countdown <= 0) {
                     if (game.previousBet) {
                         check();
                     } else {
@@ -217,8 +231,62 @@
         return selectedRanking + ' ' + selectedColor + 's';
     }
 
+    function startRoundTimer(): void {
+        if (roundTimer) {
+            return;
+        }
+        countdown = 30;
+        roundTimer = setInterval(() => {
+            if (countdown > 0) {
+                countdown--;
+            } else {
+                endOfTimerHandler();
+                clearInterval(roundTimer);
+                roundTimer = undefined;
+            }
+            socket.emit(SocketEventsFromHost.timerUpdate, countdown);
+        }, 1000);
+    }
+
+    function stopRoundTimer(): void {
+        if (roundTimer) {
+            clearInterval(roundTimer);
+        }
+        roundTimer = undefined;
+    }
+
     function sleep(ms: number) {
         return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function constructReadyCards() {
+        let iterableCards = cardCountTableToIterableArray(previousCards);
+        readyPreviousCards = [];
+
+        const cardNumberToString: { [key: number]: string } = {
+            11: 'j',
+            12: 'q',
+            13: 'k',
+            14: 'a',
+        };
+        const IndexToColor: { [key: number]: string } = {
+            4: 'spade',
+            3: 'heart',
+            2: 'club',
+            1: 'diamond',
+        };
+
+        for (let [cardNumber, colorCounts] of iterableCards) {
+            for (let [color, isThereColor] of colorCounts) {
+                if (isThereColor == 1) {
+                    let stringCardNumber = cardNumberToString[cardNumber] || cardNumber.toString();
+                    // console.log(stringCardNumber);
+                    let readyCardNumber = cardToRankTranslation[stringCardNumber].string;
+                    readyPreviousCards.push(readyCardNumber + ' ' + IndexToColor[color]);
+                }
+            }
+        }
+        // console.log(readyPreviousCards);
     }
 
     $: if (game.previousBet) {
@@ -248,20 +316,36 @@
 </ul>
 <div>
     {#if !eliminated}
-        <p>Your cards:</p>
-        <div class="hand">
-            {#each game.hand as card}
-                <!-- svelte-ignore a11y-missing-attribute -->
-                <img src={cardImageHandler.getCardImage(card[0] + ' ' + card[1])} />
-            {/each}
+        <div class="cards-container">
+            <div class={previousCards ? 'cards-width-with-prev' : 'cards-width-default'}>
+                <p>Your hand:</p>
+                <div class="hand">
+                    {#each game.hand as card}
+                        <!-- svelte-ignore a11y-missing-attribute -->
+                        <img src={cardImageHandler.getCardImage(card[0] + ' ' + card[1])} />
+                    {/each}
+                </div>
+            </div>
+            {#if previousCards}
+                <div class="prev-cards-width">
+                    <p style="font-size: 15px">Cards from previous round:</p>
+                    <div class="prev-cards-container">
+                        {#each readyPreviousCards as card}
+                            <!-- svelte-ignore a11y-missing-attribute -->
+                            <img src={cardImageHandler.getCardImage(card)} />
+                            <br />
+                        {/each}
+                    </div>
+                </div>
+            {/if}
         </div>
     {/if}
 </div>
-{#if game.currentPlayer == thisPlayerId}
+{#if game.currentPlayer == thisPlayerId && showButtons}
     <p>Your turn</p>
     <div style="display:flex; justify-content:center">
         <button class="start-close" on:click={() => (showModal = true)}>Raise</button>
-        <button class="start-close" on:click={check}>Check</button>
+        <button id="check-button" class="start-close" on:click={check}>Check</button>
     </div>
 {/if}
 
@@ -337,5 +421,44 @@
         border-radius: 15px;
         margin: 25px 0 0 20px;
         max-height: 100px;
+    }
+
+    .cards-container {
+        width: 100%;
+        display: flex;
+    }
+    .prev-cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 3px;
+        justify-content: center;
+        align-items: center;
+    }
+    .prev-cards-container img {
+        width: 80px;
+    }
+    .cards-width-default {
+        width: 100%; /* Assume full width when there are no previous cards or for smaller screens */
+    }
+    .cards-width-with-prev {
+        width: 75%; /* Default width when previous cards exist */
+    }
+    .prev-cards-width {
+        width: 25%;
+    }
+
+    @media (max-width: 800px) {
+        .cards-width-with-prev {
+            width: 85%;
+        }
+        .prev-cards-width {
+            width: 15%;
+        }
+        .prev-cards-container img {
+            width: 60px;
+        }
+        .hand img {
+            width: 150px;
+        }
     }
 </style>

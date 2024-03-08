@@ -1,4 +1,4 @@
-import type { Card } from '../model/Card';
+import type { Card, CardCountTable } from '../model/Card';
 import { Player } from '../../../common/player';
 import type { checkToServerPayload, checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
 
@@ -11,6 +11,7 @@ export class Game {
     currentPlayerIndx: number;
     previousBet!: any;
     thisPlayerId: string;
+    gameClosed: boolean;
 
     constructor(players: Player[], gameStartData: gameStartPayload, thisPlayerId: string) {
         this.playerCount = players.length;
@@ -20,6 +21,7 @@ export class Game {
         this.eliminatedPlayers = [];
         this.currentPlayerIndx = this.players.findIndex((el) => gameStartData.startingPlayerId == el.uid);
         this.thisPlayerId = thisPlayerId;
+        this.gameClosed = false;
     }
 
     removePlayer(playerUid: string) {
@@ -68,23 +70,8 @@ export class Game {
         return;
     }
 
-    startRoundTimer(): void {
+    getCardCount(): CardCountTable {
         console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
-        return;
-    }
-
-    stopRoundTimer(): void {
-        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
-        return;
-    }
-
-    getRoundTimer(): number {
-        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
-        return -1;
-    }
-
-    setRoundTimer(_: number) {
-        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
-        return;
+        return {};
     }
 }
