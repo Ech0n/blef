@@ -17,12 +17,14 @@ export enum SocketEventsCommon {
 export enum SocketEventsFromServer {
     reconnectionInfo = 'reconnectionInfo',
     playerLeftGame = 'playerLeftGame',
+    requestReconnect = 'requestReconnect',
 }
 
 export enum SocketEventsFromHostAndClient {}
 
 export enum SocketEventsFromHost {
     closeGame = 'closeGame',
+    requestReconnectResponse = 'requestReconnectResponse',
     kickPlayer = 'kickPlayer',
     timerUpdate = 'timerUpdate',
 }
