@@ -38,6 +38,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
     let io = blefServer.io;
     let rooms = blefServer.rooms;
     let roomHosts = blefServer.roomHosts;
+
     clientSocket.on('disconnect', () => {
         blefServer.disconnectPlayer(session, clientSocket);
     });
@@ -106,13 +107,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
     });
 
     clientSocket.on(SocketEventsCommon.hit, (data: hitPayload) => {
-        if (!data || !data.move) {
-            throw 'No move data passed';
-        }
-        // console.log('passing on hit data: ', data.move);
-        // TODO: Some kidn of validation would be useful
-
-        io.in(session.gameId).emit(SocketEventsCommon.hit, data);
+        blefServer.passToClientAndHost(SocketEventsCommon.hit, data, clientSocket);
     });
 
     clientSocket.on(SocketEventsCommon.checkToServer, () => {
