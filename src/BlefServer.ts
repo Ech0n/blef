@@ -146,14 +146,27 @@ export class BlefServer {
             return;
         }
         const session = req.session;
-        // session.uid = responsePayload.reconnectRequest.requesterUid;
-        let playersInRoom: Player[] = this.getPlayersInRoom(responsePayload.reconnectRequest.gameId);
-        const gameInfoPayload: gameInfo = { players: playersInRoom, thisPlayerId: req.session.uid, thisPlayerName: req.session.username, gameStarted: false };
-        responsePayload.gameInfo = gameInfoPayload;
+
+        session.gameId = responsePayload.reconnectRequest.gameId;
+        session.uid = responsePayload.reconnectRequest.requesterUid;
+        if (responsePayload.gameInfo) {
+            clientSocket.player = {
+                username: responsePayload.gameInfo.thisPlayerName,
+                uid: responsePayload.reconnectRequest.requesterUid,
+                isOnline: true,
+                isHost: false,
+            };
+        }
+
+        // let playersInRoom: Player[] = this.getPlayersInRoom(responsePayload.reconnectRequest.gameId);
+        // const gameInfoPayload: gameInfo = { players: playersInRoom, thisPlayerId: req.session.uid, thisPlayerName: req.session.username, gameStarted: false };
+        // responsePayload.gameInfo = gameInfoPayload;
         clientSocket.emit(SocketEventsFromHost.reconnectToGame, responsePayload);
 
         this.io.in(responsePayload.reconnectRequest.gameId).emit(SocketEventsFromServer.playerReconnected, { uid: responsePayload.reconnectRequest.requesterUid });
+        console.log('was here');
         clientSocket.join(responsePayload.reconnectRequest.gameId);
+        console.log('users in room ', this.io.sockets.adapter.rooms.get(session.gameId));
     }
 
     handlePlayerJoinRequest(socket: Socket, session: SessionData, gameId: string, username: string) {
@@ -172,7 +185,6 @@ export class BlefServer {
             socket.disconnect(true);
             return;
         }
-        let playersInRoom: Player[] = this.getPlayersInRoom(gameId);
 
         session.gameId = gameId;
 
@@ -182,6 +194,9 @@ export class BlefServer {
             isOnline: true,
             isHost: false,
         };
+        socket.join(gameId);
+
+        let playersInRoom: Player[] = this.getPlayersInRoom(gameId);
 
         const gameInfoPayload: gameInfo = { players: playersInRoom, thisPlayerId: session.uid, thisPlayerName: session.username, gameStarted: false };
         responsePayload.didJoin = true;
@@ -194,8 +209,6 @@ export class BlefServer {
             uid: session.uid,
             isOnline: true,
         });
-
-        socket.join(gameId);
     }
 
     disconnectPlayer(session: SessionData, playerSocket: Socket) {

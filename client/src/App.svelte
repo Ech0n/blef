@@ -20,6 +20,7 @@
     let socket: Socket;
     let players: Player[] = [];
     let thisPlayerId: string;
+    let startedGameInfo: gameInfo['startedGameInfo'];
 
     function commonListeners(socket: Socket) {
         socket.on(SocketEventsFromServer.playerReconnected, (data: { uid: string }) => {
@@ -43,12 +44,7 @@
                 return newPlayer;
             });
         }
-
-        if (gameInfo.thisPlayerId && gameInfo.thisPlayerName) {
-            // This if is wrong. If data does not exist error should be thrown // Then do it shaking my head
-            players = [...players, new Player(gameInfo.thisPlayerId, gameInfo.thisPlayerName)];
-            thisPlayerId = gameInfo.thisPlayerId;
-        }
+        thisPlayerId = gameInfo.thisPlayerId;
         gameView = import('./lobby/LobbyClient.svelte');
     }
 
@@ -141,6 +137,8 @@
                 socket.disconnect();
                 return;
             }
+            startedGameInfo = response.gameInfo.startedGameInfo;
+            console.log('app listener', startedGameInfo);
             loadClientGameView(response.gameInfo);
         });
     }
@@ -164,7 +162,7 @@
     <div class="main-content">
         {#if gameView}
             {#await gameView then { default: LobbyView }}
-                <LobbyView {gameId} usernameInput={username} on:gameClosed={leaveGame} {socket} {thisPlayerId} {players} />
+                <LobbyView {gameId} usernameInput={username} on:gameClosed={leaveGame} {socket} {thisPlayerId} {players} {startedGameInfo} />
             {/await}
         {:else if activeView === 'menu'}
             <Menu on:joinGame={joinGame} on:createGame={hostGame} />

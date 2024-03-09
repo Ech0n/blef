@@ -5,18 +5,24 @@
     import { playerStore } from '../game/stores';
     import { SocketEventsCommon, SocketEventsFromClient } from '../../../src/types/socketEvents';
     import { Player } from '../../../common/player';
-    import type { gameStartPayload } from '../../../common/payloads';
-    import type { CardCountTable } from '../model/Card';
+    import type { gameInfo, gameStartPayload } from '../../../common/payloads';
+    import type { Card, CardCountTable } from '../model/Card';
     import LobbyPlayerList from './LobbyPlayerList.svelte';
     import { config } from '../../../config';
     import WinnerModal from './WinnerModal.svelte';
+    import { Game } from '../game/Game';
+    import { start } from 'repl';
+    import { getDefaultFormatCodeSettings } from 'typescript';
 
     export let gameId: string;
     export let socket: Socket;
     export let players: Player[] = [];
     export let thisPlayerId: string;
+    export let startedGameInfo: gameInfo['startedGameInfo'];
+
     const dispatch = createEventDispatcher();
 
+    let game: Game;
     let gameView: Promise<typeof import('../game/GameView.svelte')> | undefined;
     let currentPlayer: Player;
     let gameStartData: gameStartPayload;
@@ -33,6 +39,20 @@
     });
 
     onMount(() => {
+        console.log('started game info? ', startedGameInfo);
+        if (startedGameInfo) {
+            let hands: { [key: string]: Card[] } = {};
+            hands[thisPlayerId] = startedGameInfo.newHand;
+            gameStartData = {
+                startingPlayerId: startedGameInfo.currentPlayer,
+                newHands: hands,
+            };
+            game = new Game(players, gameStartData, thisPlayerId);
+            game.previousBet = startedGameInfo.currentBet;
+            console.log('players ', game.players, players);
+            gameView = import('../game/GameView.svelte');
+        }
+
         socket.on(SocketEventsCommon.newPlayerJoined, (data: { username: string; uid: string }) => {
             console.debug('New player in lobby name:', data.username);
             let newPlayer = new Player(data.uid, data.username);
@@ -44,6 +64,8 @@
             console.debug('reveived game start message', data);
             if (data && data.startingPlayerId) {
                 gameStartData = data;
+                console.log('gsdata ', gameStartData, thisPlayerId, gameStartData.newHands[thisPlayerId]);
+                game = new Game(players, gameStartData, thisPlayerId);
                 gameView = import('../game/GameView.svelte');
             }
         });
@@ -94,18 +116,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameClient }}
-            <GameClient
-                on:leave={leaveGame}
-                on:gameFinished={showWinner}
-                {gameId}
-                {socket}
-                initialPlayerList={players}
-                {thisPlayerId}
-                isHost={false}
-                {gameStartData}
-                cardCounts={_}
-                kickPlayer={() => {}}
-            />
+            <GameClient on:leave={leaveGame} on:gameFinished={showWinner} {gameId} {socket} {thisPlayerId} isHost={false} kickPlayer={() => {}} {game} />
         {/await}
     {:else}
         Game ID: {#if gameId}

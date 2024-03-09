@@ -5,10 +5,12 @@
     import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost } from '../../../src/types/socketEvents';
     import { playerStore } from '../game/stores';
     import { initalizeGame, type CardCountTable, initalizeCountTable } from '../model/Card';
-    import type { gameStartPayload, reconnectRequestPayload, reconnectResponsePayload } from '../../../common/payloads';
+    import type { gameStartPayload, reconnectRequestPayload, reconnectResponsePayload, gameInfo } from '../../../common/payloads';
     import LobbyPlayerList from './LobbyPlayerList.svelte';
     import { config } from '../../../config';
     import WinnerModal from './WinnerModal.svelte';
+    import { GameServer } from '../game/GameServer';
+    import { Game } from '../game/Game';
 
     export let gameId: string;
     export let socket: Socket;
@@ -21,6 +23,7 @@
     let gameStartData: gameStartPayload;
     let showModal: boolean = false;
     let winnerUsername: string = '';
+    let game: GameServer;
 
     let cardCounts: CardCountTable = initalizeCountTable();
 
@@ -52,10 +55,34 @@
             let reconnectingPlayer = players.find((pl) => {
                 return pl.uid === reconnectRequestPayload.requesterUid;
             });
+
             let response: reconnectResponsePayload = {
                 didReconnect: Boolean(reconnectingPlayer),
                 reconnectRequest: reconnectRequestPayload,
             };
+            if (reconnectingPlayer) {
+                let gameInfo: gameInfo = {
+                    players: players,
+                    thisPlayerId: reconnectingPlayer.uid,
+                    thisPlayerName: reconnectingPlayer.username,
+                    gameStarted: false,
+                };
+                if (gameView) {
+                    let hand = game.hands.get(reconnectingPlayer.uid);
+                    if (!hand) {
+                        console.log('Couldnt find cards for reconnecting player');
+                        return;
+                    }
+                    gameInfo.gameStarted = true;
+                    gameInfo.startedGameInfo = {
+                        currentBet: game.previousBet,
+                        currentPlayer: game.currentPlayer,
+                        newHand: hand,
+                    };
+                }
+
+                response.gameInfo = gameInfo;
+            }
             console.log('response to request ', response);
             socket.emit(SocketEventsFromHost.reconnectToGame, response);
         });
@@ -86,6 +113,7 @@
         socket.on(SocketEventsCommon.gameStarted, (data: gameStartPayload) => {
             if (data) {
                 gameStartData = data;
+                game = new GameServer(players, gameStartData, thisPlayerId, cardCounts);
                 gameView = import('../game/GameView.svelte');
             }
         });
@@ -125,18 +153,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameView }}
-            <GameView
-                on:leave={closeGame}
-                on:gameFinished={showWinner}
-                {gameId}
-                {socket}
-                initialPlayerList={players}
-                {thisPlayerId}
-                {gameStartData}
-                isHost
-                {cardCounts}
-                {kickPlayer}
-            />
+            <GameView on:leave={closeGame} on:gameFinished={showWinner} {gameId} {socket} {thisPlayerId} isHost {kickPlayer} {game} />
         {/await}
     {:else}
         Game ID: {#if gameId}

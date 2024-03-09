@@ -14,17 +14,14 @@
 
     export let gameId: string;
     export let socket: Socket;
-    export let initialPlayerList: Player[];
     export let kickPlayer: (uid: string) => void | undefined;
 
     export let thisPlayerId: string;
     export let isHost: boolean | undefined = false;
-    export let gameStartData: gameStartPayload;
-    export let cardCounts: CardCountTable;
+    export let game: Game;
 
     const dispatch = createEventDispatcher();
     const serverUrl: string = config.BACKEND_SERVER_ADDRESS;
-    let game: Game = isHost ? new GameServer(initialPlayerList, gameStartData, thisPlayerId, cardCounts) : new Game(initialPlayerList, gameStartData, thisPlayerId);
     let eliminated = false;
     let showModal: boolean = false;
     let betName: string = '';
@@ -34,6 +31,8 @@
     let showButtons: boolean = true;
     let previousCards: CardCountTable;
     let readyPreviousCards: any = [];
+
+    //TODO : When game ends tehere should be a cleanup of socket listeners
 
     const cardImageHandler = new CardImageHandler();
     const cardFullNames: { [key: string]: string } = {
@@ -57,12 +56,9 @@
             socket = io(serverUrl);
         }
 
-        socket.on('gameState', (data) => {
-            dispatch('update', data);
-        });
-
         socket.on(SocketEventsCommon.hit, (data: { move: any }) => {
             countdown = 30;
+            console.log('hit data is here', data);
             if (isHost) {
                 stopRoundTimer();
                 sleep(2000).then(() => {
@@ -75,11 +71,11 @@
             if (!game.gameClosed) {
                 game.hit(data.move);
                 game = game;
-
-                showButtons = false; // This is necessary to avoid spamming check
-                sleep(3000).then(() => {
-                    showButtons = true;
-                });
+                showButtons = true;
+                // showButtons = false; // This is necessary to avoid spamming check
+                // sleep(3000).then(() => {
+                //     showButtons = true;
+                // });
             } else {
                 stopRoundTimer();
             }
@@ -89,6 +85,9 @@
             // ********************************************
             // |         HOST SOCKET FUNCTIONALITY        |
             // ********************************************
+
+            console.log('host');
+
             game.gameClosed = false;
             startRoundTimer();
 
@@ -124,7 +123,9 @@
             // ********************************************
             // |      NON-HOST SOCKET FUNCTIONALITY       |
             // ********************************************
+            console.log('non host');
             socket.on(SocketEventsCommon.checkToPlayers, (data: checkToPlayersPayload) => {
+                console.log('recieved check', data);
                 game.check(data);
                 game = game; // I dont think it changes anything
                 game.eliminatedPlayers.forEach((pl) => {
@@ -192,6 +193,7 @@
     }
 
     function check(): void {
+        console.log(isHost);
         socket.emit(SocketEventsCommon.checkToServer);
     }
 
