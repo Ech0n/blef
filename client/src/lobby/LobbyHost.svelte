@@ -2,10 +2,10 @@
     import { createEventDispatcher, onDestroy, onMount } from 'svelte';
     import { io, Socket } from 'socket.io-client';
     import { Player } from '../../../common/player';
-    import { SocketEventsCommon } from '../../../src/types/socketEvents';
+    import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost } from '../../../src/types/socketEvents';
     import { playerStore } from '../game/stores';
     import { initalizeGame, type CardCountTable, initalizeCountTable } from '../model/Card';
-    import type { gameStartPayload } from '../../../common/payloads';
+    import type { gameStartPayload, reconnectRequestPayload, reconnectResponsePayload } from '../../../common/payloads';
     import LobbyPlayerList from './LobbyPlayerList.svelte';
     import { config } from '../../../config';
     import WinnerModal from './WinnerModal.svelte';
@@ -47,15 +47,40 @@
             players = [...players, newPlayer];
         });
 
+        socket.on(SocketEventsFromClient.reconnectToGame, (reconnectRequestPayload: reconnectRequestPayload) => {
+            console.log('request here ', reconnectRequestPayload);
+            let reconnectingPlayer = players.find((pl) => {
+                return pl.uid === reconnectRequestPayload.requesterUid;
+            });
+            let response: reconnectResponsePayload = {
+                didReconnect: Boolean(reconnectingPlayer),
+                reconnectRequest: reconnectRequestPayload,
+            };
+            console.log('response to request ', response);
+            socket.emit(SocketEventsFromHost.reconnectToGame, response);
+        });
+
         socket.on(SocketEventsCommon.playerLeftGame, (data: { uid: string }) => {
             console.log('player disconnected', data.uid);
             if (!data) {
                 return;
             }
 
-            players = players.filter((pl) => {
-                return pl.uid !== data.uid;
-            });
+            //if game is started
+            if (gameView) {
+                let playerThatLeft = players.find((pl) => pl.uid === data.uid);
+                if (playerThatLeft) {
+                    playerThatLeft.isOnline = false;
+                }
+                players = players;
+                console.log(players);
+            } else {
+                // Tag the disconnected player as not connected
+                players = players.filter((pl) => {
+                    return pl.uid !== data.uid;
+                });
+                players = players;
+            }
         });
 
         socket.on(SocketEventsCommon.gameStarted, (data: gameStartPayload) => {

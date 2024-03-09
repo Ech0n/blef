@@ -4,10 +4,11 @@ import http, { IncomingMessage } from 'http';
 import { config } from '../config';
 import { socketEventsListeners, SessionSocket } from './socketEventListeners';
 import session, { SessionData } from 'express-session';
-import { SocketEventsCommon, SocketEventsFromServer } from './types/socketEvents';
+import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from './types/socketEvents';
 import { v4 as uuidv4 } from 'uuid';
 import { Player, createPlayerFromIPlayer } from '../common/player';
-import { gameInfo, joinGameResponsePayload, reconnectPayload } from '../common/payloads';
+import { gameInfo, joinGameResponsePayload, reconnectRequestPayload, reconnectResponsePayload } from '../common/payloads';
+import { response } from 'express';
 
 declare module 'http' {
     interface IncomingMessage {
@@ -101,25 +102,58 @@ export class BlefServer {
         }
         return req.session.gameId;
     }
-    handleReconnection(socket: Socket) {
-        //Send data about previous game to client
-        let responsePayload: reconnectPayload = {
-            didReconnect: false,
-        };
-        const req: IncomingMessage = socket.request;
-        if (!req.session || !req.session.gameId) {
+    askHostForReconnection(socket: Socket, request: reconnectRequestPayload) {
+        let hostSocketId = this.roomHosts.get(request.gameId);
+        if (!hostSocketId) {
+            const onFailResponse: reconnectResponsePayload = { reconnectRequest: request, didReconnect: false };
+            socket.emit(SocketEventsFromHost.reconnectToGame, onFailResponse);
+            return;
+        }
+        request.requesterSocketId = socket.id;
+        let roomHostSocket;
+        roomHostSocket = this.io.sockets.sockets.get(hostSocketId);
+        roomHostSocket?.emit(SocketEventsFromClient.reconnectToGame, request);
+    }
+
+    reconnectionResponse(socket: Socket, responsePayload: reconnectResponsePayload) {
+        console.log('reconect response');
+
+        let clientSid = responsePayload.reconnectRequest.requesterSocketId;
+        if (!clientSid) {
+            console.log('   no sockId');
+
+            return;
+        }
+        let clientSocket = this.io.sockets.sockets.get(clientSid);
+        if (!clientSocket) {
+            console.log('   no sock');
+
+            return;
+        }
+        if (!responsePayload.didReconnect) {
+            console.log('   no recon');
+
+            clientSocket.emit(SocketEventsFromHost.reconnectToGame, responsePayload);
+        }
+        const req: IncomingMessage = clientSocket.request;
+
+        //TODO we  should check if request (defined line above) has values in if below
+        if (!responsePayload.reconnectRequest.gameId) {
             console.debug('Reconnection failed');
-            socket.emit(SocketEventsFromServer.reconnectionInfo, responsePayload);
+            responsePayload.didReconnect = false;
+            socket.emit(SocketEventsFromHost.reconnectToGame, responsePayload);
             socket.disconnect();
             return;
         }
-        let playersInRoom: Player[] = this.getPlayersInRoom(req.session.gameId);
-
+        const session = req.session;
+        // session.uid = responsePayload.reconnectRequest.requesterUid;
+        let playersInRoom: Player[] = this.getPlayersInRoom(responsePayload.reconnectRequest.gameId);
         const gameInfoPayload: gameInfo = { players: playersInRoom, thisPlayerId: req.session.uid, thisPlayerName: req.session.username, gameStarted: false };
-        responsePayload.didReconnect = true;
         responsePayload.gameInfo = gameInfoPayload;
+        clientSocket.emit(SocketEventsFromHost.reconnectToGame, responsePayload);
 
-        socket.emit(SocketEventsFromServer.reconnectionInfo, responsePayload);
+        this.io.in(responsePayload.reconnectRequest.gameId).emit(SocketEventsFromServer.playerReconnected, { uid: responsePayload.reconnectRequest.requesterUid });
+        clientSocket.join(responsePayload.reconnectRequest.gameId);
     }
 
     handlePlayerJoinRequest(socket: Socket, session: SessionData, gameId: string, username: string) {

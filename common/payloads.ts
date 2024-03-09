@@ -42,7 +42,14 @@ export interface joinGameResponsePayload {
     gameInfo?: gameInfo;
 }
 
-export interface reconnectPayload {
+export interface reconnectRequestPayload {
+    requesterSocketId?: string;
+    requesterUid: string;
+    gameId: string;
+}
+
+export interface reconnectResponsePayload {
+    reconnectRequest: reconnectRequestPayload;
     didReconnect: boolean;
     gameInfo?: gameInfo;
 }

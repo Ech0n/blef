@@ -3,7 +3,15 @@ import http from 'http';
 import { SessionData } from 'express-session';
 import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost } from './types/socketEvents';
 import { Player, IPlayer, createPlayerFromIPlayer } from '../common/player';
-import { checkToPlayersPayload, checkToServerPayload, gameStartPayload, hitPayload, joinGameResponsePayload } from '../common/payloads';
+import {
+    checkToPlayersPayload,
+    checkToServerPayload,
+    gameStartPayload,
+    hitPayload,
+    joinGameResponsePayload,
+    reconnectRequestPayload,
+    reconnectResponsePayload,
+} from '../common/payloads';
 import { BlefServer } from './BlefServer';
 import { CardCountTable } from '../client/src/model/Card';
 
@@ -43,8 +51,12 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
         blefServer.disconnectPlayer(session, clientSocket);
     });
 
-    clientSocket.on(SocketEventsFromClient.reconnectToGame, () => {
-        blefServer.handleReconnection(clientSocket);
+    clientSocket.on(SocketEventsFromClient.reconnectToGame, (request: reconnectRequestPayload) => {
+        blefServer.askHostForReconnection(clientSocket, request);
+    });
+
+    clientSocket.on(SocketEventsFromHost.reconnectToGame, (hostResponse: reconnectResponsePayload) => {
+        blefServer.reconnectionResponse(clientSocket, hostResponse);
     });
 
     clientSocket.on(SocketEventsCommon.createGame, (data) => {

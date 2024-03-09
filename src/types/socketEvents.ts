@@ -19,6 +19,7 @@ export enum SocketEventsFromServer {
     reconnectionInfo = 'reconnectionInfo',
     playerLeftGame = 'playerLeftGame',
     requestReconnect = 'requestReconnect',
+    playerReconnected = 'playerReconnected',
 }
 
 export enum SocketEventsFromHostAndClient {}
@@ -29,9 +30,10 @@ export enum SocketEventsFromHost {
     kickPlayer = 'kickPlayer',
     timerUpdate = 'timerUpdate',
     cardListToPlayers = 'cardListToPlayers',
+    reconnectToGame = 'reconnectToGameResponseFromHost',
 }
 
 export enum SocketEventsFromClient {
     leaveGame = 'ClientLeaveGame',
-    reconnectToGame = 'reconnectToGame',
+    reconnectToGame = 'reconnectToGameRequestFromClient',
 }

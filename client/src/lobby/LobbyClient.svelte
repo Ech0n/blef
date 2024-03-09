@@ -63,11 +63,19 @@
                 return;
             }
 
-            // Tag the disconnected player as not connected
-            players = players.filter((pl) => {
-                return pl.uid !== data.uid;
-            });
-            players = players;
+            //if game is started
+            if (gameView) {
+                let playerThatLeft = players.find((pl) => pl.uid === data.uid);
+                if (playerThatLeft) {
+                    playerThatLeft.isOnline = false;
+                }
+            } else {
+                // Tag the disconnected player as not connected
+                players = players.filter((pl) => {
+                    return pl.uid !== data.uid;
+                });
+                players = players;
+            }
         });
     });
 
