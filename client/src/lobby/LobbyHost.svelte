@@ -136,6 +136,7 @@
                 isHost
                 {cardCounts}
                 {kickPlayer}
+                {closeGame}
             />
         {/await}
     {:else}

@@ -1,25 +1,24 @@
 <script lang="ts">
-    import witcherGoodGame from '../assets/giphy.gif';
+    import { createEventDispatcher } from 'svelte';
 
-    export let showModal: boolean;
-    export let winnerUsername: string;
-    export let close: () => void;
+    const dispatch = createEventDispatcher();
+
+    function closeModal(): void {
+        dispatch('close');
+    }
 </script>
 
-{#if showModal}
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div class="modal" on:click={close}>
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <div class="modal" on:click={close}>
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div class="modal-content" on:click|stopPropagation>
         <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div class="modal-content" on:click|stopPropagation>
-            <!-- svelte-ignore a11y-no-static-element-interactions -->
-            <span class="close" on:click={close}>&times;</span>
-            <p>Congratulations, {winnerUsername} won!</p>
-            <img src={witcherGoodGame} alt="Wiedzmak" />
-        </div>
+        <span class="close" on:click={closeModal}>&times;</span>
+        <p>WIP</p>
     </div>
-{/if}
+</div>
 
 <style>
     .modal {
@@ -44,10 +43,6 @@
         margin-top: 50px;
         margin-left: 12.5%;
     }
-    .modal-content img {
-        margin-top: 100px;
-        scale: 1.5;
-    }
 
     .close {
         color: #aaa;
@@ -71,19 +66,12 @@
         p {
             font-size: 34px;
         }
-        .modal-content img {
-            scale: 1;
-        }
     }
 
     @media (max-width: 650px) {
         .modal-content {
             width: 100%;
             margin-left: 0;
-        }
-        .modal-content img {
-            width: 100%;
-            margin-left: -12.5%;
         }
         p {
             font-size: 28px;

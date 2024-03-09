@@ -41,7 +41,7 @@
         color: aliceblue;
         height: 100%;
         border-radius: 0;
-        font-size: 30px;
+        font-size: 40px;
     }
     button:hover {
         background-color: #2f2a2a;
@@ -49,5 +49,11 @@
     button:focus {
         outline: none;
         border: none;
+    }
+
+    @media (max-width: 1000px) {
+        button {
+            font-size: 22px;
+        }
     }
 </style>

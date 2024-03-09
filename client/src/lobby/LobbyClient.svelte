@@ -105,6 +105,7 @@
                 {gameStartData}
                 cardCounts={_}
                 kickPlayer={() => {}}
+                closeGame={() => {}}
             />
         {/await}
     {:else}

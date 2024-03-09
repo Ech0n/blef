@@ -103,7 +103,7 @@
                 </div>
             {/if}
 
-            <button on:click={handleSelect}>Select</button>
+            <button style="margin-top: 20px;" on:click={handleSelect}>Select</button>
         </div>
     </div>
 {/if}
@@ -158,8 +158,6 @@
         cursor: pointer;
         transition: transform 0.2s;
     }
-    .card-option-container:hover,
-    .card-option-container.selected,
     .color-option-container:hover,
     .color-option-container.selected {
         background-color: #0a0909;
@@ -168,7 +166,10 @@
     }
     .card-option-container:hover,
     .card-option-container.selected {
-        padding: 1%;
+        background-color: none;
+        border-radius: 50px;
+        transform: scale(1.15);
+        box-shadow: 24px 16px 20px rgba(0, 0, 0, 0.6);
     }
     .auto-scale-image {
         max-height: 200px;
@@ -176,7 +177,7 @@
     }
     h3 {
         font-size: 35px;
-        margin-bottom: 10px 10px 20px 10px;
+        margin-bottom: 0px 10px 20px 10px;
     }
 
     @media (max-width: 1000px) {
