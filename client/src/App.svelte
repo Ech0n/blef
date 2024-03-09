@@ -8,8 +8,11 @@
     import type { gameInfo, joinGameResponsePayload, reconnectRequestPayload, reconnectResponsePayload } from '../../common/payloads';
     import { onMount } from 'svelte';
     import session from 'express-session';
+    import Navbar from './Navbar.svelte';
+    import Home from './Home.svelte';
 
     let gameView: Promise<any> | undefined;
+    let activeView: string = 'menu';
     let gameId: string | null = null;
     let player: Player | null = null;
     let username = '';
@@ -145,14 +148,40 @@
     onMount(() => {
         checkForReconnect();
     });
+    function handleViewChange(data: any): void {
+        // console.log("It doesnt get here");
+        if (gameView !== undefined) {
+            // Ignore calls from navbar methods in game.
+            return;
+        }
+        const { newView } = data.detail.detail;
+        activeView = newView;
+    }
 </script>
 
 <main>
-    {#if gameView}
-        {#await gameView then { default: LobbyView }}
-            <LobbyView {gameId} usernameInput={username} on:gameClosed={leaveGame} {socket} {thisPlayerId} {players} />
-        {/await}
-    {:else}
-        <Menu on:joinGame={joinGame} on:createGame={hostGame} />
-    {/if}
+    <Navbar on:viewChange={handleViewChange} {activeView} />
+    <div class="main-content">
+        {#if gameView}
+            {#await gameView then { default: LobbyView }}
+                <LobbyView {gameId} usernameInput={username} on:gameClosed={leaveGame} {socket} {thisPlayerId} {players} />
+            {/await}
+        {:else if activeView === 'menu'}
+            <Menu on:joinGame={joinGame} on:createGame={hostGame} />
+        {:else if activeView === 'settings'}
+            <!-- Currently its called settings but It would more likely be account in near future -->
+        {:else if activeView === 'info'}
+            <Home />
+        {/if}
+    </div>
 </main>
+
+<style>
+    .main-content {
+        height: calc(100% - 70px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+</style>

@@ -125,26 +125,19 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameView }}
-            <GameView on:leave={closeGame} on:gameFinished={showWinner} {gameId} {socket} initialPlayerList={players} {thisPlayerId} {gameStartData} isHost {cardCounts} />
+            <GameView
+                on:leave={closeGame}
+                on:gameFinished={showWinner}
+                {gameId}
+                {socket}
+                initialPlayerList={players}
+                {thisPlayerId}
+                {gameStartData}
+                isHost
+                {cardCounts}
+                {kickPlayer}
+            />
         {/await}
-        <p>host options:</p>
-        <p>kick player:</p>
-        <div class="hostPlayerToolContainer">
-            {#each players as player}
-                {#if player.uid != thisPlayerId}
-                    <div class="playerItemForHost">
-                        {player.username}
-                        {#if player.isOnline}
-                            🟢
-                        {:else}
-                            🔴
-                        {/if}
-                        <button class="kick-button" on:click={() => kickPlayer(player.uid)}>Kick player</button>
-                    </div>
-                {/if}
-            {/each}
-        </div>
-        <button class="kick-button" on:click={closeGame}>Close Game</button>
     {:else}
         Game ID: {#if gameId}
             {gameId}
@@ -170,14 +163,6 @@
 <style>
     p {
         font-size: 15px;
-    }
-    .playerItemForHost {
-        font-size: 13px;
-    }
-    .kick-button {
-        font-size: 13px;
-        font-size: 1rem;
-        background-color: brown;
     }
     .start-close {
         color: aliceblue;

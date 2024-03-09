@@ -122,11 +122,13 @@
 <div class="modal">
     <div class="modal-content">
         <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <span class="close" on:click={closeModal}>&times;</span>
         <h2 style="font-size: 55px">Select Hand Ranking</h2>
         <div class="hands-container">
             {#each handRankings as { name, imageUrl }}
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <!-- svelte-ignore a11y-no-static-element-interactions -->
                 <div on:click={() => (selectedRanking = name)} class="hand-ranking-image {selectedRanking === name ? 'selected' : ''}">
                     <h3 style="margin: 10px;">{name}</h3>
                     <!-- svelte-ignore a11y-missing-attribute -->

@@ -15,6 +15,7 @@
     export let gameId: string;
     export let socket: Socket;
     export let initialPlayerList: Player[];
+    export let kickPlayer: (uid: string) => void | undefined;
 
     export let thisPlayerId: string;
     export let isHost: boolean | undefined = false;
@@ -92,8 +93,10 @@
             startRoundTimer();
 
             socket.on(SocketEventsCommon.checkToServer, (data) => {
-                previousCards = game.getCardCount();
-                constructReadyCards();
+                if (game.previousBet) {
+                    previousCards = game.getCardCount();
+                    constructReadyCards();
+                }
 
                 let checkResult = game.validateCheck();
                 game = game;
@@ -169,11 +172,8 @@
                             startingCard: '',
                         };
 
-                        const forcedBetEvent = new CustomEvent('forcedBetEvent', {
-                            detail: forcedBet,
-                        });
-
-                        handleBetSelection(forcedBetEvent);
+                        socket.emit(SocketEventsCommon.hit, { move: forcedBet });
+                        showModal = false;
                     }
                 }
             });
@@ -183,9 +183,11 @@
     // TODO: On finished game when new game is tarted players are not initalized properly
     // This function is called when the modal is closed and we have selected a bet
     function handleBetSelection(event: CustomEvent) {
-        const { detail } = event;
-        selectedHand = detail;
-        socket.emit(SocketEventsCommon.hit, { move: selectedHand });
+        if (countdown > 0) {
+            const { detail } = event;
+            selectedHand = detail;
+            socket.emit(SocketEventsCommon.hit, { move: selectedHand });
+        }
         showModal = false;
     }
 
@@ -294,83 +296,99 @@
     }
 </script>
 
-<h3>
-    {#if gameId}
-        Game ID: {gameId}
-    {/if}
-</h3>
-<ul>
-    {#each game.players as { username, loses, uid }}
-        <div style="white-space: nowrap; font-size: 32px">
-            {#if uid === game.currentPlayer}
-                <strong> > {username}</strong>
-            {:else}
-                {username}
-            {/if}
-            | {1 + loses} Cards 🂠
-        </div>
-    {/each}
-    {#each game.eliminatedPlayers as { username }}
-        <p class="eliminated">{username}</p>
-    {/each}
-</ul>
-<div>
-    {#if !eliminated}
-        <div class="cards-container">
-            <div class={previousCards ? 'cards-width-with-prev' : 'cards-width-default'}>
-                <p>Your hand:</p>
-                <div class="hand">
-                    {#each game.hand as card}
-                        <!-- svelte-ignore a11y-missing-attribute -->
-                        <img src={cardImageHandler.getCardImage(card[0] + ' ' + card[1])} />
-                    {/each}
-                </div>
+<div class="game-container">
+    <h3>
+        {#if gameId}
+            Game ID: {gameId}
+        {/if}
+    </h3>
+    <ul>
+        {#each game.players as { username, loses, uid }}
+            <div style="white-space: nowrap; font-size: 32px">
+                {#if uid === game.currentPlayer}
+                    <strong> > {username}</strong>
+                {:else}
+                    {username}
+                {/if}
+                | {1 + loses} Cards 🂠
+                {#if isHost && kickPlayer !== undefined && thisPlayerId !== uid}
+                    <button class="kick-button" on:click={() => kickPlayer(uid)}>Kick</button>
+                {/if}
             </div>
-            {#if previousCards}
-                <div class="prev-cards-width">
-                    <p style="font-size: 15px">Cards from previous round:</p>
-                    <div class="prev-cards-container">
-                        {#each readyPreviousCards as card}
+        {/each}
+        {#each game.eliminatedPlayers as { username }}
+            <p class="eliminated">{username}</p>
+        {/each}
+    </ul>
+    <div>
+        {#if !eliminated}
+            <div class="cards-container">
+                <div class={previousCards ? 'cards-width-with-prev' : 'cards-width-default'}>
+                    <p>Your hand:</p>
+                    <div class="hand">
+                        {#each game.hand as card}
                             <!-- svelte-ignore a11y-missing-attribute -->
-                            <img src={cardImageHandler.getCardImage(card)} />
-                            <br />
+                            <img src={cardImageHandler.getCardImage(card[0] + ' ' + card[1])} />
                         {/each}
                     </div>
                 </div>
-            {/if}
-        </div>
-    {/if}
-</div>
-{#if game.currentPlayer == thisPlayerId && showButtons}
-    <p>Your turn</p>
-    <div style="display:flex; justify-content:center">
-        <button class="start-close" on:click={() => (showModal = true)}>Raise</button>
-        <button id="check-button" class="start-close" on:click={check}>Check</button>
-    </div>
-{/if}
-
-<div class="bet-container">
-    <div>
-        <p>Current bet:</p>
-        {#if game.previousBet}
-            {betName}
-        {:else}
-            No bet has been made yet
+                {#if previousCards}
+                    <div class="prev-cards-width">
+                        <p style="font-size: 15px">Cards from previous round:</p>
+                        <div class="prev-cards-container">
+                            {#each readyPreviousCards as card}
+                                <!-- svelte-ignore a11y-missing-attribute -->
+                                <img src={cardImageHandler.getCardImage(card)} />
+                                <br />
+                            {/each}
+                        </div>
+                    </div>
+                {/if}
+            </div>
         {/if}
     </div>
-    <div class="timer-container">
-        0:{countdown < 10 ?
-            countdown < 0 ?
-                '00'
-            :   '0' + countdown
-        :   countdown}
+    {#if game.currentPlayer == thisPlayerId && showButtons}
+        <p>Your turn</p>
+        <div style="display:flex; justify-content:center">
+            <button class="start-close" on:click={() => (showModal = true)}>Raise</button>
+            <button id="check-button" class="start-close" on:click={check}>Check</button>
+        </div>
+    {/if}
+
+    <div class="bet-container">
+        <div>
+            <p>Current bet:</p>
+            {#if game.previousBet}
+                {betName}
+            {:else}
+                No bet has been made yet
+            {/if}
+        </div>
+        <div class="timer-container">
+            0:{countdown < 10 ?
+                countdown < 0 ?
+                    '00'
+                :   '0' + countdown
+            :   countdown}
+        </div>
     </div>
+    {#if showModal}
+        <CardModal on:close={() => (showModal = false)} on:select={handleBetSelection} previousBet={game.previousBet} />
+    {/if}
 </div>
-{#if showModal}
-    <CardModal on:close={() => (showModal = false)} on:select={handleBetSelection} previousBet={game.previousBet} />
-{/if}
 
 <style>
+    .kick-button {
+        background-color: red;
+        padding: 5px;
+        font-size: 15px;
+    }
+    .game-container {
+        position: absolute;
+        top: 70px;
+        left: 0;
+        width: 100%;
+    }
     .eliminated {
         color: rgb(167, 167, 167);
     }
@@ -402,9 +420,10 @@
     }
 
     .bet-container {
+        width: 80%;
         background-color: rgb(26, 25, 25);
         padding: 5px 15px 15px 15px;
-        margin: 15px 0;
+        margin: 15px 10%;
         border-radius: 10px;
         display: flex;
         flex-direction: row;
