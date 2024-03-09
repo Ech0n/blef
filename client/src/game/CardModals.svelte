@@ -129,8 +129,14 @@
             {#each handRankings as { name, imageUrl }}
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <!-- svelte-ignore a11y-no-static-element-interactions -->
-                <div on:click={() => (selectedRanking = name)} class="hand-ranking-image {selectedRanking === name ? 'selected' : ''}">
-                    <h3 style="margin: 10px;">{name}</h3>
+                <div
+                    on:click={() => {
+                        selectedRanking = name;
+                        openModal();
+                    }}
+                    class="hand-ranking-image {selectedRanking === name ? 'selected' : ''}"
+                >
+                    <h3 style="margin: 10px;">{name == 'Royal' ? 'Royal Flush' : name}</h3>
                     <!-- svelte-ignore a11y-missing-attribute -->
                     <img src={imageUrl} class="auto-scale-image" />
                 </div>

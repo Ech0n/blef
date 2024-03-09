@@ -11,10 +11,14 @@
     import { cardCountTableToIterableArray, type CardCountTable, cardToRankTranslation } from '../model/Card';
     import CardImageHandler from './CardImageHandler';
     import { config } from '../../../config';
+    import HelpModal from '../HelpModal.svelte';
+    import App from '../App.svelte';
+    import CardModals from './CardModals.svelte';
 
     export let gameId: string;
     export let socket: Socket;
     export let kickPlayer: (uid: string) => void | undefined;
+    export let closeGame: () => void | undefined;
 
     export let thisPlayerId: string;
     export let isHost: boolean | undefined = false;
@@ -31,6 +35,7 @@
     let showButtons: boolean = true;
     let previousCards: CardCountTable;
     let readyPreviousCards: any = [];
+    let showHelpModal: boolean = false;
 
     //TODO : When game ends tehere should be a cleanup of socket listeners
 
@@ -249,7 +254,7 @@
                 roundTimer = undefined;
             }
             socket.emit(SocketEventsFromHost.timerUpdate, countdown);
-        }, 1000);
+        }, 1000000);
     }
 
     function stopRoundTimer(): void {
@@ -284,13 +289,11 @@
             for (let [color, isThereColor] of colorCounts) {
                 if (isThereColor == 1) {
                     let stringCardNumber = cardNumberToString[cardNumber] || cardNumber.toString();
-                    // console.log(stringCardNumber);
                     let readyCardNumber = cardToRankTranslation[stringCardNumber].string;
                     readyPreviousCards.push(readyCardNumber + ' ' + IndexToColor[color]);
                 }
             }
         }
-        // console.log(readyPreviousCards);
     }
 
     $: if (game.previousBet) {
@@ -298,15 +301,31 @@
     }
 </script>
 
+<!-- -------------------------------------------- -->
+<!-- |             HTML SVELTE CODE             | -->
+<!-- -------------------------------------------- -->
 <div class="game-container">
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div
+        class="helper"
+        on:click={() => {
+            showHelpModal = true;
+        }}
+    >
+        <!-- Man autoformatter... what the fuck is this-->
+        ❔
+    </div>
     <h3>
         {#if gameId}
             Game ID: {gameId}
+            {#if isHost && kickPlayer !== undefined}
+                <button class="kick-button" style="padding: 7px 4px 1px 4px; font-size: 32px" on:click={() => closeGame()}>Close Game</button>
+            {/if}
         {/if}
     </h3>
     <ul>
         {#each game.players as { username, loses, uid }}
-            <div style="white-space: nowrap; font-size: 32px">
+            <div class="player-names">
                 {#if uid === game.currentPlayer}
                     <strong> > {username}</strong>
                 {:else}
@@ -356,34 +375,48 @@
             <button id="check-button" class="start-close" on:click={check}>Check</button>
         </div>
     {/if}
-
-    <div class="bet-container">
-        <div>
-            <p>Current bet:</p>
-            {#if game.previousBet}
-                {betName}
-            {:else}
-                No bet has been made yet
-            {/if}
-        </div>
-        <div class="timer-container">
-            0:{countdown < 10 ?
-                countdown < 0 ?
-                    '00'
-                :   '0' + countdown
-            :   countdown}
+    <div class="center-items">
+        <div class="bet-container">
+            <div>
+                <p>Current bet:</p>
+                {#if game.previousBet}
+                    {betName}
+                {:else}
+                    <p class="stronger">No bet has been made yet</p>
+                {/if}
+            </div>
+            <div class="timer-container">
+                0:{countdown < 10 ?
+                    countdown < 0 ?
+                        '00'
+                    :   '0' + countdown
+                :   countdown}
+            </div>
         </div>
     </div>
     {#if showModal}
         <CardModal on:close={() => (showModal = false)} on:select={handleBetSelection} previousBet={game.previousBet} />
     {/if}
+    {#if showHelpModal}
+        <HelpModal on:close={() => (showHelpModal = false)} />
+    {/if}
 </div>
 
 <style>
+    .helper {
+        position: absolute;
+        top: 1%;
+        right: 1%;
+        cursor: pointer;
+        color: black;
+        border: 2px solid gray;
+        padding: 5px 0;
+        border-radius: 100px;
+    }
     .kick-button {
-        background-color: red;
-        padding: 5px;
-        font-size: 15px;
+        background-color: rgb(214, 4, 4);
+        padding: 4px;
+        font-size: 26px;
     }
     .game-container {
         position: absolute;
@@ -420,9 +453,15 @@
         font-size: 35px;
         max-height: 100px;
     }
+    .center-items {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
     .bet-container {
-        width: 80%;
+        width: fit-content;
         background-color: rgb(26, 25, 25);
         padding: 5px 15px 15px 15px;
         margin: 15px 10%;
@@ -447,6 +486,7 @@
     .cards-container {
         width: 100%;
         display: flex;
+        margin-bottom: 20px;
     }
     .prev-cards-container {
         display: flex;
@@ -454,32 +494,51 @@
         gap: 3px;
         justify-content: center;
         align-items: center;
+        position: relative;
+        right: 5%;
     }
     .prev-cards-container img {
         width: 80px;
     }
     .cards-width-default {
-        width: 100%; /* Assume full width when there are no previous cards or for smaller screens */
+        margin-left: 10%;
+        width: 80%; /* Assume full width when there are no previous cards or for smaller screens */
     }
     .cards-width-with-prev {
-        width: 75%; /* Default width when previous cards exist */
+        margin-left: 10%;
+        width: 80%; /* Default width when previous cards exist */
     }
-    .prev-cards-width {
-        width: 25%;
+    .player-names {
+        white-space: nowrap;
+        font-size: 32px;
+    }
+    .stronger {
+        font-size: 45px;
     }
 
     @media (max-width: 800px) {
         .cards-width-with-prev {
-            width: 85%;
-        }
-        .prev-cards-width {
-            width: 15%;
+            margin-left: 0;
+            width: 100%;
         }
         .prev-cards-container img {
-            width: 60px;
+            width: 45px;
         }
         .hand img {
-            width: 150px;
+            width: 100px;
+        }
+        .player-names {
+            font-size: 24px;
+        }
+        strong {
+            font-size: 28px;
+        }
+        .stronger {
+            font-size: 20px;
+        }
+        .helper {
+            font-size: 30px;
+            padding: 4px 0px;
         }
     }
 </style>

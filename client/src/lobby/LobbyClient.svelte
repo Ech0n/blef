@@ -116,7 +116,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameClient }}
-            <GameClient on:leave={leaveGame} on:gameFinished={showWinner} {gameId} {socket} {thisPlayerId} isHost={false} kickPlayer={() => {}} {game} />
+            <GameClient on:leave={leaveGame} on:gameFinished={showWinner} {gameId} {socket} {thisPlayerId} isHost={false} kickPlayer={() => {}} {game} closeGame={() => {}} />
         {/await}
     {:else}
         Game ID: {#if gameId}

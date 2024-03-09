@@ -153,7 +153,7 @@
 <h1>
     {#if gameView}
         {#await gameView then { default: GameView }}
-            <GameView on:leave={closeGame} on:gameFinished={showWinner} {gameId} {socket} {thisPlayerId} isHost {kickPlayer} {game} />
+            <GameView on:leave={closeGame} on:gameFinished={showWinner} {gameId} {socket} {thisPlayerId} isHost {kickPlayer} {game} {closeGame} />
         {/await}
     {:else}
         Game ID: {#if gameId}
