@@ -7,7 +7,7 @@
     import { Player } from '../../../common/player';
     import CardModal from './CardModals.svelte';
     import { Game } from './Game';
-    import type { checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
+    import type { checkToPlayersPayload, gameStartPayload, hitPayload } from '../../../common/payloads';
     import { cardCountTableToIterableArray, type CardCountTable, cardToRankTranslation } from '../model/Card';
     import CardImageHandler from './CardImageHandler';
     import { config } from '../../../config';
@@ -55,13 +55,22 @@
         'K': 'King',
         'A': 'Ace',
     };
+    onDestroy(() => {
+        console.log('Im destroun this !!!');
+        socket.removeAllListeners(SocketEventsCommon.hit);
+        socket.removeAllListeners(SocketEventsCommon.checkToServer);
+        socket.removeAllListeners(SocketEventsCommon.checkToPlayers);
+        socket.removeAllListeners(SocketEventsCommon.kickPlayer);
+        socket.removeAllListeners(SocketEventsCommon.checkToPlayers);
+        socket.removeAllListeners(SocketEventsCommon.checkToPlayers);
+    });
 
     onMount(() => {
         if (!socket) {
             socket = io(serverUrl);
         }
 
-        socket.on(SocketEventsCommon.hit, (data: { move: any }) => {
+        socket.on(SocketEventsCommon.hit, (data: hitPayload) => {
             countdown = 30;
             console.log('hit data is here', data);
             if (isHost) {
@@ -72,15 +81,14 @@
                     }
                 });
             }
-
+            console.log('is gameCLosed: ', game.gameClosed);
             if (!game.gameClosed) {
                 game.hit(data.move);
                 game = game;
-                showButtons = true;
-                // showButtons = false; // This is necessary to avoid spamming check
-                // sleep(3000).then(() => {
-                //     showButtons = true;
-                // });
+                showButtons = false; // This is necessary to avoid spamming check
+                sleep(3000).then(() => {
+                    showButtons = true;
+                });
             } else {
                 stopRoundTimer();
             }
@@ -132,7 +140,8 @@
             socket.on(SocketEventsCommon.checkToPlayers, (data: checkToPlayersPayload) => {
                 console.log('recieved check', data);
                 game.check(data);
-                game = game; // I dont think it changes anything
+                // OPTIMIZE maybe shoudld fix
+                game = game; // I dont think it changes anything //UGLY
                 game.eliminatedPlayers.forEach((pl) => {
                     if (pl.uid == thisPlayerId) {
                         eliminated = true;
@@ -254,7 +263,7 @@
                 roundTimer = undefined;
             }
             socket.emit(SocketEventsFromHost.timerUpdate, countdown);
-        }, 1000000);
+        }, 1000);
     }
 
     function stopRoundTimer(): void {
@@ -265,6 +274,7 @@
     }
 
     function sleep(ms: number) {
+        console.log('prevbet', game.previousBet);
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
 

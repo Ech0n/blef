@@ -66,6 +66,8 @@
                 gameStartData = data;
                 console.log('gsdata ', gameStartData, thisPlayerId, gameStartData.newHands[thisPlayerId]);
                 game = new Game(players, gameStartData, thisPlayerId);
+                game.gameClosed = false;
+
                 gameView = import('../game/GameView.svelte');
             }
         });
@@ -110,6 +112,7 @@
             winnerUsername = winner.detail.username;
             showModal = true;
         }
+        gameView = undefined;
     }
 </script>
 

@@ -78,7 +78,7 @@ export class GameServer extends Game {
 
         this.players[this.currentPlayerIndx].loses += 1;
 
-        if (this.players[this.currentPlayerIndx].loses == 5) {
+        if (this.players[this.currentPlayerIndx].loses == 2) {
             this.eliminatedPlayers.push(this.players[this.currentPlayerIndx]);
             this.players.splice(this.currentPlayerIndx, 1);
             this.playerCount -= 1;
@@ -89,7 +89,7 @@ export class GameServer extends Game {
             this.currentPlayer = this.players[this.currentPlayerIndx].uid;
         }
 
-        this.previousBet = undefined;
+        this.previousBet = null;
     }
 
     validateCheck(): checkToServerPayload {

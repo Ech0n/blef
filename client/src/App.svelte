@@ -16,7 +16,7 @@
     let gameId: string | null = null;
     let player: Player | null = null;
     let username = '';
-    const serverUrl: string = config.BACKEND_SERVER_ADDRESS || 'http://localhost:5678';
+    const serverUrl: string = config.BACKEND_SERVER_ADDRESS;
     let socket: Socket;
     let players: Player[] = [];
     let thisPlayerId: string;

@@ -74,6 +74,9 @@
                         return;
                     }
                     gameInfo.gameStarted = true;
+                    if (!game.previousBet) {
+                        throw 'There should be a previous bet!?';
+                    }
                     gameInfo.startedGameInfo = {
                         currentBet: game.previousBet,
                         currentPlayer: game.currentPlayer,
@@ -114,6 +117,7 @@
             if (data) {
                 gameStartData = data;
                 game = new GameServer(players, gameStartData, thisPlayerId, cardCounts);
+                game.gameClosed = false;
                 gameView = import('../game/GameView.svelte');
             }
         });
@@ -132,6 +136,7 @@
     }
 
     function closeGame(): void {
+        console.warn('THIS SHIT IS CALLED');
         socket.emit(SocketEventsCommon.gameClosed, { gameId });
 
         gameView = undefined;
@@ -147,6 +152,7 @@
             winnerUsername = winner.detail.username;
             showModal = true;
         }
+        gameView = undefined;
     }
 </script>
 

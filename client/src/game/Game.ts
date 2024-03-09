@@ -1,6 +1,7 @@
 import type { Card, CardCountTable } from '../model/Card';
 import { Player } from '../../../common/player';
 import type { checkToServerPayload, checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
+import type { HandInfo } from './HandRankings';
 
 export class Game {
     playerCount: number;
@@ -9,7 +10,7 @@ export class Game {
     currentPlayer: string;
     hand: Card[];
     currentPlayerIndx: number;
-    previousBet!: any;
+    previousBet: HandInfo | null;
     thisPlayerId: string;
     gameClosed: boolean;
 
@@ -17,6 +18,7 @@ export class Game {
         this.playerCount = players.length;
         this.players = structuredClone(players);
         this.hand = gameStartData.newHands[thisPlayerId];
+        this.previousBet = null;
         this.currentPlayer = gameStartData.startingPlayerId;
         this.eliminatedPlayers = [];
         this.currentPlayerIndx = this.players.findIndex((el) => gameStartData.startingPlayerId == el.uid);
@@ -38,7 +40,7 @@ export class Game {
         }
     }
 
-    hit(bet: any): void {
+    hit(bet: HandInfo): void {
         //TODO: consider validation if bet is possible?
         this.previousBet = bet;
         this.nextPlayer();
@@ -62,7 +64,7 @@ export class Game {
         this.currentPlayerIndx = this.players.findIndex((pl) => {
             return pl.uid == this.currentPlayer;
         });
-        this.previousBet = undefined;
+        this.previousBet = null;
     }
 
     validateCheck(): checkToServerPayload | undefined {
