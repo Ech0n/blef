@@ -2,18 +2,14 @@
     import { onMount, createEventDispatcher, onDestroy } from 'svelte';
     import { io } from 'socket.io-client';
     import type { Socket } from 'socket.io-client';
-    import { GameServer } from './GameServer';
     import { SocketEventsCommon, SocketEventsFromHost } from '../../../src/types/socketEvents';
-    import { Player } from '../../../common/player';
     import CardModal from './CardModals.svelte';
     import { Game } from './Game';
-    import type { checkToPlayersPayload, gameStartPayload, hitPayload } from '../../../common/payloads';
+    import type { checkToPlayersPayload, hitPayload } from '../../../common/payloads';
     import { cardCountTableToIterableArray, type CardCountTable, cardToRankTranslation } from '../model/Card';
     import CardImageHandler from './CardImageHandler';
     import { config } from '../../../config';
     import HelpModal from '../HelpModal.svelte';
-    import App from '../App.svelte';
-    import CardModals from './CardModals.svelte';
 
     export let gameId: string;
     export let socket: Socket;
@@ -55,6 +51,7 @@
         'K': 'King',
         'A': 'Ace',
     };
+
     onDestroy(() => {
         console.log('Im destroun this !!!');
         socket.removeAllListeners(SocketEventsCommon.hit);

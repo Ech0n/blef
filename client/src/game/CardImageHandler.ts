@@ -153,7 +153,6 @@ class CardImageHandler {
     }
 
     public getCardImage(cardName: string): string | null {
-        // console.log(cardName);
         const normalizedCardName = cardName.toLowerCase();
         return this.cardImages[normalizedCardName] || null;
     }

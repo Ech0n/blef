@@ -8,7 +8,6 @@
     import LobbyPlayerList from './LobbyPlayerList.svelte';
     import WinnerModal from './WinnerModal.svelte';
     import { GameServer } from '../game/GameServer';
-    import { Game } from '../game/Game';
 
     export let gameId: string;
     export let socket: Socket;
@@ -21,9 +20,7 @@
     let winnerUsername: string = '';
     let game: GameServer;
     let readyPlayers: number = 1;
-
     let cardCounts: CardCountTable = initalizeCountTable();
-
     const dispatch = createEventDispatcher();
 
     onMount(() => {

@@ -15,7 +15,8 @@
         <div class="modal-content" on:click|stopPropagation>
             <!-- svelte-ignore a11y-no-static-element-interactions -->
             <span class="close" on:click={close}>&times;</span>
-            <p>Congratulations, {winnerUsername} won!</p>
+            <p>Congratulations!</p>
+            <p>{winnerUsername} won!</p>
             <img src={witcherGoodGame} alt="Wiedzmak" />
         </div>
     </div>
