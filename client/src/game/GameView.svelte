@@ -10,6 +10,7 @@
     import CardImageHandler from './CardImageHandler';
     import { config } from '../../../config';
     import HelpModal from '../HelpModal.svelte';
+    import CardsInHand from './CardsInHand.svelte';
 
     export let gameId: string;
     export let socket: Socket;
@@ -260,7 +261,7 @@
                 roundTimer = undefined;
             }
             socket.emit(SocketEventsFromHost.timerUpdate, countdown);
-        }, 1000);
+        }, 100000);
     }
 
     function stopRoundTimer(): void {
@@ -353,12 +354,7 @@
             <div class="cards-container">
                 <div class={previousCards ? 'cards-width-with-prev' : 'cards-width-default'}>
                     <p>Your hand:</p>
-                    <div class="hand">
-                        {#each game.hand as card}
-                            <!-- svelte-ignore a11y-missing-attribute -->
-                            <img src={cardImageHandler.getCardImage(card[0] + ' ' + card[1])} />
-                        {/each}
-                    </div>
+                    <CardsInHand hand={game.hand} />
                 </div>
                 {#if previousCards}
                     <div class="prev-cards-width">

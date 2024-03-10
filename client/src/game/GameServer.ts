@@ -57,7 +57,7 @@ export class GameServer extends Game {
         this.shuffleDeck();
         this.hands = new Map<string, Card[]>();
         this.players.forEach((player: Player) => {
-            this.hands.set(player.uid, this.drawCards(1 + player.loses));
+            this.hands.set(player.uid, this.drawCards(5));
         });
     }
 
