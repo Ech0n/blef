@@ -48,10 +48,10 @@
         <div class="modal" on:click|stopPropagation>
             <div class="modal-header">
                 <h2>
-                    {mode === 'join' ? 'Provide game ID:' : 'Enter Your Name:'}
+                    {mode === 'join' ? 'Join game:' : 'Create game:'}
                 </h2>
             </div>
-            <div class="modal-body">
+            <div class="container">
                 {#if errorMessage}
                     <p class="error">{errorMessage}</p>
                 {/if}
@@ -59,16 +59,21 @@
                     <input type="text" placeholder="Enter Game ID" bind:value={gameId} maxlength="10" />
                 {/if}
                 <input type="text" placeholder="Enter Your Name" bind:value={username} maxlength="14" />
-                <div>
-                    <button class="start-close" on:click={action}>{mode === 'join' ? 'Join Game' : 'Create Game'}</button>
-                    <button class="start-close" on:click={closeModal}>Close</button>
-                </div>
+
+                <button class="start-close" on:click={action}>{mode === 'join' ? 'Join Game' : 'Create Game'}</button>
+                <button class="start-close" on:click={closeModal}>Cancel</button>
             </div>
         </div>
     </div>
 {/if}
 
 <style>
+    .container {
+        display: flex;
+        flex-direction: column;
+        row-gap: 1.5rem;
+        padding: 15px;
+    }
     .modal-backdrop {
         position: fixed;
         top: 0;
@@ -83,24 +88,9 @@
 
     .modal {
         background-color: rgb(31, 31, 31);
-        padding: 25px;
-        border-radius: 5px;
-        border-radius: 20px;
+        border-radius: 30px;
         border-width: 5px;
-    }
-
-    .start-close {
-        margin: 15px 5px;
-        color: aliceblue;
-    }
-
-    input {
-        color: rgb(15, 15, 15);
-        padding: 15px 10px;
-        font-size: 20px;
-        background-color: whitesmoke;
-        border-radius: 5px;
-        margin-right: 10px;
+        width: 90vw;
     }
 
     h2 {

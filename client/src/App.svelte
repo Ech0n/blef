@@ -158,8 +158,9 @@
 </script>
 
 <main>
-    <Navbar on:viewChange={handleViewChange} {activeView} />
+    <!-- <Navbar on:viewChange={handleViewChange} {activeView} /> -->
     <div class="main-content">
+        <h1 id="title">BLEF</h1>
         {#if gameView}
             {#await gameView then { default: LobbyView }}
                 <LobbyView {gameId} usernameInput={username} on:gameClosed={leaveGame} {socket} {thisPlayerId} {players} {startedGameInfo} />
@@ -175,11 +176,15 @@
 </main>
 
 <style>
+    #title {
+        font-size: 128px;
+        text-shadow: 4px 8px 8px black;
+    }
     .main-content {
         height: calc(100% - 70px);
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: space-evenly;
     }
 </style>
