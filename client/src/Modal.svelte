@@ -68,12 +68,6 @@
 {/if}
 
 <style>
-    .container {
-        display: flex;
-        flex-direction: column;
-        row-gap: 1.5rem;
-        padding: 15px;
-    }
     .modal-backdrop {
         position: fixed;
         top: 0;
@@ -90,7 +84,8 @@
         background-color: rgb(31, 31, 31);
         border-radius: 30px;
         border-width: 5px;
-        width: 90vw;
+        max-width: 400px;
+        margin: 10px;
     }
 
     h2 {

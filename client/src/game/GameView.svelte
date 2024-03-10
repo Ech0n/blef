@@ -322,14 +322,14 @@
         <!-- Man autoformatter... what the fuck is this-->
         ❔
     </div>
-    <h3>
+    <!-- <h3>
         {#if gameId}
             Game ID: {gameId}
             {#if isHost && kickPlayer !== undefined}
                 <button class="kick-button" style="padding: 7px 4px 1px 4px; font-size: 32px" on:click={() => closeGame()}>Close Game</button>
             {/if}
         {/if}
-    </h3>
+    </h3> -->
     <ul>
         {#each game.players as { username, loses, uid }}
             <div class="player-names">
@@ -430,6 +430,7 @@
         top: 70px;
         left: 0;
         width: 100%;
+        background-color: #070c07;
     }
     .eliminated {
         color: rgb(167, 167, 167);

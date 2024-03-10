@@ -154,24 +154,28 @@
     }
 </script>
 
-<h1>
+<div class="container">
     {#if gameView}
         {#await gameView then { default: GameView }}
             <GameView on:leave={closeGame} on:gameFinished={showWinner} {gameId} {socket} {thisPlayerId} isHost {kickPlayer} {game} {closeGame} />
         {/await}
     {:else}
-        Game ID: {#if gameId}
-            {gameId}
-        {/if}
+        <div class="container group kod">
+            {#if gameId}
+                <div>game code:</div>
+                <div>
+                    {gameId}
+                </div>
+            {/if}
+        </div>
         <br />
-        Players:
         <LobbyPlayerList {players} {thisPlayerId} />
-        <div>
-            <button class="start-close" on:click={startGame}>Start Game</button>
-            <button class="start-close" on:click={closeGame}>Close Game</button>
+        <div class="container">
+            <button on:click={startGame}>Start Game</button>
+            <button on:click={closeGame}>Close Game</button>
         </div>
     {/if}
-</h1>
+</div>
 <WinnerModal
     {showModal}
     {winnerUsername}
@@ -182,7 +186,7 @@
 />
 
 <style>
-    .start-close {
-        color: aliceblue;
+    .kod {
+        width: 300px;
     }
 </style>

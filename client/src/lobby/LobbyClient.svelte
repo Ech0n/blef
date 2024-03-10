@@ -120,22 +120,25 @@
     }
 </script>
 
-<h1>
+<div class="container">
     {#if gameView}
         {#await gameView then { default: GameClient }}
             <GameClient on:leave={leaveGame} on:gameFinished={showWinner} {gameId} {socket} {thisPlayerId} isHost={false} kickPlayer={() => {}} {game} closeGame={() => {}} />
         {/await}
     {:else}
-        Game ID: {#if gameId}
-            {gameId}
-        {/if}
-        <div>
-            <LobbyPlayerList {players} {thisPlayerId} />
-
-            <button class="start-close" on:click={leaveGame}>Leave</button>
+        <div class="container group kod">
+            {#if gameId}
+                <div>game code:</div>
+                <div>
+                    {gameId}
+                </div>
+            {/if}
         </div>
+        <LobbyPlayerList {players} {thisPlayerId} />
+        <button on:click={leaveGame}>Leave</button>
     {/if}
-</h1>
+</div>
+
 <WinnerModal
     {showModal}
     {winnerUsername}

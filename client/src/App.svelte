@@ -22,6 +22,15 @@
     let thisPlayerId: string;
     let startedGameInfo: gameInfo['startedGameInfo'];
 
+    let theme = {
+        'primary-color': '#05580c',
+        'secondary-color': '#01420d',
+        'background-color': '#070c07',
+    };
+    $: cssVarTheme = Object.entries(theme)
+        .map(([key, value]) => `--${key}:${value}`)
+        .join(';');
+
     function commonListeners(socket: Socket) {
         socket.on(SocketEventsFromServer.playerReconnected, (data: { uid: string }) => {
             let player = players.find((pl) => {
@@ -157,7 +166,7 @@
     }
 </script>
 
-<main>
+<main style={cssVarTheme}>
     <!-- <Navbar on:viewChange={handleViewChange} {activeView} /> -->
     <div class="main-content">
         <h1 id="title">BLEF</h1>
@@ -176,9 +185,16 @@
 </main>
 
 <style>
+    main {
+        background-color: var(--background-color);
+    }
     #title {
         font-size: 128px;
-        text-shadow: 4px 8px 8px black;
+        text-shadow:
+            1px 1px 8px var(--theme-color),
+            -1px -1px 8px var(--theme-color),
+            1px -1px 8px var(--theme-color),
+            -1px 1px 8px var(--theme-color);
     }
     .main-content {
         height: calc(100% - 70px);
