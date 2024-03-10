@@ -70,14 +70,13 @@ export class BlefServer {
         let gameId = this.getRoomId(socket);
         socket.to(gameId).emit(event, payload);
     }
+
     passToHost(
         event: SocketEventsCommon,
         payload: any, // payload in futer of payload type
         socket: Socket
     ) {
         let gameId = this.getRoomId(socket);
-        socket.to(gameId).emit(event, payload);
-
         let roomHostSocketId = this.roomHosts.get(gameId);
         let roomHostSocket;
         if (roomHostSocketId) {
@@ -85,6 +84,7 @@ export class BlefServer {
             roomHostSocket?.emit(event, payload);
         }
     }
+
     passToClientAndHost(
         event: SocketEventsCommon,
         payload: any, // payload in futer of payload type
@@ -102,6 +102,7 @@ export class BlefServer {
         }
         return req.session.gameId;
     }
+
     askHostForReconnection(socket: Socket, request: reconnectRequestPayload) {
         let hostSocketId = this.roomHosts.get(request.gameId);
         if (!hostSocketId) {
@@ -121,18 +122,17 @@ export class BlefServer {
         let clientSid = responsePayload.reconnectRequest.requesterSocketId;
         if (!clientSid) {
             console.log('   no sockId');
-
             return;
         }
+
         let clientSocket = this.io.sockets.sockets.get(clientSid);
         if (!clientSocket) {
             console.log('   no sock');
-
             return;
         }
+
         if (!responsePayload.didReconnect) {
             console.log('   no recon');
-
             clientSocket.emit(SocketEventsFromHost.reconnectToGame, responsePayload);
         }
         const req: IncomingMessage = clientSocket.request;
@@ -145,6 +145,7 @@ export class BlefServer {
             socket.disconnect();
             return;
         }
+
         const session = req.session;
 
         session.gameId = responsePayload.reconnectRequest.gameId;

@@ -28,7 +28,6 @@
     let gameStartData: gameStartPayload;
     let showModal: boolean = false;
     let winnerUsername: string = '';
-    let _: CardCountTable; // This is completely useless and made to avoid errors
 
     const unsubscribe = playerStore.subscribe((value) => {
         currentPlayer = value!;
@@ -114,6 +113,11 @@
         }
         gameView = undefined;
     }
+
+    function notifyHostThatPlayerReady() {
+        console.log('why twice?');
+        socket.emit(SocketEventsFromClient.playerReady, thisPlayerId);
+    }
 </script>
 
 <h1>
@@ -138,6 +142,7 @@
     close={() => {
         showModal = false;
         gameView = undefined;
+        notifyHostThatPlayerReady();
     }}
 />
 

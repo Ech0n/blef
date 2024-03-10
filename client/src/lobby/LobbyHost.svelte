@@ -3,11 +3,9 @@
     import { io, Socket } from 'socket.io-client';
     import { Player } from '../../../common/player';
     import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost } from '../../../src/types/socketEvents';
-    import { playerStore } from '../game/stores';
     import { initalizeGame, type CardCountTable, initalizeCountTable } from '../model/Card';
     import type { gameStartPayload, reconnectRequestPayload, reconnectResponsePayload, gameInfo } from '../../../common/payloads';
     import LobbyPlayerList from './LobbyPlayerList.svelte';
-    import { config } from '../../../config';
     import WinnerModal from './WinnerModal.svelte';
     import { GameServer } from '../game/GameServer';
     import { Game } from '../game/Game';
@@ -17,25 +15,16 @@
     export let players: Player[] = [];
     export let thisPlayerId: string;
 
-    let player: Player | null;
-    let host: Player;
     let gameView: Promise<typeof import('../game/GameView.svelte')> | undefined;
     let gameStartData: gameStartPayload;
     let showModal: boolean = false;
     let winnerUsername: string = '';
     let game: GameServer;
+    let readyPlayers: number = 1;
 
     let cardCounts: CardCountTable = initalizeCountTable();
 
     const dispatch = createEventDispatcher();
-
-    const unsubscribe = playerStore.subscribe((value) => {
-        player = value;
-    });
-
-    onDestroy(() => {
-        unsubscribe();
-    });
 
     onMount(() => {
         socket.on(SocketEventsCommon.newPlayerJoined, (data: { username: string; uid: string; isOnline: boolean }) => {
@@ -44,6 +33,7 @@
                 throw 'No data from server';
             }
 
+            readyPlayers++;
             let newPlayer: Player = new Player(data.uid, data.username);
             newPlayer.isOnline = data.isOnline;
 
@@ -110,6 +100,7 @@
                     return pl.uid !== data.uid;
                 });
                 players = players;
+                readyPlayers--;
             }
         });
 
@@ -122,17 +113,26 @@
             }
         });
 
+        socket.on(SocketEventsCommon.playerReady, (readyPlayerId: string) => {
+            console.log('this player ready here!');
+            readyPlayers++;
+        });
+
         socket.on(SocketEventsCommon.gameClosed, () => {
             dispatch('gameClosed');
         });
     });
 
     function startGame(): void {
-        //TODO: Randomize starting player?
-        let initializationData = initalizeGame(players);
-        cardCounts = initializationData.cardCounts;
-        let startPayload = initializationData.payload;
-        socket.emit(SocketEventsCommon.gameStarted, startPayload);
+        if (players.length >= 2 && players.length <= 5 && readyPlayers == players.length) {
+            let initializationData = initalizeGame(players);
+            cardCounts = initializationData.cardCounts;
+            let startPayload = initializationData.payload;
+            socket.emit(SocketEventsCommon.gameStarted, startPayload);
+        } else {
+            console.log(readyPlayers);
+            throw 'Invalid amount of players to start the game or not everyone is ready';
+        }
     }
 
     function closeGame(): void {
@@ -148,6 +148,7 @@
     }
 
     function showWinner(winner: any): void {
+        readyPlayers = 1;
         if (winner.detail && winner.detail.username) {
             winnerUsername = winner.detail.username;
             showModal = true;
@@ -184,9 +185,6 @@
 />
 
 <style>
-    p {
-        font-size: 15px;
-    }
     .start-close {
         color: aliceblue;
     }

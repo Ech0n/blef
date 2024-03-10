@@ -473,7 +473,7 @@
     .bet-container {
         width: fit-content;
         background-color: rgb(26, 25, 25);
-        padding: 5px 15px 15px 15px;
+        padding: 5px 30px 15px 30px;
         margin: 15px 10%;
         border-radius: 10px;
         display: flex;
