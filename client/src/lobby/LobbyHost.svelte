@@ -20,6 +20,7 @@
     let winnerUsername: string = '';
     let game: GameServer;
     let readyPlayers: number = 1;
+    let waitingPlayers: number = 0;
     let cardCounts: CardCountTable = initalizeCountTable();
     const dispatch = createEventDispatcher();
 
@@ -30,7 +31,11 @@
                 throw 'No data from server';
             }
 
-            readyPlayers++;
+            if (gameView) {
+                waitingPlayers++;
+            } else {
+                readyPlayers++;
+            }
             let newPlayer: Player = new Player(data.uid, data.username);
             newPlayer.isOnline = data.isOnline;
 
@@ -141,7 +146,6 @@
     }
 
     function closeGame(): void {
-        console.warn('THIS SHIT IS CALLED');
         socket.emit(SocketEventsCommon.gameClosed, { gameId });
 
         gameView = undefined;
@@ -154,7 +158,8 @@
     }
 
     function showWinner(winner: any): void {
-        readyPlayers = 1;
+        readyPlayers = 1 + waitingPlayers;
+        waitingPlayers = 0;
         if (winner.detail && winner.detail.username) {
             winnerUsername = winner.detail.username;
             showModal = true;

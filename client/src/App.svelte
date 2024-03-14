@@ -30,7 +30,7 @@
             if (!player) {
                 return;
             }
-            console.log('rejoined playere ', player);
+            //console.log('rejoined playere ', player);
 
             player.isOnline = true;
         });
@@ -67,7 +67,7 @@
 
         // Listen for messages from the server
         socket.on(SocketEventsCommon.joinGame, (data: joinGameResponsePayload) => {
-            console.log('DDDD' + data);
+            //console.log('DDDD' + data);
             if (!data || !data.didJoin || !data.gameInfo) {
                 //TODO: Some kind of toast saying "Could not connect to game" and possibly information why
                 return;
@@ -84,7 +84,7 @@
     }
 
     function hostGame(event: CustomEvent): void {
-        console.log(event.detail.username);
+        //console.log(event.detail.username);
         if (!player) {
             const newId = Date.now().toString(); // Placeholder ID generation TODO
             username = event.detail.username;
@@ -130,14 +130,14 @@
         };
         socket.emit(SocketEventsFromClient.reconnectToGame, request);
         socket.on(SocketEventsFromHost.reconnectToGame, (response: reconnectResponsePayload) => {
-            console.log('reconnection response ', response);
+            // console.log('reconnection response ', response);
 
             if (!response.didReconnect || !response.gameInfo) {
                 socket.disconnect();
                 return;
             }
             startedGameInfo = response.gameInfo.startedGameInfo;
-            console.log('app listener', startedGameInfo);
+            //console.log('app listener', startedGameInfo);
             loadClientGameView(response.gameInfo);
         });
     }
