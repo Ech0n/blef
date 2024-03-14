@@ -53,7 +53,7 @@
     };
 
     onDestroy(() => {
-        console.log('Im destroun this !!!');
+        // console.log('Im destroun this !!!');
         socket.removeAllListeners(SocketEventsCommon.hit);
         socket.removeAllListeners(SocketEventsCommon.checkToServer);
         socket.removeAllListeners(SocketEventsCommon.checkToPlayers);
@@ -271,7 +271,7 @@
     }
 
     function sleep(ms: number) {
-        console.log('prevbet', game.previousBet);
+        // console.log('prevbet', game.previousBet);
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
 

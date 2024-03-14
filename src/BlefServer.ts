@@ -174,10 +174,12 @@ export class BlefServer {
         let responsePayload: joinGameResponsePayload = {
             didJoin: false,
         };
+
         if (!gameId || !username) {
             socket.emit(SocketEventsCommon.joinGame, responsePayload);
             return;
         }
+
         session.username = username;
 
         if (!this.rooms.has(gameId)) {
@@ -188,6 +190,7 @@ export class BlefServer {
         }
 
         session.gameId = gameId;
+        let playersInRoom: Player[] = this.getPlayersInRoom(gameId);
 
         socket.player = {
             username: session.username,
@@ -195,9 +198,18 @@ export class BlefServer {
             isOnline: true,
             isHost: false,
         };
+
         socket.join(gameId);
 
-        let playersInRoom: Player[] = this.getPlayersInRoom(gameId);
+        for (let player of playersInRoom) {
+            if (player.username === session.username) {
+                console.debug('Player with that name already in game.', this.rooms);
+                socket.disconnect(true);
+                return;
+            }
+        }
+
+        playersInRoom = this.getPlayersInRoom(gameId);
 
         const gameInfoPayload: gameInfo = { players: playersInRoom, thisPlayerId: session.uid, thisPlayerName: session.username, gameStarted: false };
         responsePayload.didJoin = true;

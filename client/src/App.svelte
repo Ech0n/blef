@@ -50,12 +50,10 @@
 
     function joinGame(event: CustomEvent): void {
         gameId = event.detail.gameId;
-        if (!player) {
-            username = event.detail.username;
-            const newId = Date.now().toString(); // Placeholder ID generation TODO
-            player = new Player(newId, event.detail.username);
-            player.isOnline = true; // Set the player as online upon joining
-        }
+        username = event.detail.username;
+        const newId = Date.now().toString(); // Placeholder ID generation TODO
+        player = new Player(newId, event.detail.username);
+
         socket = io(serverUrl);
 
         socket.emit(SocketEventsCommon.joinGame, {
@@ -67,7 +65,7 @@
 
         // Listen for messages from the server
         socket.on(SocketEventsCommon.joinGame, (data: joinGameResponsePayload) => {
-            console.log(data);
+            console.log('DDDD' + data);
             if (!data || !data.didJoin || !data.gameInfo) {
                 //TODO: Some kind of toast saying "Could not connect to game" and possibly information why
                 return;
@@ -96,7 +94,7 @@
         commonListeners(socket);
 
         socket.on(SocketEventsCommon.createGame, (data: { gameId: string; hostId: string }) => {
-            console.log('User created a game, its id is:', data.gameId);
+            // console.log('User created a game, its id is:', data.gameId);
             gameId = data.gameId;
             let host = new Player(data.hostId, username);
             host.isOnline = true;
@@ -119,8 +117,7 @@
         let sessionGameId = sessionStorage.getItem('gameId');
         let sessionUid = sessionStorage.getItem('uid');
         if (!sessionUid || !sessionGameId) {
-            console.log('reconnection failed no data in session  ', sessionUid, sessionGameId);
-
+            // console.log('reconnection failed no data in session  ', sessionUid, sessionGameId);
             return;
         }
 

@@ -92,12 +92,20 @@
                 players = players;
                 console.log(players);
             } else {
-                // Tag the disconnected player as not connected
+                let wasInLobby: boolean = false;
+                for (let player of players) {
+                    if (player.uid === data.uid) {
+                        wasInLobby = true;
+                        break;
+                    }
+                }
+
                 players = players.filter((pl) => {
                     return pl.uid !== data.uid;
                 });
                 players = players;
-                readyPlayers--;
+
+                if (wasInLobby) readyPlayers--;
             }
         });
 
