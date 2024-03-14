@@ -50,10 +50,12 @@
 
     function joinGame(event: CustomEvent): void {
         gameId = event.detail.gameId;
-        username = event.detail.username;
-        const newId = Date.now().toString(); // Placeholder ID generation TODO
-        player = new Player(newId, event.detail.username);
-
+        if (!player) {
+            username = event.detail.username;
+            const newId = Date.now().toString(); // Placeholder ID generation TODO
+            player = new Player(newId, event.detail.username);
+            player.isOnline = true; // Set the player as online upon joining
+        }
         socket = io(serverUrl);
 
         socket.emit(SocketEventsCommon.joinGame, {

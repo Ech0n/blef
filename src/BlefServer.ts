@@ -204,7 +204,7 @@ export class BlefServer {
         for (let player of playersInRoom) {
             if (player.username === session.username) {
                 console.debug('Player with that name already in game.', this.rooms);
-                socket.disconnect(true);
+                socket.disconnect(true); // it needs to be replaced with something else but idk TODO
                 return;
             }
         }

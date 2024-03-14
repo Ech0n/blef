@@ -100,6 +100,10 @@
                 players = players;
             }
         });
+
+        socket.on(SocketEventsCommon.kickPlayer, (uid: string) => {
+            players = players.filter((player) => player.uid !== uid);
+        });
     });
 
     function leaveGame(): void {
@@ -115,7 +119,7 @@
     }
 
     function notifyHostThatPlayerReady() {
-        console.log('why twice?');
+        //console.log('why twice?');
         socket.emit(SocketEventsFromClient.playerReady, thisPlayerId);
     }
 </script>

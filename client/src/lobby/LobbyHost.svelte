@@ -148,8 +148,9 @@
         players = [];
     }
 
-    function kickPlayer(id: string) {
-        socket.emit(SocketEventsCommon.kickPlayer, id);
+    function kickPlayer(uid: string) {
+        socket.emit(SocketEventsFromHost.kickPlayer, uid);
+        players = players.filter((player) => player.uid !== uid);
     }
 
     function showWinner(winner: any): void {

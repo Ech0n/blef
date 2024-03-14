@@ -91,6 +91,16 @@
             }
         });
 
+        socket.on(SocketEventsCommon.kickPlayer, (playerId: string) => {
+            if (playerId === thisPlayerId) {
+                dispatch('leave');
+            } else {
+                game.removePlayer(playerId);
+                game = game; // I dont think it changes anything
+                dispatch('playerLeft', playerId);
+            }
+        });
+
         if (isHost) {
             // ********************************************
             // |         HOST SOCKET FUNCTIONALITY        |
@@ -150,12 +160,6 @@
                 }
 
                 countdown = 30; // Not necessary but let it stay
-            });
-
-            socket.on(SocketEventsCommon.kickPlayer, (playerId: string) => {
-                game.removePlayer(playerId);
-                game = game; // I dont think it changes anything
-                dispatch('playerLeft', playerId);
             });
 
             socket.on(SocketEventsCommon.updateTimerToPlayers, (update: number) => {
