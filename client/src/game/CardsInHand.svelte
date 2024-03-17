@@ -21,7 +21,9 @@
     }
     .karta {
         position: absolute;
-        width: 130px;
+        width: 160px;
+        box-shadow: -1px 1px 12px black;
+        border-radius: 7px;
     }
     #card0 {
         left: 150px;
