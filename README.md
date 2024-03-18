@@ -1,30 +1,29 @@
-# svelte-express-boilerplate 📦
+# Blef Online Card Game
 
-> Boilerplate for developing full stack apps with Express and Svelte.js
+Blef is a Polish card game, based on deceiving other players.
+<br>
+It can be played by anyone with an internet connection on official [website](https://www.blefgame.us).
+<br>
+The rules can be found in: [Rules of the Game](#rules-of-the-game).
+<br>
+It is best played face to face or with Facecams.
 
-1. Widok pokazuje dwie opcje: "Dołącz do gry", "Stwórz grę"
-2A. Po wybraniu opcji "Dołącz do gry" użytkownik proszony jest o podanie kodu sesji
-2B. Po wybraniu opcji "Stwórz grę" użytkownik widzi kod sesji, liczbę graczy, którzy dołączyli do sesji oraz przycisk "Start gry" (Problem: Stan gry powinien być optymalnie przechowywany w pamięci podręcznej nie w bazie danych, Rozwiązanie?: Redis)
-3. Gra została wystartowana przyciskiem "Start gry". (Problem: nalezy powiadomić uzytkowników o starcie gry bez wcześniejszego requestu od użytkownika(Sockety?). PlanB: Użytkownik regularnie requestuje informacje o stanie gry)
-4. Losowany jest gracz startujący rozgrywke (przez serwer)
-5. Każdy gracz dostaje od serwera karty (Ilość kart które powinien mieć każdy użytkownik przechowywana w stanie gry)
-6. Obecny gracz dostaję opcje Zaproponować ułożenie albo Sprawdzić poprzedniego gracza (Wykluczone dla pierwszego ruchu w turze)
-7. Kroki 5-6 powtarzają się do momentu pierwszego sprawdzenia
+## Authors
 
-Alternatywne rozwiązanie: Logika rozgrywki zarządzana jest lokalnie na komputerze hosta, do którego dochodzą zapytania przez serwer od użytkowników. (Plusem tego rozwiązania jest odciążenie serwera, minusem obciążenie urządzenia użytkownika)
+-   **Mateusz Dyszewski** - [LinkedIn](https://www.linkedin.com/in/mateusz-dyszewski-56a40726a/)
+-   **Miłosz Junak** - [LinkedIn](https://www.linkedin.com/in/miloszjunak/)
 
-### Prerequisites  
+### Prerequisites
 
-For this project you need [__Node__](https://nodejs.org/en/) installed on your machine with [__Npm__](https://www.npmjs.com/) or [__Yarn__](https://yarnpkg.com).
+For this project you need [**Node**](https://nodejs.org/en/) installed on your machine with [**Npm**](https://www.npmjs.com/) or [**Yarn**](https://yarnpkg.com).
 
 ### Download
 
-You can clone this repository using __Git__:
-```bash
-git clone https://github.com/dj0nny/svelte-express-boilerplate.git
-```
+You can clone this repository using **Git**:
 
-Or download the repository [here](https://github.com/dj0nny/svelte-express-boilerplate/archive/develop.zip)
+```bash
+git clone https://github.com/Ech0n/blef.git
+```
 
 ### Quick start
 
@@ -32,27 +31,56 @@ Or download the repository [here](https://github.com/dj0nny/svelte-express-boile
 # Install dependencies for server
 npm install
 
-# Install dependencies for client
-npm run client-install
-
 # Run the client & server with concurrently
-npm run dev
-
-# Run the Express server only
-npm run serve:server
-
-# Run the Svelte client only
-npm run serve:client
-
-# Server runs on http://localhost:5678 and client on http://localhost:5000
+npm run start # Use 'npm run dev' for a development build
 ```
+
+## Implementation and Views
+
+Game has been implemented using Broker Server, meaning server only handles establishing and mantaining connections between player instances though the use of sockets.
+<br> All the game logic is performed on players machines, most of which on host's machine.
+<br> Game should be responsive for any device above 320px od width.
+
+1. When opening the website, the first view will be the "Play" View.
+   ![Play View](/docs/play_small.png/)
+    - **Join Game**: After selecting "Join Game", you will be asked to input your preferred username and a Game ID provided to you by the Lobby Host.
+    - **Create Game**: After selecting "Create Game", you will be asked to input your preferred username. After providing the username, a new lobby will open, and the Game ID will be generated and ready to be distributed to your friends.
+2. After creating or joining to the game, Lobby View will open with all currently connected players listed.
+   ![Lobby View](/docs/lobby_small.png)
+    - **Start Game**: Only available to Lobby Host. Game can be started by Lobby Host only if there are 2-5 Players in the lobby.
+    - **Close Game**: Only available to Lobby Host, closes lobby and disconnects every player in that game.
+    - **Leave Game**: Only availabe to Clients, leaves the lobby.
+3. After Lobby Host starts the game, following view will be shown.
+   ![Game View](/docs/game.png)
+    - **Raise**: Only available to person who's turn currently it is. Showcases a list of possible Hand Rankings to select. Afterwards next person has a turn.
+    - **Check**: Only available to person who's turn currently it is. Immediately checks previous Hand Ranking bet.
+    - **Host Functionality**: Additionally, Lobby Host always has available option to Close Game or Kick Player.
+4. There is also available navbar on which "What's Blef" will showcase idea and rules of the game similarly to [Rules of the Game](#rules-of-the-game).
+
+After the game ends, Lobby Host can start another game from same Lobby once everyone is ready and close winner's popup.
+
+## Rules of the Game
+
+The rules of the game are based on the ones described on page it's Polish Wikipedia page: https://pl.wikipedia.org/wiki/Blef_(gra)
+
+1. There is a standard deck of 52 cards in the game.
+
+2. At the start of the game, each player gets 1 random card.
+
+3. Once it is your turn during the round, there are 2 possible moves: Raise and Check.
+
+    **Raise** - You can choose a Hand Ranking, for example, a Pair of Aces. That means that you bet there are 2 Aces among ALL dealt cards in the current round. The new bet must have a higher ranking than the previous bet.
+
+    **Check** - You can check the previous player's bet. If his bet was correct, then you will be the one to receive another card. If his bet was incorrect, then the previous player will receive an additional card and he will begin the next round. For example, if the previous player bets there is One King and you check it, and there are no dealt kings in the current round => The Previous Player loses that round.
+
+4. A player is eliminated once they lose a round with 5 cards.
+
+5. There can be a maximum of 5 players in 1 game.
+
+6. There is a 45-second timer for each turn during a round. If it ends, a move is made automatically.
 
 ## Built with ❤️ using:
 
-* [Node.js](https://nodejs.org/en/) - JavaScript runtime built on Chrome's V8 JavaScript engine.
-* [Express](https://expressjs.com/) - Fast, unopinionated, minimalist web framework for Node.js
-* [Svelte.js](https://svelte.dev/) - Javascript framework
-
-## Contributing
-
-Pull Requests for adding features ⇄ and ★ are welcome 😎
+-   [Node.js](https://nodejs.org/en/) - JavaScript runtime built on Chrome's V8 JavaScript engine.
+-   [Express](https://expressjs.com/) - Fast, unopinionated, minimalist web framework for Node.js
+-   [Svelte.js](https://svelte.dev/) - Javascript framework
