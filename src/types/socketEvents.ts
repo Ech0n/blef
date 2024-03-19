@@ -32,10 +32,12 @@ export enum SocketEventsFromHost {
     timerUpdate = 'timerUpdate',
     cardListToPlayers = 'cardListToPlayers',
     reconnectToGame = 'reconnectToGameResponseFromHost',
+    joinResponse = 'joinResponse',
 }
 
 export enum SocketEventsFromClient {
     leaveGame = 'ClientLeaveGame',
     reconnectToGame = 'reconnectToGameRequestFromClient',
     playerReady = 'playerReady',
+    joinRequest = 'joinRequest',
 }

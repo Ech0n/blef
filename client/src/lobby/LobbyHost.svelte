@@ -4,7 +4,7 @@
     import { Player } from '../../../common/player';
     import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost } from '../../../src/types/socketEvents';
     import { initalizeGame, type CardCountTable, initalizeCountTable } from '../model/Card';
-    import type { gameStartPayload, reconnectRequestPayload, reconnectResponsePayload, gameInfo } from '../../../common/payloads';
+    import type { gameStartPayload, reconnectRequestPayload, reconnectResponsePayload, gameInfo, joinRequest, joinGameResponsePayload } from '../../../common/payloads';
     import LobbyPlayerList from './LobbyPlayerList.svelte';
     import WinnerModal from './WinnerModal.svelte';
     import { GameServer } from '../game/GameServer';
@@ -26,7 +26,7 @@
 
     onMount(() => {
         socket.on(SocketEventsCommon.newPlayerJoined, (data: { username: string; uid: string; isOnline: boolean }) => {
-            console.log('Join event', data.username);
+            console.log('Join event', data);
             if (!data) {
                 throw 'No data from server';
             }
@@ -41,7 +41,22 @@
 
             players = [...players, newPlayer];
         });
-
+        socket.on(SocketEventsFromClient.joinRequest, (data: joinRequest) => {
+            console.log('recevied request to join: ', data);
+            let response: joinGameResponsePayload = {
+                didJoin: false,
+                request: data,
+            };
+            if (!data.requesterUid) {
+                socket.emit(SocketEventsFromHost.joinResponse, response);
+                return;
+            }
+            response.didJoin = true;
+            let gameInfo: gameInfo = { players: players, thisPlayerId: data.requesterUid, thisPlayerName: data.requesterUsername, gameStarted: false };
+            response.gameInfo = gameInfo;
+            console.log('sent response: ', response);
+            socket.emit(SocketEventsFromHost.joinResponse, response);
+        });
         socket.on(SocketEventsFromClient.reconnectToGame, (reconnectRequestPayload: reconnectRequestPayload) => {
             console.log('request here ', reconnectRequestPayload);
             let reconnectingPlayer = players.find((pl) => {

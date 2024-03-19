@@ -5,7 +5,7 @@
     import { config } from '../../config';
     import { io, type Socket } from 'socket.io-client';
     import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from '../../src/types/socketEvents';
-    import type { gameInfo, joinGameResponsePayload, reconnectRequestPayload, reconnectResponsePayload } from '../../common/payloads';
+    import type { gameInfo, joinGameResponsePayload, joinRequest, reconnectRequestPayload, reconnectResponsePayload } from '../../common/payloads';
     import { onMount } from 'svelte';
     import session from 'express-session';
     import Navbar from './Navbar.svelte';
@@ -50,24 +50,16 @@
 
     function joinGame(event: CustomEvent): void {
         gameId = event.detail.gameId;
-        if (!player) {
-            username = event.detail.username;
-            const newId = Date.now().toString(); // Placeholder ID generation TODO
-            player = new Player(newId, event.detail.username);
-            player.isOnline = true; // Set the player as online upon joining
+        username = event.detail.username;
+
+        if (!gameId) {
+            return; //TODO ensure that gameId is not undefined
         }
         socket = io(serverUrl);
 
-        socket.emit(SocketEventsCommon.joinGame, {
-            gameId: gameId,
-            username: username,
-        });
-
-        commonListeners(socket);
-
         // Listen for messages from the server
-        socket.on(SocketEventsCommon.joinGame, (data: joinGameResponsePayload) => {
-            //console.log('DDDD' + data);
+        socket.on(SocketEventsFromHost.joinResponse, (data: joinGameResponsePayload) => {
+            console.log('join response', data);
             if (!data || !data.didJoin || !data.gameInfo) {
                 //TODO: Some kind of toast saying "Could not connect to game" and possibly information why
                 return;
@@ -79,8 +71,24 @@
             sessionStorage.setItem('uid', data.gameInfo.thisPlayerId);
             playerStore.set(player);
 
+            thisPlayerId = data.gameInfo.thisPlayerId;
+            username = data.gameInfo.thisPlayerName;
+
+            player = new Player(thisPlayerId, username);
+            player.isOnline = true;
+            data.gameInfo.players = [...data.gameInfo.players, player];
+
+            commonListeners(socket);
+
             loadClientGameView(data.gameInfo);
         });
+
+        let requestPayload: joinRequest = {
+            gameId: gameId,
+            requesterUsername: username,
+        };
+
+        socket.emit(SocketEventsFromClient.joinRequest, requestPayload);
     }
 
     function hostGame(event: CustomEvent): void {

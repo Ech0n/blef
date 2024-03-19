@@ -37,9 +37,17 @@ export interface gameInfo {
     };
 }
 
+export interface joinRequest {
+    requesterSocketId?: string;
+    requesterUid?: string;
+    requesterUsername: string;
+    gameId: string;
+}
+
 export interface joinGameResponsePayload {
     didJoin: boolean;
     gameInfo?: gameInfo;
+    request?: joinRequest;
 }
 
 export interface reconnectRequestPayload {

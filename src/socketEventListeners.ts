@@ -9,6 +9,7 @@ import {
     gameStartPayload,
     hitPayload,
     joinGameResponsePayload,
+    joinRequest,
     reconnectRequestPayload,
     reconnectResponsePayload,
 } from '../common/payloads';
@@ -86,6 +87,62 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
         });
     });
 
+    clientSocket.on(SocketEventsFromClient.joinRequest, (data: joinRequest) => {
+        const responsePayload: joinGameResponsePayload = {
+            didJoin: false,
+        };
+        if (!data || !data.gameId) {
+            clientSocket.emit(SocketEventsFromHost.joinResponse, responsePayload);
+            return;
+        }
+        let hostId: string | undefined = roomHosts.get(data.gameId);
+        if (!hostId) {
+            clientSocket.emit(SocketEventsFromHost.joinResponse, responsePayload);
+            return;
+        }
+        let hostSocket = io.sockets.sockets.get(hostId);
+        if (!hostSocket) {
+            clientSocket.emit(SocketEventsFromHost.joinResponse, responsePayload);
+            return;
+        }
+
+        data.requesterSocketId = clientSocket.id;
+        data.requesterUid = clientSocket.request.session.uid;
+
+        hostSocket.emit(SocketEventsFromClient.joinRequest, data);
+    });
+
+    clientSocket.on(SocketEventsFromHost.joinResponse, (data: joinGameResponsePayload) => {
+        if (!data || !data.request || !data.request.requesterSocketId || !data.gameInfo) {
+            const responsePayload: joinGameResponsePayload = {
+                didJoin: false,
+            };
+            clientSocket.emit(SocketEventsFromHost.joinResponse, responsePayload);
+            return;
+        }
+
+        let requesterSocket = io.sockets.sockets.get(data.request.requesterSocketId);
+        if (!requesterSocket) {
+            const responsePayload: joinGameResponsePayload = {
+                didJoin: false,
+            };
+            clientSocket.emit(SocketEventsFromHost.joinResponse, responsePayload);
+            return;
+        }
+        requesterSocket.join(data.request.gameId);
+
+        requesterSocket.emit(SocketEventsFromHost.joinResponse, data);
+
+        let newPlayerPayload = {
+            username: data.request.requesterUsername,
+            uid: data.gameInfo.thisPlayerId,
+            isOnline: true,
+        };
+        console.log(newPlayerPayload, data.request.requesterUsername, data.request);
+
+        requesterSocket.to(data.request.gameId).emit(SocketEventsCommon.newPlayerJoined, newPlayerPayload);
+    });
+
     clientSocket.on(SocketEventsCommon.joinGame, (data) => {
         if (!data) {
             const responsePayload: joinGameResponsePayload = {
@@ -94,7 +151,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
             clientSocket.emit(SocketEventsCommon.joinGame, responsePayload);
             return;
         }
-        blefServer.handlePlayerJoinRequest(clientSocket, session, data.gameId, data.username);
+        blefServer.handlePlayerJoinResponse(clientSocket, session, data.gameId, data.username);
     });
 
     clientSocket.on(SocketEventsFromClient.leaveGame, () => {

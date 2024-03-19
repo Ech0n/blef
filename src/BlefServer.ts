@@ -170,7 +170,7 @@ export class BlefServer {
         console.log('users in room ', this.io.sockets.adapter.rooms.get(session.gameId));
     }
 
-    handlePlayerJoinRequest(socket: Socket, session: SessionData, gameId: string, username: string) {
+    handlePlayerJoinResponse(socket: Socket, session: SessionData, gameId: string, username: string) {
         let responsePayload: joinGameResponsePayload = {
             didJoin: false,
         };
