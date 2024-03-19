@@ -307,6 +307,10 @@
         }
     }
 
+    const shortenUsername = (username: string) => {
+        return username.length > 5 ? `${username.slice(0, 5)}...` : username;
+    };
+
     $: if (game.previousBet) {
         betName = getBetName();
     }
@@ -338,9 +342,13 @@
         {#each game.players as { username, loses, uid }}
             <div class="player-names">
                 {#if uid === game.currentPlayer}
-                    <strong> > {username}</strong>
+                    <strong>
+                        > <span class="full-name">{username}</span>
+                        <span class="short-name">{shortenUsername(username)}</span>
+                    </strong>
                 {:else}
-                    {username}
+                    <span class="full-name">{username}</span>
+                    <span class="short-name">{shortenUsername(username)}</span>
                 {/if}
                 | {1 + loses} Cards 🂠
                 {#if isHost && kickPlayer !== undefined && thisPlayerId !== uid}
@@ -388,7 +396,7 @@
     {/if}
     <div class="center-items">
         <div class="bet-container">
-            <div>
+            <div class="bet-name-container">
                 <p>Current bet:</p>
                 {#if game.previousBet}
                     {betName}
@@ -421,7 +429,7 @@
         cursor: pointer;
         color: black;
         border: 2px solid gray;
-        padding: 5px 0;
+        padding: 3px 0;
         border-radius: 100px;
     }
     .kick-button {
@@ -482,6 +490,13 @@
         justify-content: space-around;
         align-items: center;
     }
+    .bet-name-container {
+        background-color: rgb(32, 31, 32);
+        margin-top: 10px;
+        padding: 0 15px 10px 15px;
+        border-radius: 10px;
+        border: 2px solid rgb(46, 45, 45);
+    }
 
     .timer-container {
         color: aliceblue;
@@ -526,6 +541,28 @@
     .stronger {
         font-size: 45px;
     }
+    .short-name {
+        display: none; /* Hide shortened names by default */
+    }
+
+    @media (max-width: 500px) {
+        .full-name {
+            display: none; /* Hide full names on narrow screens */
+        }
+        .short-name {
+            display: inline; /* Show shortened names on narrow screens */
+        }
+        .stronger {
+            font-size: 15px;
+        }
+        .timer-container {
+            font-size: 40px;
+            margin-left: 10px;
+        }
+        .bet-name-container {
+            width: 200px;
+        }
+    }
 
     @media (max-width: 800px) {
         .cards-width-with-prev {
@@ -548,8 +585,9 @@
             font-size: 20px;
         }
         .helper {
+            top: 0;
             font-size: 30px;
-            padding: 4px 0px;
+            padding: 2px 0px;
         }
     }
 </style>

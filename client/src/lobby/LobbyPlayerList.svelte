@@ -3,12 +3,16 @@
 
     export let players: Player[];
     export let thisPlayerId: string;
+
+    // Function to truncate usernames
+    const truncateUsername = (username: string) => (username.length > 5 ? `${username.slice(0, 5)}...` : username);
 </script>
 
 <div class="playerList">
     {#each players as player}
         <div class="playerItem">
-            {player.username}
+            <span class="full-name">{player.username}</span>
+            <span class="short-name">{truncateUsername(player.username)}</span>
             {#if player.isOnline || player.uid !== thisPlayerId}
                 🟢
             {:else}
@@ -34,5 +38,24 @@
         padding: 10px 20px 10px 20px;
         margin: 20px 0 15px 0;
         white-space: nowrap;
+        position: relative;
+    }
+
+    .full-name {
+        display: inline;
+    }
+
+    .short-name {
+        display: none;
+    }
+
+    @media (max-width: 500px) {
+        .full-name {
+            display: none;
+        }
+
+        .short-name {
+            display: inline;
+        }
     }
 </style>

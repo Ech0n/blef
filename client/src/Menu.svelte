@@ -43,5 +43,6 @@
 <style>
     .start-close {
         color: aliceblue;
+        margin-bottom: 10px;
     }
 </style>

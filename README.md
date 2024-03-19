@@ -79,6 +79,12 @@ The rules of the game are based on the ones described on page it's Polish Wikipe
 
 6. There is a 45-second timer for each turn during a round. If it ends, a move is made automatically.
 
+## Planned features:
+
+-   Full UI Design Rework
+-   Possibility to play against AI
+-   Accounts
+
 ## Built with ❤️ using:
 
 -   [Node.js](https://nodejs.org/en/) - JavaScript runtime built on Chrome's V8 JavaScript engine.

@@ -124,7 +124,7 @@
     }
 </script>
 
-<h1>
+<div class="main-content">
     {#if gameView}
         {#await gameView then { default: GameClient }}
             <GameClient on:leave={leaveGame} on:gameFinished={showWinner} {gameId} {socket} {thisPlayerId} isHost={false} kickPlayer={() => {}} {game} closeGame={() => {}} />
@@ -139,7 +139,7 @@
             <button class="start-close" on:click={leaveGame}>Leave</button>
         </div>
     {/if}
-</h1>
+</div>
 <WinnerModal
     {showModal}
     {winnerUsername}
@@ -151,7 +151,26 @@
 />
 
 <style>
+    .main-content {
+        position: absolute;
+        top: 100px;
+        min-height: calc(95% - 100px);
+        font-size: 40px;
+        font-weight: bold;
+        margin-top: 0.67em;
+        margin-bottom: 0.67em;
+        margin-left: 0;
+        margin-right: 0;
+        font-family: inherit;
+        line-height: 1.2;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+    }
+
     .start-close {
+        margin-bottom: 10px;
         color: aliceblue;
     }
 </style>
