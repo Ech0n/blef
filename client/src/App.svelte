@@ -10,6 +10,7 @@
     import session from 'express-session';
     import Navbar from './Navbar.svelte';
     import Home from './Home.svelte';
+    import Account from './Account.svelte';
 
     let gameView: Promise<any> | undefined;
     let activeView: string = 'menu';
@@ -174,7 +175,7 @@
         {:else if activeView === 'menu'}
             <Menu on:joinGame={joinGame} on:createGame={hostGame} />
         {:else if activeView === 'settings'}
-            <!-- Currently its called settings but It would more likely be account in near future -->
+            <Account />
         {:else if activeView === 'info'}
             <Home />
         {/if}

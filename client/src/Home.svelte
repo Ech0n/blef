@@ -4,6 +4,10 @@
 
     const cardImageHandler = new CardImageHandler();
     const handRankings: string[] = ['one', 'pair', 'three', 'double', 'street', 'full', 'color', 'four', 'flush', 'royal'];
+    const linkedInUrls = {
+        mateusz: 'https://www.linkedin.com/in/mateusz-dyszewski-56a40726a/',
+        milosz: 'https://www.linkedin.com/in/miloszjunak/',
+    };
 </script>
 
 <div class="main-container">
@@ -12,7 +16,7 @@
         <p>Blef is a Polish card game, based on deceiving other players. Best played face to face or with Facecams.</p>
     </div>
     <div class="game-info-container">
-        <p>1. There is a stand deck of 52 cards in game.</p>
+        <p>1. There is a standard deck of 52 cards in game.</p>
         <p>2. At the start of the game each players gets 1 random card.</p>
         <p>
             3. One it is Your turn during the round, there are 2 possible moves: Raise and Check.
@@ -46,8 +50,11 @@
         </ul>
     </div>
     <div class="authors-container">
-        <h3>Made by: Mateusz Dyszewski and Miłosz Junak</h3>
-        <p>github or linked in idk</p>
+        <h3>
+            Made by:
+            <a href={linkedInUrls.mateusz}>Mateusz Dyszewski</a> and
+            <a href={linkedInUrls.milosz}>Miłosz Junak</a>
+        </h3>
     </div>
 </div>
 

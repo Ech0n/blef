@@ -16,7 +16,7 @@
 <nav>
     <button on:click={() => changeView('info')}>What's Blef?</button>
     <button on:click={() => changeView('menu')}>Play</button>
-    <button on:click={() => changeView('settings')}>Settings</button>
+    <button on:click={() => changeView('settings')}>Account</button>
 </nav>
 
 <style>
