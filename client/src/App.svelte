@@ -56,6 +56,9 @@
         if (!gameId) {
             return; //TODO ensure that gameId is not undefined
         }
+        if (!username) {
+            return;
+        }
         socket = io(serverUrl);
 
         // Listen for messages from the server
@@ -77,7 +80,7 @@
 
             player = new Player(thisPlayerId, username);
             player.isOnline = true;
-            data.gameInfo.players = [...data.gameInfo.players, player];
+            // data.gameInfo.players = [...data.gameInfo.players, player];
 
             commonListeners(socket);
 

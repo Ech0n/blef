@@ -96,11 +96,10 @@ export class BlefServer {
     }
 
     getRoomId(socket: Socket): string {
-        const req: IncomingMessage = socket.request;
-        if (!req.session || !req.session.gameId) {
+        if (!socket.gameId) {
             throw 'request dosent contain session or gameId';
         }
-        return req.session.gameId;
+        return socket.gameId;
     }
 
     askHostForReconnection(socket: Socket, request: reconnectRequestPayload) {

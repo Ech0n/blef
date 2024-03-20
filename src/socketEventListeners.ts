@@ -27,6 +27,7 @@ declare module 'express-session' {
 declare module 'socket.io' {
     interface Socket {
         player?: IPlayer;
+        gameId: string;
     }
 }
 
@@ -73,6 +74,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
         // roomIds.set(session.uid, gameId);
         clientSocket.join(gameId);
         session.gameId = gameId;
+        clientSocket.gameId = gameId;
 
         clientSocket.player = {
             username: session.username,
@@ -130,6 +132,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
             return;
         }
         requesterSocket.join(data.request.gameId);
+        requesterSocket.gameId = data.request.gameId;
 
         requesterSocket.emit(SocketEventsFromHost.joinResponse, data);
 

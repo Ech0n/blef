@@ -51,8 +51,21 @@
                 socket.emit(SocketEventsFromHost.joinResponse, response);
                 return;
             }
+
+            let playersList = players;
+            let wasPlayerFound = playersList.find((el) => {
+                el.username == data.requesterUsername;
+            });
+
+            console.log('Found player : ', wasPlayerFound, 'players', playersList);
+            if (!wasPlayerFound) {
+                let newPlayer = new Player(data.requesterUid, data.requesterUsername);
+                newPlayer.isOnline = true;
+                playersList = [...players, newPlayer];
+            }
+
             response.didJoin = true;
-            let gameInfo: gameInfo = { players: players, thisPlayerId: data.requesterUid, thisPlayerName: data.requesterUsername, gameStarted: false };
+            let gameInfo: gameInfo = { players: playersList, thisPlayerId: data.requesterUid, thisPlayerName: data.requesterUsername, gameStarted: false };
             response.gameInfo = gameInfo;
             console.log('sent response: ', response);
             socket.emit(SocketEventsFromHost.joinResponse, response);
