@@ -95,7 +95,7 @@ export class BlefServer {
 
     getRoomId(socket: Socket): string {
         if (!socket.gameId) {
-            throw 'request dosent contain session or gameId';
+            throw 'request dosent contain session or gameId' + new Error().stack;
         }
         return socket.gameId;
     }

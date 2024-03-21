@@ -97,7 +97,7 @@
                 dispatch('leave');
             } else {
                 game.removePlayer(playerId);
-                game = game; // I dont think it changes anything
+                game = game;
                 dispatch('playerLeft', playerId);
             }
         });

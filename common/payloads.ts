@@ -32,7 +32,7 @@ export interface gameInfo {
     gameStarted: boolean;
     startedGameInfo?: {
         currentPlayer: string;
-        currentBet: HandInfo;
+        currentBet: HandInfo | null;
         newHand: Card[];
     };
 }

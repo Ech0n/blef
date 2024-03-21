@@ -96,9 +96,7 @@
                         return;
                     }
                     gameInfo.gameStarted = true;
-                    if (!game.previousBet) {
-                        throw 'There should be a previous bet!?';
-                    }
+
                     gameInfo.startedGameInfo = {
                         currentBet: game.previousBet,
                         currentPlayer: game.currentPlayer,

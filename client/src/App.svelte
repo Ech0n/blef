@@ -142,7 +142,7 @@
         };
         socket.emit(SocketEventsFromClient.reconnectToGame, request);
         socket.on(SocketEventsFromHost.reconnectToGame, (response: reconnectResponsePayload) => {
-            // console.log('reconnection response ', response);
+            console.log('reconnection response ', response);
 
             if (!response.didReconnect || !response.gameInfo) {
                 socket.disconnect();
