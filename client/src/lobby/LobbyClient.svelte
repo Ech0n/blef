@@ -53,6 +53,10 @@
         }
 
         socket.on(SocketEventsCommon.newPlayerJoined, (data: { username: string; uid: string }) => {
+            // let searchForPlayer = players.find((el) => el.username === data.username);
+            // if (searchForPlayer) {
+            //     return;
+            // }
             console.debug('New player in lobby name:', data.username);
             let newPlayer = new Player(data.uid, data.username);
             newPlayer.isOnline = true;

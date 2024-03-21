@@ -149,8 +149,7 @@
             socket.on(SocketEventsCommon.checkToPlayers, (data: checkToPlayersPayload) => {
                 console.log('recieved check', data);
                 game.check(data);
-                // OPTIMIZE maybe shoudld fix
-                game = game; // I dont think it changes anything //UGLY
+                game = game;
                 game.eliminatedPlayers.forEach((pl) => {
                     if (pl.uid == thisPlayerId) {
                         eliminated = true;

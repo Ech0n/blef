@@ -30,7 +30,10 @@
             if (!data) {
                 throw 'No data from server';
             }
-
+            let searchForPlayer = players.find((el) => el.username === data.username);
+            if (searchForPlayer) {
+                return;
+            }
             if (gameView) {
                 waitingPlayers++;
             } else {
@@ -49,14 +52,14 @@
                 didJoin: false,
                 request: data,
             };
-            if (!data.requesterUid) {
+            if (!data || !data.requesterUid) {
                 socket.emit(SocketEventsFromHost.joinResponse, response);
                 return;
             }
 
             let playersList = players;
             let wasPlayerFound = playersList.find((el) => {
-                el.username == data.requesterUsername;
+                return el.username === data.requesterUsername;
             });
 
             console.log('Found player : ', wasPlayerFound, 'players', playersList);
@@ -70,11 +73,30 @@
                 let newPlayer = new Player(data.requesterUid, data.requesterUsername);
                 newPlayer.isOnline = true;
                 playersList = [...players, newPlayer];
+            } else {
+                //Its not udnefined
+                //@ts-ignore
+                response.request.requesterUid = wasPlayerFound.uid;
             }
 
             response.didJoin = true;
             let gameInfo: gameInfo = { players: playersList, thisPlayerId: data.requesterUid, thisPlayerName: data.requesterUsername, gameStarted: false };
+
+            if (gameView) {
+                let hand = game.hands.get(data.requesterUid);
+                if (hand) {
+                    console.log('Couldnt find cards for reconnecting player');
+                    gameInfo.gameStarted = true;
+
+                    gameInfo.startedGameInfo = {
+                        currentBet: game.previousBet,
+                        currentPlayer: game.currentPlayer,
+                        newHand: hand,
+                    };
+                }
+            }
             response.gameInfo = gameInfo;
+
             console.log('sent response: ', response);
             socket.emit(SocketEventsFromHost.joinResponse, response);
         });

@@ -83,7 +83,8 @@
             // data.gameInfo.players = [...data.gameInfo.players, player];
 
             commonListeners(socket);
-
+            startedGameInfo = data.gameInfo.startedGameInfo;
+            console.log(startedGameInfo);
             loadClientGameView(data.gameInfo);
         });
 

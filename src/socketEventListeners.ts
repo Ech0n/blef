@@ -121,6 +121,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
         requesterSocket.join(data.request.gameId);
         requesterSocket.gameId = data.request.gameId;
         requesterSocket.player = new Player(data.request.requesterUid, data.request.requesterUsername);
+        requesterSocket.uid = data.request.requesterUid;
 
         requesterSocket.emit(SocketEventsFromHost.joinResponse, data);
 
