@@ -61,6 +61,12 @@
 
             console.log('Found player : ', wasPlayerFound, 'players', playersList);
             if (!wasPlayerFound) {
+                if (game) {
+                    socket.emit(SocketEventsFromHost.joinResponse, response);
+
+                    return;
+                }
+
                 let newPlayer = new Player(data.requesterUid, data.requesterUsername);
                 newPlayer.isOnline = true;
                 playersList = [...players, newPlayer];
