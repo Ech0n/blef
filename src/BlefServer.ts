@@ -48,10 +48,8 @@ export class BlefServer {
     }
 
     setupConnection(socket: Socket) {
-        const req: IncomingMessage = socket.request;
-        const session = req.session;
-        if (!session.uid) {
-            session.uid = uuidv4();
+        if (!socket.uid) {
+            socket.uid = uuidv4();
         }
     }
 
@@ -147,8 +145,8 @@ export class BlefServer {
 
         const session = req.session;
 
-        session.gameId = responsePayload.reconnectRequest.gameId;
-        session.uid = responsePayload.reconnectRequest.requesterUid;
+        clientSocket.gameId = responsePayload.reconnectRequest.gameId;
+        clientSocket.uid = responsePayload.reconnectRequest.requesterUid;
         if (responsePayload.gameInfo) {
             clientSocket.player = {
                 username: responsePayload.gameInfo.thisPlayerName,
@@ -166,68 +164,13 @@ export class BlefServer {
         this.io.in(responsePayload.reconnectRequest.gameId).emit(SocketEventsFromServer.playerReconnected, { uid: responsePayload.reconnectRequest.requesterUid });
         console.log('was here');
         clientSocket.join(responsePayload.reconnectRequest.gameId);
-        console.log('users in room ', this.io.sockets.adapter.rooms.get(session.gameId));
     }
 
-    handlePlayerJoinResponse(socket: Socket, session: SessionData, gameId: string, username: string) {
-        let responsePayload: joinGameResponsePayload = {
-            didJoin: false,
-        };
-
-        if (!gameId || !username) {
-            socket.emit(SocketEventsCommon.joinGame, responsePayload);
-            return;
-        }
-
-        session.username = username;
-
-        if (!this.rooms.has(gameId)) {
-            socket.emit(SocketEventsCommon.joinGame, responsePayload);
-            console.debug('room does not exist', this.rooms);
-            socket.disconnect(true);
-            return;
-        }
-
-        session.gameId = gameId;
-        let playersInRoom: Player[] = this.getPlayersInRoom(gameId);
-
-        socket.player = {
-            username: session.username,
-            uid: session.uid,
-            isOnline: true,
-            isHost: false,
-        };
-
-        socket.join(gameId);
-
-        for (let player of playersInRoom) {
-            if (player.username === session.username) {
-                console.debug('Player with that name already in game.', this.rooms);
-                socket.disconnect(true); // it needs to be replaced with something else but idk TODO
-                return;
-            }
-        }
-
-        playersInRoom = this.getPlayersInRoom(gameId);
-
-        const gameInfoPayload: gameInfo = { players: playersInRoom, thisPlayerId: session.uid, thisPlayerName: session.username, gameStarted: false };
-        responsePayload.didJoin = true;
-        responsePayload.gameInfo = gameInfoPayload;
-
-        socket.emit(SocketEventsCommon.joinGame, responsePayload);
-
-        socket.to(gameId).emit(SocketEventsCommon.newPlayerJoined, {
-            username: session.username,
-            uid: session.uid,
-            isOnline: true,
-        });
-    }
-
-    disconnectPlayer(session: SessionData, playerSocket: Socket) {
-        if (session.gameId) {
-            playerSocket.leave(session.gameId);
-            playerSocket.to(session.gameId).emit(SocketEventsCommon.playerLeftGame, { uid: session.uid });
-            session.gameId = null;
+    disconnectPlayer(playerSocket: Socket) {
+        if (playerSocket.gameId) {
+            playerSocket.leave(playerSocket.gameId);
+            playerSocket.to(playerSocket.gameId).emit(SocketEventsCommon.playerLeftGame, { uid: playerSocket.uid });
+            playerSocket.gameId = null;
         }
     }
 

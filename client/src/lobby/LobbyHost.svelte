@@ -40,6 +40,8 @@
             newPlayer.isOnline = data.isOnline;
 
             players = [...players, newPlayer];
+
+            console.log(players);
         });
         socket.on(SocketEventsFromClient.joinRequest, (data: joinRequest) => {
             console.log('recevied request to join: ', data);

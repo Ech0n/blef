@@ -82,10 +82,11 @@
             if (!game.gameClosed) {
                 game.hit(data.move);
                 game = game;
-                showButtons = false; // This is necessary to avoid spamming check
-                sleep(3000).then(() => {
-                    showButtons = true;
-                });
+                // showButtons = false; // This is necessary to avoid spamming check
+                // sleep(3000).then(() => {
+                //     showButtons = true;
+                // });
+                showButtons = true;
             } else {
                 stopRoundTimer();
             }
@@ -122,6 +123,7 @@
                 socket.emit(SocketEventsCommon.checkToPlayers, checkResult);
                 // console.log(previousCards);
                 socket.emit(SocketEventsFromHost.cardListToPlayers, previousCards);
+                console.log('sending to players: ', previousCards, checkResult);
                 game.eliminatedPlayers.forEach((pl) => {
                     if (pl.uid == thisPlayerId) {
                         eliminated = true;
