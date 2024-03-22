@@ -6,46 +6,50 @@
 
     const cardImageHandler = new CardImageHandler();
     console.log(hand);
+    let spread = '35px';
 </script>
 
 <div class="hand">
     {#each hand as card, index}
         <!-- svelte-ignore a11y-missing-attribute -->
-        <img class="karta" id="card{index}" src={cardImageHandler.getCardImage(card[0] + ' ' + card[1])} />
+        <img style="--spread:{spread}" class="karta" id="card{index}" src={cardImageHandler.getCardImage(card[0] + ' ' + card[1])} />
     {/each}
 </div>
 
 <style>
     .hand {
-        width: 400px;
+        width: 100vw;
+        height: 240px;
+        margin-top: 10px;
     }
+
     .karta {
-        position: absolute;
-        width: 160px;
+        position: relative;
+        width: 180px;
         box-shadow: -1px 1px 12px black;
         border-radius: 7px;
     }
     #card0 {
-        left: 150px;
+        left: 120px;
         z-index: 2;
     }
     #card1 {
-        left: 120px;
+        left: calc(120px - var(--spread));
         z-index: 1;
         transform: translateY(10px) rotate(-15deg);
     }
     #card2 {
-        left: 190px;
+        left: calc(130px + var(--spread));
         transform: translateY(10px) rotate(15deg);
         z-index: 3;
     }
     #card3 {
-        left: 80px;
-        transform: translateY(30px) rotate(-25deg);
+        left: calc(120px - calc(var(--spread) + var(--spread)));
+        transform: translateY(30px) rotate(-30deg);
         z-index: 0;
     }
     #card4 {
-        left: 250px;
+        left: calc(140px + calc(var(--spread) + var(--spread)));
         transform: translateY(30px) rotate(25deg);
 
         z-index: 3;

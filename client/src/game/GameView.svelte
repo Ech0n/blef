@@ -331,7 +331,7 @@
             {/if}
         {/if}
     </h3> -->
-    <ul>
+    <!-- <ul>
         {#each game.players as { username, loses, uid }}
             <div class="player-names">
                 {#if uid === game.currentPlayer}
@@ -348,20 +348,20 @@
         {#each game.eliminatedPlayers as { username }}
             <p class="eliminated">{username}</p>
         {/each}
-    </ul>
-    <div>
+    </ul> -->
+    <!-- tutaj paste -->
+    <!-- <div>
         {#if !eliminated}
             <div class="cards-container">
                 <div class={previousCards ? 'cards-width-with-prev' : 'cards-width-default'}>
                     <p>Your hand:</p>
-                    <CardsInHand hand={game.hand} />
                 </div>
                 {#if previousCards}
                     <div class="prev-cards-width">
                         <p style="font-size: 15px">Cards from previous round:</p>
                         <div class="prev-cards-container">
                             {#each readyPreviousCards as card}
-                                <!-- svelte-ignore a11y-missing-attribute -->
+                                svelte-ignore a11y-missing-attribute
                                 <img src={cardImageHandler.getCardImage(card)} />
                                 <br />
                             {/each}
@@ -370,8 +370,8 @@
                 {/if}
             </div>
         {/if}
-    </div>
-    {#if game.currentPlayer == thisPlayerId && showButtons}
+    </div> -->
+    <!-- {#if game.currentPlayer == thisPlayerId && showButtons}
         <p>Your turn</p>
         <div style="display:flex; justify-content:center">
             <button class="start-close" on:click={() => (showModal = true)}>Raise</button>
@@ -402,10 +402,22 @@
     {/if}
     {#if showHelpModal}
         <HelpModal on:close={() => (showHelpModal = false)} />
-    {/if}
+    {/if} -->
+    <div class="hand-wrapper">
+        <CardsInHand hand={game.hand} />
+    </div>
 </div>
 
 <style>
+    .hand-wrapper {
+        position: absolute;
+        bottom: 0px;
+        display: flex;
+        overflow: hidden;
+    }
+    /* .hand-inside {
+        flex-wrap: nowrap;
+    } */
     .helper {
         position: absolute;
         top: 1%;
@@ -423,8 +435,9 @@
     }
     .game-container {
         position: absolute;
-        top: 70px;
+        top: 0px;
         left: 0;
+        height: 100%;
         width: 100%;
         background-color: #070c07;
     }
