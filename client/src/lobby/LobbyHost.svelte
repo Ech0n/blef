@@ -64,7 +64,7 @@
 
             console.log('Found player : ', wasPlayerFound, 'players', playersList);
             if (!wasPlayerFound) {
-                if (game) {
+                if (gameView) {
                     socket.emit(SocketEventsFromHost.joinResponse, response);
 
                     return;
@@ -77,6 +77,12 @@
                 //Its not udnefined
                 //@ts-ignore
                 response.request.requesterUid = wasPlayerFound.uid;
+                if (!gameView || wasPlayerFound.isOnline) {
+                    socket.emit(SocketEventsFromHost.joinResponse, response);
+                    return;
+                } else {
+                    wasPlayerFound.isOnline = true;
+                }
             }
 
             response.didJoin = true;

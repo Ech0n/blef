@@ -563,6 +563,12 @@
         .bet-name-container {
             width: 200px;
         }
+        .bet-container {
+            width: 300px;
+        }
+        .start-close {
+            font-size: 30px;
+        }
     }
 
     @media (max-width: 800px) {
