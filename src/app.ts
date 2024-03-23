@@ -1,10 +1,9 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 
-import api from './api'; // Ensure this is exported correctly in the respective file
-import { notFound, errorHandler } from './middlewares/errors.middleware'; // Ensure these are exported correctly
+import api from './api';
+import { notFound, errorHandler } from './middlewares/errors.middleware';
 import { config } from '../config';
 
 const app = express();
@@ -37,7 +36,7 @@ app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
     res.status(200).json({
-        message: '📦 Svelte Express Boilerplate 📦',
+        message: '...',
     });
 });
 

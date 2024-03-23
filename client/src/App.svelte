@@ -63,7 +63,7 @@
 
         // Listen for messages from the server
         socket.on(SocketEventsFromHost.joinResponse, (data: joinGameResponsePayload) => {
-            console.log('join response', data);
+            //console.log('join response', data);
             if (!data || !data.didJoin || !data.gameInfo) {
                 //TODO: Some kind of toast saying "Could not connect to game" and possibly information why
                 return;
@@ -84,7 +84,7 @@
 
             commonListeners(socket);
             startedGameInfo = data.gameInfo.startedGameInfo;
-            console.log(startedGameInfo);
+            //console.log(startedGameInfo);
             loadClientGameView(data.gameInfo);
         });
 
@@ -143,7 +143,7 @@
         };
         socket.emit(SocketEventsFromClient.reconnectToGame, request);
         socket.on(SocketEventsFromHost.reconnectToGame, (response: reconnectResponsePayload) => {
-            console.log('reconnection response ', response);
+            //console.log('reconnection response ', response);
 
             if (!response.didReconnect || !response.gameInfo) {
                 socket.disconnect();
@@ -170,7 +170,9 @@
 </script>
 
 <main>
-    <Navbar on:viewChange={handleViewChange} {activeView} />
+    {#if !gameView}
+        <Navbar on:viewChange={handleViewChange} {activeView} />
+    {/if}
     <div class="main-content">
         {#if gameView}
             {#await gameView then { default: LobbyView }}

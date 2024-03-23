@@ -1,11 +1,6 @@
 import app from './app';
-import { Socket, Server as SocketIOServer } from 'socket.io';
 import http from 'http';
 import session from 'express-session';
-import { SocketEventsCommon } from './types/socketEvents';
-import { v4 as uuidv4 } from 'uuid';
-import { Player, IPlayer, createPlayerFromIPlayer } from '../common/player';
-import { checkToPlayersPayload, checkToServerPayload, gameStartPayload, hitPayload } from '../common/payloads';
 import { config } from '../config';
 import { BlefServer } from './BlefServer';
 const port = config.BACKENDSERVERPORT || 5678;

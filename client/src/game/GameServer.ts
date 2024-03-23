@@ -78,7 +78,7 @@ export class GameServer extends Game {
 
         this.players[this.currentPlayerIndx].loses += 1;
 
-        if (this.players[this.currentPlayerIndx].loses == 2) {
+        if (this.players[this.currentPlayerIndx].loses == 5) {
             this.eliminatedPlayers.push(this.players[this.currentPlayerIndx]);
             this.players.splice(this.currentPlayerIndx, 1);
             this.playerCount -= 1;

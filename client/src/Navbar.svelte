@@ -16,7 +16,6 @@
 <nav>
     <button on:click={() => changeView('info')}>What's Blef?</button>
     <button on:click={() => changeView('menu')}>Play</button>
-    <button on:click={() => changeView('settings')}>Account</button>
 </nav>
 
 <style>
@@ -37,7 +36,7 @@
         background-color: transparent;
         border: 1px solid transparent;
         transition: background-color 0.3s;
-        width: 33%;
+        width: 50%;
         color: aliceblue;
         height: 100%;
         border-radius: 0;
@@ -53,7 +52,12 @@
 
     @media (max-width: 1000px) {
         button {
-            font-size: 22px;
+            font-size: 32px;
+        }
+    }
+    @media (max-width: 500px) {
+        button {
+            font-size: 24px;
         }
     }
 </style>
