@@ -11,6 +11,8 @@
         });
         dispatch('viewChange', event);
     }
+
+    $: dummyUsage = activeView;
 </script>
 
 <nav>

@@ -1,18 +1,16 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import path from 'path';
-
-import api from './api';
+import dotenv from 'dotenv';
 import { notFound, errorHandler } from './middlewares/errors.middleware';
 import { config } from '../config';
+import path from 'path';
+
+dotenv.config();
 
 const app = express();
 
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static('client/public'));
-    app.get('*', (req: Request, res: Response) => {
-        res.sendFile(path.resolve(__dirname, 'client', 'public', 'index.html'));
-    });
+    app.use(express.static(path.join(__dirname, '../client/public')));
 }
 
 app.use(
@@ -33,14 +31,6 @@ app.use(
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-app.get('/', (req: Request, res: Response) => {
-    res.status(200).json({
-        message: '...',
-    });
-});
-
-app.use('/api/v1', api);
 app.use(notFound);
 app.use(errorHandler);
 

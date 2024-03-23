@@ -331,14 +331,12 @@
         <!-- Man autoformatter... what the fuck is this-->
         ❔
     </div>
-    <h3>
-        {#if gameId}
-            {#if isHost && kickPlayer !== undefined}
-                Game ID: {gameId}
-                <button class="kick-button" style="padding: 7px 4px 1px 4px; font-size: 32px" on:click={() => closeGame()}>Close Game</button>
-            {/if}
-        {/if}
-    </h3>
+    {#if gameId && isHost && kickPlayer !== undefined}
+        <h3>
+            Game ID: {gameId}
+            <button class="kick-button" style="padding: 7px 4px 1px 4px; font-size: 32px" on:click={() => closeGame()}>Close Game</button>
+        </h3>
+    {/if}
     <ul>
         {#each game.players as { username, loses, uid }}
             <div class="player-names">
@@ -406,7 +404,7 @@
                 {#if game.previousBet}
                     {betName}
                 {:else}
-                    <p class="stronger">No bet has been made yet</p>
+                    No bet has been made yet
                 {/if}
             </div>
             <div class="timer-container">
@@ -447,6 +445,10 @@
         top: 0;
         left: 0;
         width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
     }
     .eliminated {
         color: rgb(167, 167, 167);
@@ -475,8 +477,8 @@
     }
     .your-turn-container {
         background-color: rgb(117, 25, 25);
-        padding: 10px;
-        border-radius: 5px 8px;
+        padding: 0 8px 3px 8px;
+        border-radius: 10px;
     }
 
     .start-close {
@@ -551,9 +553,6 @@
         white-space: nowrap;
         font-size: 32px;
     }
-    .stronger {
-        font-size: 45px;
-    }
     .short-name {
         display: none; /* Hide shortened names by default */
     }
@@ -565,15 +564,13 @@
         .short-name {
             display: inline; /* Show shortened names on narrow screens */
         }
-        .stronger {
-            font-size: 15px;
-        }
         .timer-container {
             font-size: 40px;
             margin-left: 10px;
         }
         .bet-name-container {
             width: 200px;
+            font-size: 28px;
         }
         .bet-container {
             width: 300px;
@@ -583,6 +580,12 @@
         }
         .prev-cards-width {
             max-width: 100px;
+        }
+        .your-turn-container {
+            width: 330px;
+        }
+        .game-container {
+            margin-top: 30px;
         }
     }
 
@@ -602,9 +605,6 @@
         }
         strong {
             font-size: 28px;
-        }
-        .stronger {
-            font-size: 20px;
         }
         .helper {
             top: 0;
