@@ -52,7 +52,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
 
     clientSocket.on(SocketEventsCommon.createGame, (data) => {
         if (!data) {
-            console.log('No user name provided!', data);
+            //console.log('No user name provided!', data);
             throw 'No user name';
         }
 
@@ -130,13 +130,13 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
             uid: data.gameInfo.thisPlayerId,
             isOnline: true,
         };
-        console.log(newPlayerPayload, data.request.requesterUsername, data.request);
+        //console.log(newPlayerPayload, data.request.requesterUsername, data.request);
 
         requesterSocket.to(data.request.gameId).emit(SocketEventsCommon.newPlayerJoined, newPlayerPayload);
     });
 
     clientSocket.on(SocketEventsFromClient.leaveGame, () => {
-        console.log('Player trying to leave a game: ', clientSocket.uid, clientSocket.gameId);
+        //console.log('Player trying to leave a game: ', clientSocket.uid, clientSocket.gameId);
 
         clientSocket.emit(SocketEventsCommon.playerLeftGame, { uid: clientSocket.uid });
         clientSocket.disconnect();
@@ -149,7 +149,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
 
         if (roomHosts.get(blefServer.getRoomId(clientSocket)) != clientSocket.id) {
             clientSocket.emit(SocketEventsCommon.gameStarted, false);
-            console.log('Could not start the game, (user is not a host)');
+            //console.log('Could not start the game, (user is not a host)');
             return;
         }
 
@@ -178,7 +178,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
     clientSocket.on(SocketEventsCommon.checkToPlayers, (payload: checkToServerPayload) => {
         if (roomHosts.get(blefServer.getRoomId(clientSocket)) != clientSocket.id) {
             clientSocket.emit(SocketEventsCommon.gameStarted, false);
-            console.log('Could not check, (user is not a host)');
+            //console.log('Could not check, (user is not a host)');
             return;
         }
 
@@ -186,10 +186,10 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
         if (!clients) {
             return;
         }
-        console.log('clients in room', clients);
+        //console.log('clients in room', clients);
         for (const clientId of clients) {
             const playerSocket = io.sockets.sockets.get(clientId);
-            console.log('plas scoke', playerSocket, playerSocket?.player);
+            //console.log('plas scoke', playerSocket, playerSocket?.player);
             if (playerSocket && playerSocket.player) {
                 let newPayload: checkToPlayersPayload = {
                     newHand: payload.newHands[playerSocket.player.uid],
@@ -197,18 +197,18 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
                     roundStartingPlayerId: payload.roundStartingPlayerId,
                     eliminatedPlayers: payload.eliminatedPlayers,
                 };
-                console.log('SEnding check to polayers L: ', newPayload);
+                //console.log('SEnding check to polayers L: ', newPayload);
                 playerSocket.emit(SocketEventsCommon.checkToPlayers, newPayload);
             }
         }
     });
 
     clientSocket.on(SocketEventsCommon.gameClosed, () => {
-        console.log('Trying to close room');
+        //console.log('Trying to close room');
 
         if (roomHosts.get(blefServer.getRoomId(clientSocket)) != clientSocket.id) {
             clientSocket.emit(SocketEventsCommon.gameClosed, false);
-            console.log('Cannot Close server u are not a host');
+            //console.log('Cannot Close server u are not a host');
             return;
         }
         let roomToCloseId = blefServer.getRoomId(clientSocket);
@@ -233,7 +233,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
 
     clientSocket.on(SocketEventsFromHost.timerUpdate, (update: number) => {
         if (roomHosts.get(blefServer.getRoomId(clientSocket)) != clientSocket.id) {
-            console.log('Could not update timer, (user is not a host)');
+            //console.log('Could not update timer, (user is not a host)');
             return;
         }
 
@@ -253,7 +253,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
 
     clientSocket.on(SocketEventsFromHost.cardListToPlayers, (cardCount: CardCountTable) => {
         if (roomHosts.get(blefServer.getRoomId(clientSocket)) != clientSocket.id) {
-            console.log('Could not send cardCountTable, (user is not a host)');
+            //console.log('Could not send cardCountTable, (user is not a host)');
             return;
         }
 

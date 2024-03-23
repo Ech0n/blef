@@ -26,7 +26,7 @@
     let showModal: boolean = false;
     let betName: string = '';
     let selectedHand;
-    let countdown: number = 30;
+    let countdown: number = 45;
     let roundTimer: ReturnType<typeof setInterval> | undefined;
     let showButtons: boolean = true;
     let previousCards: CardCountTable;
@@ -68,8 +68,8 @@
         }
 
         socket.on(SocketEventsCommon.hit, (data: hitPayload) => {
-            countdown = 30;
-            console.log('hit data is here', data);
+            countdown = 45;
+            //console.log('hit data is here', data);
             if (isHost) {
                 stopRoundTimer();
                 sleep(2000).then(() => {
@@ -78,7 +78,7 @@
                     }
                 });
             }
-            console.log('is gameCLosed: ', game.gameClosed);
+            //console.log('is gameCLosed: ', game.gameClosed);
             if (!game.gameClosed) {
                 game.hit(data.move);
                 game = game;
@@ -107,7 +107,7 @@
             // |         HOST SOCKET FUNCTIONALITY        |
             // ********************************************
 
-            console.log('host');
+            //console.log('host');
 
             game.gameClosed = false;
             startRoundTimer();
@@ -123,7 +123,7 @@
                 socket.emit(SocketEventsCommon.checkToPlayers, checkResult);
                 // console.log(previousCards);
                 socket.emit(SocketEventsFromHost.cardListToPlayers, previousCards);
-                console.log('sending to players: ', previousCards, checkResult);
+                //console.log('sending to players: ', previousCards, checkResult);
                 game.eliminatedPlayers.forEach((pl) => {
                     if (pl.uid == thisPlayerId) {
                         eliminated = true;
@@ -145,9 +145,9 @@
             // ********************************************
             // |      NON-HOST SOCKET FUNCTIONALITY       |
             // ********************************************
-            console.log('non host');
+            //console.log('non host');
             socket.on(SocketEventsCommon.checkToPlayers, (data: checkToPlayersPayload) => {
-                console.log('recieved check', data);
+                //console.log('recieved check', data);
                 game.check(data);
                 game = game;
                 game.eliminatedPlayers.forEach((pl) => {
@@ -160,7 +160,7 @@
                     dispatch('gameFinished', game.players[0]);
                 }
 
-                countdown = 30; // Not necessary but let it stay
+                countdown = 45; // Not necessary but let it stay
             });
 
             socket.on(SocketEventsCommon.updateTimerToPlayers, (update: number) => {
@@ -209,7 +209,7 @@
     }
 
     function check(): void {
-        console.log(isHost);
+        //console.log(isHost);
         socket.emit(SocketEventsCommon.checkToServer);
     }
 
@@ -255,7 +255,7 @@
         if (roundTimer) {
             return;
         }
-        countdown = 30;
+        countdown = 45;
         roundTimer = setInterval(() => {
             if (countdown > 0) {
                 countdown--;
@@ -309,7 +309,7 @@
     }
 
     const shortenUsername = (username: string) => {
-        return username.length > 5 ? `${username.slice(0, 5)}...` : username;
+        return username.length > 6 ? `${username.slice(0, 6)}...` : username;
     };
 
     $: if (game.previousBet) {
@@ -331,14 +331,12 @@
         <!-- Man autoformatter... what the fuck is this-->
         ❔
     </div>
-    <h3>
-        {#if gameId}
+    {#if gameId && isHost && kickPlayer !== undefined}
+        <h3>
             Game ID: {gameId}
-            {#if isHost && kickPlayer !== undefined}
-                <button class="kick-button" style="padding: 7px 4px 1px 4px; font-size: 32px" on:click={() => closeGame()}>Close Game</button>
-            {/if}
-        {/if}
-    </h3>
+            <button class="kick-button" style="padding: 7px 4px 1px 4px; font-size: 32px" on:click={() => closeGame()}>Close Game</button>
+        </h3>
+    {/if}
     <ul>
         {#each game.players as { username, loses, uid }}
             <div class="player-names">
@@ -389,10 +387,14 @@
         {/if}
     </div>
     {#if game.currentPlayer == thisPlayerId && showButtons}
-        <p>Your turn</p>
-        <div style="display:flex; justify-content:center">
-            <button class="start-close" on:click={() => (showModal = true)}>Raise</button>
-            <button id="check-button" class="start-close" on:click={check}>Check</button>
+        <div style="width: 100%; display: flex; align-items: center; justify-content: center">
+            <div class="your-turn-container">
+                <p style="font-size: 21px">Your turn</p>
+                <div style="display:flex; justify-content:center">
+                    <button class="start-close" on:click={() => (showModal = true)}>Raise</button>
+                    <button id="check-button" class="start-close" on:click={check}>Check</button>
+                </div>
+            </div>
         </div>
     {/if}
     <div class="center-items">
@@ -402,7 +404,7 @@
                 {#if game.previousBet}
                     {betName}
                 {:else}
-                    <p class="stronger">No bet has been made yet</p>
+                    No bet has been made yet
                 {/if}
             </div>
             <div class="timer-container">
@@ -440,9 +442,13 @@
     }
     .game-container {
         position: absolute;
-        top: 70px;
+        top: 0;
         left: 0;
         width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
     }
     .eliminated {
         color: rgb(167, 167, 167);
@@ -455,6 +461,9 @@
         flex-wrap: wrap;
         gap: 15px;
     }
+    .prev-cards-width {
+        max-width: 400px;
+    }
 
     strong {
         font-weight: 900;
@@ -465,6 +474,11 @@
 
     p {
         font-size: 20px;
+    }
+    .your-turn-container {
+        background-color: rgb(117, 25, 25);
+        padding: 0 8px 3px 8px;
+        border-radius: 10px;
     }
 
     .start-close {
@@ -539,9 +553,6 @@
         white-space: nowrap;
         font-size: 32px;
     }
-    .stronger {
-        font-size: 45px;
-    }
     .short-name {
         display: none; /* Hide shortened names by default */
     }
@@ -553,21 +564,28 @@
         .short-name {
             display: inline; /* Show shortened names on narrow screens */
         }
-        .stronger {
-            font-size: 15px;
-        }
         .timer-container {
             font-size: 40px;
             margin-left: 10px;
         }
         .bet-name-container {
             width: 200px;
+            font-size: 28px;
         }
         .bet-container {
             width: 300px;
         }
         .start-close {
             font-size: 30px;
+        }
+        .prev-cards-width {
+            max-width: 100px;
+        }
+        .your-turn-container {
+            width: 330px;
+        }
+        .game-container {
+            margin-top: 30px;
         }
     }
 
@@ -587,9 +605,6 @@
         }
         strong {
             font-size: 28px;
-        }
-        .stronger {
-            font-size: 20px;
         }
         .helper {
             top: 0;

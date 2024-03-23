@@ -10,16 +10,16 @@
     const cardImageHandler = new CardImageHandler();
     const dispatch = createEventDispatcher();
     const handRankings = [
-        { name: 'Royal', imageUrl: cardImageHandler.getCardImage('royal') },
-        { name: 'Flush', imageUrl: cardImageHandler.getCardImage('flush') },
-        { name: 'Four', imageUrl: cardImageHandler.getCardImage('four') },
-        { name: 'Full', imageUrl: cardImageHandler.getCardImage('full') },
-        { name: 'Street', imageUrl: cardImageHandler.getCardImage('street') },
-        { name: 'Color', imageUrl: cardImageHandler.getCardImage('color') },
-        { name: 'Three', imageUrl: cardImageHandler.getCardImage('three') },
-        { name: 'Double', imageUrl: cardImageHandler.getCardImage('double') },
-        { name: 'Pair', imageUrl: cardImageHandler.getCardImage('pair') },
         { name: 'One', imageUrl: cardImageHandler.getCardImage('one') },
+        { name: 'Pair', imageUrl: cardImageHandler.getCardImage('pair') },
+        { name: 'Double', imageUrl: cardImageHandler.getCardImage('double') },
+        { name: 'Three', imageUrl: cardImageHandler.getCardImage('three') },
+        { name: 'Color', imageUrl: cardImageHandler.getCardImage('color') },
+        { name: 'Street', imageUrl: cardImageHandler.getCardImage('street') },
+        { name: 'Full', imageUrl: cardImageHandler.getCardImage('full') },
+        { name: 'Four', imageUrl: cardImageHandler.getCardImage('four') },
+        { name: 'Flush', imageUrl: cardImageHandler.getCardImage('flush') },
+        { name: 'Royal', imageUrl: cardImageHandler.getCardImage('royal') },
     ];
     const cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
     const colors = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
@@ -102,7 +102,7 @@
         closeModal();
     }
 
-    $: options = // Damn auto formatter goes kinda crazy here
+    $: options =
         ['Royal', 'Color'].includes(selectedRanking) ? colors
         : ['Street', 'Full', 'Double', 'Pair', 'One', 'Three', 'Four'].includes(selectedRanking) ? cards
         : ['Flush'].includes(selectedRanking) ? colors.concat(cards)
@@ -165,9 +165,9 @@
     .modal-content {
         background-color: #3a3636;
         border-radius: 10px;
-        margin: 8% auto;
+        margin: 5% auto;
         padding: 20px;
-        width: 80%;
+        width: 95%;
         box-shadow: 10px 10px 5px 12px rgb(18, 18, 19);
     }
     .close {
@@ -193,8 +193,7 @@
         font-size: 45px;
     }
     .hand-ranking-image {
-        width: 46%;
-        margin: 3% 1%;
+        width: 18%;
         padding: 1%;
         cursor: pointer;
         transition: transform 0.2s;
@@ -214,7 +213,7 @@
         align-items: center;
     }
     .auto-scale-image {
-        max-height: 200px;
+        max-height: 100px;
         max-width: 100%;
     }
     h3 {

@@ -38,7 +38,7 @@
     });
 
     onMount(() => {
-        console.log('started game info? ', startedGameInfo);
+        //console.log('started game info? ', startedGameInfo);
         if (startedGameInfo) {
             let hands: { [key: string]: Card[] } = {};
             hands[thisPlayerId] = startedGameInfo.newHand;
@@ -48,7 +48,7 @@
             };
             game = new Game(players, gameStartData, thisPlayerId);
             game.previousBet = startedGameInfo.currentBet;
-            console.log('players ', game.players, players);
+            //console.log('players ', game.players, players);
             gameView = import('../game/GameView.svelte');
         }
 
@@ -67,7 +67,7 @@
             console.debug('reveived game start message', data);
             if (data && data.startingPlayerId) {
                 gameStartData = data;
-                console.log('gsdata ', gameStartData, thisPlayerId, gameStartData.newHands[thisPlayerId]);
+                //console.log('gsdata ', gameStartData, thisPlayerId, gameStartData.newHands[thisPlayerId]);
                 game = new Game(players, gameStartData, thisPlayerId);
                 game.gameClosed = false;
 
@@ -128,13 +128,13 @@
     }
 </script>
 
-<div class="main-content">
+<div class="main-content" style="top: {gameView ? '10px' : '100px'};">
     {#if gameView}
         {#await gameView then { default: GameClient }}
             <GameClient on:leave={leaveGame} on:gameFinished={showWinner} {gameId} {socket} {thisPlayerId} isHost={false} kickPlayer={() => {}} {game} closeGame={() => {}} />
         {/await}
     {:else}
-        Game ID: {#if gameId}
+        Join Game ID: {#if gameId}
             {gameId}
         {/if}
         <div>
@@ -157,11 +157,9 @@
 <style>
     .main-content {
         position: absolute;
-        top: 100px;
         min-height: calc(95% - 100px);
         font-size: 40px;
         font-weight: bold;
-        margin-top: 0.67em;
         margin-bottom: 0.67em;
         margin-left: 0;
         margin-right: 0;

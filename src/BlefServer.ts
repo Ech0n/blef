@@ -1,14 +1,12 @@
 import { Socket, Server } from 'socket.io';
-import { io } from 'socket.io-client';
 import http, { IncomingMessage } from 'http';
 import { config } from '../config';
 import { socketEventsListeners, SessionSocket } from './socketEventListeners';
-import session, { SessionData } from 'express-session';
+import { SessionData } from 'express-session';
 import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from './types/socketEvents';
 import { v4 as uuidv4 } from 'uuid';
 import { Player, createPlayerFromIPlayer } from '../common/player';
-import { gameInfo, joinGameResponsePayload, reconnectRequestPayload, reconnectResponsePayload } from '../common/payloads';
-import { response } from 'express';
+import { reconnectRequestPayload, reconnectResponsePayload } from '../common/payloads';
 
 declare module 'http' {
     interface IncomingMessage {
@@ -31,17 +29,9 @@ export class BlefServer {
                 credentials: true,
             },
         });
-        const sessionConfig = session({
-            resave: true,
-            saveUninitialized: true,
-            secret: config.sessionSecret,
-            rolling: false,
-        });
-
-        this.io.engine.use(sessionConfig);
 
         this.io.on('connection', (socket) => {
-            console.log('A user connected');
+            //console.log('A user connected');
             this.setupConnection(socket);
             socketEventsListeners(this, <SessionSocket>socket);
         });
@@ -114,22 +104,22 @@ export class BlefServer {
     }
 
     reconnectionResponse(socket: Socket, responsePayload: reconnectResponsePayload) {
-        console.log('reconect response');
+        //console.log('reconect response');
 
         let clientSid = responsePayload.reconnectRequest.requesterSocketId;
         if (!clientSid) {
-            console.log('   no sockId');
+            //console.log('   no sockId');
             return;
         }
 
         let clientSocket = this.io.sockets.sockets.get(clientSid);
         if (!clientSocket) {
-            console.log('   no sock');
+            //console.log('   no sock');
             return;
         }
 
         if (!responsePayload.didReconnect) {
-            console.log('   no recon');
+            //console.log('   no recon');
             clientSocket.emit(SocketEventsFromHost.reconnectToGame, responsePayload);
         }
         const req: IncomingMessage = clientSocket.request;
@@ -162,7 +152,7 @@ export class BlefServer {
         clientSocket.emit(SocketEventsFromHost.reconnectToGame, responsePayload);
 
         this.io.in(responsePayload.reconnectRequest.gameId).emit(SocketEventsFromServer.playerReconnected, { uid: responsePayload.reconnectRequest.requesterUid });
-        console.log('was here');
+        //console.log('was here');
         clientSocket.join(responsePayload.reconnectRequest.gameId);
     }
 

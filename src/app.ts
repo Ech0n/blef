@@ -1,19 +1,16 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
-
-import api from './api'; // Ensure this is exported correctly in the respective file
-import { notFound, errorHandler } from './middlewares/errors.middleware'; // Ensure these are exported correctly
+import dotenv from 'dotenv';
+import { notFound, errorHandler } from './middlewares/errors.middleware';
 import { config } from '../config';
+import path from 'path';
+
+dotenv.config();
 
 const app = express();
 
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static('client/public'));
-    app.get('*', (req: Request, res: Response) => {
-        res.sendFile(path.resolve(__dirname, 'client', 'public', 'index.html'));
-    });
+    app.use(express.static(path.join(__dirname, '../client/public')));
 }
 
 app.use(
@@ -34,14 +31,6 @@ app.use(
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-app.get('/', (req: Request, res: Response) => {
-    res.status(200).json({
-        message: '📦 Svelte Express Boilerplate 📦',
-    });
-});
-
-app.use('/api/v1', api);
 app.use(notFound);
 app.use(errorHandler);
 

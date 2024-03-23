@@ -5,7 +5,7 @@
     export let thisPlayerId: string;
 
     // Function to truncate usernames
-    const truncateUsername = (username: string) => (username.length > 5 ? `${username.slice(0, 5)}...` : username);
+    const truncateUsername = (username: string) => (username.length > 6 ? `${username.slice(0, 6)}...` : username);
 </script>
 
 <div class="playerList">

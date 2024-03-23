@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "Node",
+        "target": "ESNext",
+        "module": "ESNext",
+        "isolatedModules": true,
+        "resolveJsonModule": true,
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "allowJs": true,
+        "noEmit": false,
+        "outDir": "./dist/client",
+        "jsx": "preserve",
+        "baseUrl": ".",
+        "paths": {
+            "@models/*": ["src/models/*"],
+            "@game/*": ["src/game/*"],
+            "@lobby/*": ["src/lobby/*"]
+        }
+    },
+    "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte", "../src/types/HandRankings.ts"],
+    "exclude": ["node_modules", "dist"]
+}

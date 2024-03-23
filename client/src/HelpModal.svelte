@@ -77,10 +77,10 @@
         border: 2px solid rgb(0, 0, 22);
         border-radius: 10px;
         box-shadow: 10px 10px 5px rgb(0, 0, 0);
-        width: 70%;
+        width: 80%;
         min-height: 100%;
         margin-top: 50px;
-        margin-left: 12.5%;
+        margin-left: 1.5%;
     }
 
     .close {

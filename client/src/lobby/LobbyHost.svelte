@@ -26,7 +26,7 @@
 
     onMount(() => {
         socket.on(SocketEventsCommon.newPlayerJoined, (data: { username: string; uid: string; isOnline: boolean }) => {
-            console.log('Join event', data);
+            //console.log('Join event', data);
             if (!data) {
                 throw 'No data from server';
             }
@@ -44,10 +44,10 @@
 
             players = [...players, newPlayer];
 
-            console.log(players);
+            //console.log(players);
         });
         socket.on(SocketEventsFromClient.joinRequest, (data: joinRequest) => {
-            console.log('recevied request to join: ', data);
+            //console.log('recevied request to join: ', data);
             let response: joinGameResponsePayload = {
                 didJoin: false,
                 request: data,
@@ -62,7 +62,7 @@
                 return el.username === data.requesterUsername;
             });
 
-            console.log('Found player : ', wasPlayerFound, 'players', playersList);
+            //console.log('Found player : ', wasPlayerFound, 'players', playersList);
             if (!wasPlayerFound) {
                 if (gameView) {
                     socket.emit(SocketEventsFromHost.joinResponse, response);
@@ -91,7 +91,7 @@
             if (gameView) {
                 let hand = game.hands.get(data.requesterUid);
                 if (hand) {
-                    console.log('Couldnt find cards for reconnecting player');
+                    //console.log('Couldnt find cards for reconnecting player');
                     gameInfo.gameStarted = true;
 
                     gameInfo.startedGameInfo = {
@@ -103,11 +103,11 @@
             }
             response.gameInfo = gameInfo;
 
-            console.log('sent response: ', response);
+            //console.log('sent response: ', response);
             socket.emit(SocketEventsFromHost.joinResponse, response);
         });
         socket.on(SocketEventsFromClient.reconnectToGame, (reconnectRequestPayload: reconnectRequestPayload) => {
-            console.log('request here ', reconnectRequestPayload);
+            //console.log('request here ', reconnectRequestPayload);
             let reconnectingPlayer = players.find((pl) => {
                 return pl.uid === reconnectRequestPayload.requesterUid;
             });
@@ -126,7 +126,7 @@
                 if (gameView) {
                     let hand = game.hands.get(reconnectingPlayer.uid);
                     if (!hand) {
-                        console.log('Couldnt find cards for reconnecting player');
+                        //console.log('Couldnt find cards for reconnecting player');
                         return;
                     }
                     gameInfo.gameStarted = true;
@@ -140,12 +140,12 @@
 
                 response.gameInfo = gameInfo;
             }
-            console.log('response to request ', response);
+            //console.log('response to request ', response);
             socket.emit(SocketEventsFromHost.reconnectToGame, response);
         });
 
         socket.on(SocketEventsCommon.playerLeftGame, (data: { uid: string }) => {
-            console.log('player disconnected', data.uid);
+            //console.log('player disconnected', data.uid);
             if (!data) {
                 return;
             }
@@ -157,7 +157,7 @@
                     playerThatLeft.isOnline = false;
                 }
                 players = players;
-                console.log(players);
+                //console.log(players);
             } else {
                 let wasInLobby: boolean = false;
                 for (let player of players) {
@@ -186,7 +186,7 @@
         });
 
         socket.on(SocketEventsCommon.playerReady, (readyPlayerId: string) => {
-            console.log('this player ready here!');
+            //console.log('this player ready here!');
             readyPlayers++;
         });
 
@@ -202,7 +202,7 @@
             let startPayload = initializationData.payload;
             socket.emit(SocketEventsCommon.gameStarted, startPayload);
         } else {
-            console.log(readyPlayers);
+            //console.log(readyPlayers);
             throw 'Invalid amount of players to start the game or not everyone is ready';
         }
     }
@@ -230,13 +230,13 @@
     }
 </script>
 
-<div class="main-content">
+<div class="main-content" style="top: {gameView ? '0' : '100px'};">
     {#if gameView}
         {#await gameView then { default: GameView }}
             <GameView on:leave={closeGame} on:gameFinished={showWinner} {gameId} {socket} {thisPlayerId} isHost {kickPlayer} {game} {closeGame} />
         {/await}
     {:else}
-        Game ID: {#if gameId}
+        Join Game ID: {#if gameId}
             {gameId}
         {/if}
         <br />
@@ -260,11 +260,9 @@
 <style>
     .main-content {
         position: absolute;
-        top: 100px;
         min-height: calc(95% - 100px);
         font-size: 40px;
         font-weight: bold;
-        margin-top: 0.67em;
         margin-bottom: 0.67em;
         margin-left: 0;
         margin-right: 0;
