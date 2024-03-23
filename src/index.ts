@@ -10,14 +10,7 @@ const port = config.BACKENDSERVERPORT || 5678;
 const server = http.createServer(app).listen(port, () => {
     console.log(`Server is up at port http://localhost:${port}`);
 });
-const sessionConfig = session({
-    resave: true,
-    saveUninitialized: true,
-    secret: 'pizda', // :O
-    rolling: false,
-});
 
 app.set('trust proxy', 1); // trust first proxy
-app.use(sessionConfig);
 
 let blefServer = new BlefServer(server);
