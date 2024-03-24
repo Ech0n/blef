@@ -1,16 +1,16 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { notFound, errorHandler } from './middlewares/errors.middleware';
 import { config } from '../config';
 import path from 'path';
 
-dotenv.config();
-
 const app = express();
 
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../client/public')));
+    app.use(express.static('public'));
+    app.get('*', (req: Request, res: Response) => {
+        res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
+    });
 }
 
 app.use(
