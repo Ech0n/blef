@@ -323,61 +323,14 @@
         <!-- Man autoformatter... what the fuck is this-->
         ❔
     </div>
-    <!-- <h3>
-        {#if gameId}
-            Game ID: {gameId}
-            {#if isHost && kickPlayer !== undefined}
-                <button class="kick-button" style="padding: 7px 4px 1px 4px; font-size: 32px" on:click={() => closeGame()}>Close Game</button>
-            {/if}
+
+    {#if gameId}
+        <h3 id="gamecode">#{gameId}</h3>
+        {#if isHost && kickPlayer !== undefined}
+            <button class="kick-button" style="padding: 7px 4px 1px 4px; font-size: 32px" on:click={() => closeGame()}>Close Game</button>
         {/if}
-    </h3> -->
-    <!-- <ul>
-        {#each game.players as { username, loses, uid }}
-            <div class="player-names">
-                {#if uid === game.currentPlayer}
-                    <strong> > {username}</strong>
-                {:else}
-                    {username}
-                {/if}
-                | {1 + loses} Cards 🂠
-                {#if isHost && kickPlayer !== undefined && thisPlayerId !== uid}
-                    <button class="kick-button" on:click={() => kickPlayer(uid)}>Kick</button>
-                {/if}
-            </div>
-        {/each}
-        {#each game.eliminatedPlayers as { username }}
-            <p class="eliminated">{username}</p>
-        {/each}
-    </ul> -->
-    <!-- tutaj paste -->
-    <!-- <div>
-        {#if !eliminated}
-            <div class="cards-container">
-                <div class={previousCards ? 'cards-width-with-prev' : 'cards-width-default'}>
-                    <p>Your hand:</p>
-                </div>
-                {#if previousCards}
-                    <div class="prev-cards-width">
-                        <p style="font-size: 15px">Cards from previous round:</p>
-                        <div class="prev-cards-container">
-                            {#each readyPreviousCards as card}
-                                svelte-ignore a11y-missing-attribute
-                                <img src={cardImageHandler.getCardImage(card)} />
-                                <br />
-                            {/each}
-                        </div>
-                    </div>
-                {/if}
-            </div>
-        {/if}
-    </div> -->
-    <!-- {#if game.currentPlayer == thisPlayerId && showButtons}
-        <p>Your turn</p>
-        <div style="display:flex; justify-content:center">
-            <button class="start-close" on:click={() => (showModal = true)}>Raise</button>
-            <button id="check-button" class="start-close" on:click={check}>Check</button>
-        </div>
     {/if}
+
     <div class="center-items">
         <div class="bet-container">
             <div>
@@ -397,27 +350,77 @@
             </div>
         </div>
     </div>
+
+    <ul>
+        {#each game.players as { username, loses, uid }}
+            <div class="player-names">
+                {#if uid === game.currentPlayer}
+                    <strong> > {username}</strong>
+                {:else}
+                    {username}
+                {/if}
+                | {1 + loses} Cards 🂠
+                {#if isHost && kickPlayer !== undefined && thisPlayerId !== uid}
+                    <button class="kick-button" on:click={() => kickPlayer(uid)}>Kick</button>
+                {/if}
+            </div>
+        {/each}
+        {#each game.eliminatedPlayers as { username }}
+            <p class="eliminated">{username}</p>
+        {/each}
+    </ul>
+    <div>
+        {#if !eliminated}
+            <div class="cards-container">
+                {#if previousCards}
+                    <div class="prev-cards-width">
+                        <p style="font-size: 15px">Cards from previous round:</p>
+                        <div class="prev-cards-container">
+                            {#each readyPreviousCards as card}
+                                svelte-ignore a11y-missing-attribute
+                                <img src={cardImageHandler.getCardImage(card)} />
+                                <br />
+                            {/each}
+                        </div>
+                    </div>
+                {/if}
+            </div>
+        {/if}
+    </div>
+
+    {#if game.currentPlayer == thisPlayerId && showButtons}
+        <p>Your turn</p>
+        <div style="display:flex; justify-content:center">
+            <button class="start-close" on:click={() => (showModal = true)}>Raise</button>
+            <button id="check-button" class="start-close" on:click={check}>Check</button>
+        </div>
+    {/if}
+
+    <CardsInHand hand={game.hand} />
+
     {#if showModal}
         <CardModal on:close={() => (showModal = false)} on:select={handleBetSelection} previousBet={game.previousBet} />
     {/if}
     {#if showHelpModal}
         <HelpModal on:close={() => (showHelpModal = false)} />
-    {/if} -->
-    <div class="hand-wrapper">
-        <CardsInHand hand={game.hand} />
-    </div>
+    {/if}
 </div>
 
 <style>
-    .hand-wrapper {
+    .game-container {
         position: absolute;
-        bottom: 0px;
+        top: 0px;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background-color: #070c07;
         display: flex;
+        align-items: space-between;
         overflow: hidden;
+        flex-direction: column;
+        justify-content: center;
     }
-    /* .hand-inside {
-        flex-wrap: nowrap;
-    } */
+
     .helper {
         position: absolute;
         top: 1%;
@@ -428,19 +431,18 @@
         padding: 5px 0;
         border-radius: 100px;
     }
+    #gamecode {
+        position: absolute;
+        top: 1%;
+        left: 10px;
+        margin: 10px;
+    }
     .kick-button {
         background-color: rgb(214, 4, 4);
         padding: 4px;
         font-size: 26px;
     }
-    .game-container {
-        position: absolute;
-        top: 0px;
-        left: 0;
-        height: 100%;
-        width: 100%;
-        background-color: #070c07;
-    }
+
     .eliminated {
         color: rgb(167, 167, 167);
     }
