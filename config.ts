@@ -1,6 +1,7 @@
 const back_port = 5678;
 const front_port = 5173;
 
+// TODO: maybe we should use json for config
 export const config = {
     BACKENDSERVERPORT: 5678,
     FRONTENDSERVERPORT: 5173,
