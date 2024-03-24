@@ -9,6 +9,6 @@ const server = http.createServer(app).listen(port, hostname, () => {
     console.log(`Server is up at port http://localhost:${port}`);
 });
 
-app.set('trust proxy', 1); // Trust first proxy
+app.set('trust proxy', 1); // Trust first proxy!
 
 let blefServer = new BlefServer(server);
