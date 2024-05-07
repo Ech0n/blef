@@ -81,24 +81,18 @@ main {
     height: 100%;
 }
 input {
-    color: rgb(15, 15, 15);
-    padding: 15px 10px;
+    background-color: rgb(15, 15, 15);
     font-size: 20px;
     border-radius: 35px;
     margin-right: 10px;
-    color: #fff;
     font-size: 25px;
-    line-height: 1;
     border-style: none;
+    color:aliceblue;
     outline: none;
     height: calc(1em);
-    padding: 0.8em 1em;
+    padding: 0.5em 1em;
     border: 0.15em solid transparent;
-    background-image: linear-gradient(#000, #000), linear-gradient(120deg, rgb(93, 247, 4) 0%, rgb(5, 77, 27) 50%, rgb(64, 247, 9) 100%);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
     border-radius: 2em;
-    background-size: 150% 100%;
     transition: background-position 0.8s ease-out;
     text-align: center;
 }

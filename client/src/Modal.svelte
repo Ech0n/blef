@@ -59,15 +59,25 @@
                     <input type="text" placeholder="Enter Game ID" bind:value={gameId} maxlength="10" />
                 {/if}
                 <input type="text" placeholder="Enter Your Name" bind:value={username} maxlength="14" />
-
-                <button class="start-close" on:click={action}>{mode === 'join' ? 'Join Game' : 'Create Game'}</button>
-                <button class="start-close" on:click={closeModal}>Cancel</button>
+                <div class="button-container">
+                    <button class="start-close" on:click={closeModal}>Cancel</button>
+                    <button class="start-close" on:click={action}>{mode === 'join' ? 'Join Game' : 'Create Game'}</button>
+                </div>
             </div>
         </div>
     </div>
 {/if}
 
 <style>
+    .button-container{
+        margin:10px;
+        display: flex;
+        justify-content: space-evenly;
+    }
+    .start-close{
+        font-size:1.3rem;
+        width: 140px;
+    }
     .modal-backdrop {
         position: fixed;
         top: 0;
@@ -86,9 +96,15 @@
         border-width: 5px;
         max-width: 400px;
         margin: 10px;
+        display:flex;
+        flex-direction:column;
+        justify-content: space-between;
     }
 
     h2 {
         font-size: 30px;
+    }
+    .container{
+        padding-top:0px;
     }
 </style>
