@@ -25,7 +25,7 @@
     let theme = {
         'primary-color': '#05580c',
         'secondary-color': '#01420d',
-        'background-color': '#070c07',
+        'background-color': '#171c17',
     };
     $: cssVarTheme = Object.entries(theme)
         .map(([key, value]) => `--${key}:${value}`)

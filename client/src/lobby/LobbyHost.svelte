@@ -154,7 +154,7 @@
     }
 </script>
 
-<div class="container">
+<div class="container view">
     {#if gameView}
         {#await gameView then { default: GameView }}
             <GameView on:leave={closeGame} on:gameFinished={showWinner} {gameId} {socket} {thisPlayerId} isHost {kickPlayer} {game} {closeGame} />
@@ -170,9 +170,9 @@
         </div>
         <br />
         <LobbyPlayerList {players} {thisPlayerId} />
-        <div class="container">
-            <button on:click={startGame}>Start Game</button>
+        <div class="responsive">
             <button on:click={closeGame}>Close Game</button>
+            <button on:click={startGame}>Start Game</button>
         </div>
     {/if}
 </div>

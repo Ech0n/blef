@@ -158,6 +158,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
                     players: payload.players,
                     roundStartingPlayerId: payload.roundStartingPlayerId,
                     eliminatedPlayers: payload.eliminatedPlayers,
+                    checkSuccesful: payload.checkSuccesful,
                 };
                 clientSocket.emit(SocketEventsCommon.checkToPlayers, newPayload);
             }

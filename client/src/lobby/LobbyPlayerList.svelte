@@ -5,7 +5,7 @@
     export let thisPlayerId: string;
 </script>
 
-<div class="playerList group">
+<div class="playerList container group">
     <h3>Players</h3>
     {#each players as player}
         <div class="playerItem">

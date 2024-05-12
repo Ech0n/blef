@@ -45,7 +45,7 @@
     <div class="modal-backdrop">
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div class="modal" on:click|stopPropagation>
+        <div class="modal p15" on:click|stopPropagation>
             <div class="modal-header">
                 <h2>
                     {mode === 'join' ? 'Join game:' : 'Create game:'}
@@ -89,6 +89,8 @@
     }
 
     h2 {
+        margin: 20px;
+        margin-top: 0px;
         font-size: 30px;
     }
 </style>
