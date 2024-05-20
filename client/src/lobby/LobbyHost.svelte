@@ -230,21 +230,25 @@
     }
 </script>
 
-<div class="main-content" style="top: {gameView ? '0' : '100px'};">
+<div class="container view">
     {#if gameView}
         {#await gameView then { default: GameView }}
             <GameView on:leave={closeGame} on:gameFinished={showWinner} {gameId} {socket} {thisPlayerId} isHost {kickPlayer} {game} {closeGame} />
         {/await}
     {:else}
-        Join Game ID: {#if gameId}
-            {gameId}
-        {/if}
+        <div class="container group kod">
+            {#if gameId}
+                <div>game code:</div>
+                <div>
+                    {gameId}
+                </div>
+            {/if}
+        </div>
         <br />
-        Players:
         <LobbyPlayerList {players} {thisPlayerId} />
-        <div>
-            <button class="start-close" on:click={startGame}>Start Game</button>
-            <button class="start-close" on:click={closeGame}>Close Game</button>
+        <div class="responsive">
+            <button on:click={closeGame}>Close Game</button>
+            <button on:click={startGame}>Start Game</button>
         </div>
     {/if}
 </div>
@@ -258,24 +262,7 @@
 />
 
 <style>
-    .main-content {
-        position: absolute;
-        min-height: calc(95% - 100px);
-        font-size: 40px;
-        font-weight: bold;
-        margin-bottom: 0.67em;
-        margin-left: 0;
-        margin-right: 0;
-        font-family: inherit;
-        line-height: 1.2;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        width: 100%;
-    }
-
-    .start-close {
-        margin-bottom: 10px;
-        color: aliceblue;
+    .kod {
+        width: 300px;
     }
 </style>

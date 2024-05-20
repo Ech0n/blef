@@ -23,6 +23,15 @@
     let thisPlayerId: string;
     let startedGameInfo: gameInfo['startedGameInfo'];
 
+    let theme = {
+        'primary-color': '#05580c',
+        'secondary-color': '#01420d',
+        'background-color': '#171c17',
+    };
+    $: cssVarTheme = Object.entries(theme)
+        .map(([key, value]) => `--${key}:${value}`)
+        .join(';');
+
     function commonListeners(socket: Socket) {
         socket.on(SocketEventsFromServer.playerReconnected, (data: { uid: string }) => {
             let player = players.find((pl) => {
@@ -169,11 +178,10 @@
     }
 </script>
 
-<main>
-    {#if !gameView}
-        <Navbar on:viewChange={handleViewChange} {activeView} />
-    {/if}
+<main style={cssVarTheme}>
+    <!-- <Navbar on:viewChange={handleViewChange} {activeView} /> -->
     <div class="main-content">
+        <h1 id="title">BLEF</h1>
         {#if gameView}
             {#await gameView then { default: LobbyView }}
                 <LobbyView {gameId} usernameInput={username} on:gameClosed={leaveGame} {socket} {thisPlayerId} {players} {startedGameInfo} />
@@ -189,11 +197,22 @@
 </main>
 
 <style>
+    main {
+        background-color: var(--background-color);
+    }
+    #title {
+        font-size: 128px;
+        text-shadow:
+            1px 1px 8px var(--theme-color),
+            -1px -1px 8px var(--theme-color),
+            1px -1px 8px var(--theme-color),
+            -1px 1px 8px var(--theme-color);
+    }
     .main-content {
         height: calc(100% - 70px);
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: space-evenly;
     }
 </style>

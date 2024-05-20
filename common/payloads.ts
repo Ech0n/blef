@@ -7,6 +7,7 @@ export interface checkToServerPayload {
     roundStartingPlayerId: string;
     eliminatedPlayers: Player[];
     players: Player[];
+    checkSuccesful: boolean;
 }
 
 export interface checkToPlayersPayload {
@@ -14,6 +15,7 @@ export interface checkToPlayersPayload {
     players: Player[];
     roundStartingPlayerId: string;
     eliminatedPlayers: Player[];
+    checkSuccesful: boolean;
 }
 
 export interface gameStartPayload {

@@ -8,16 +8,16 @@
     const truncateUsername = (username: string) => (username.length > 6 ? `${username.slice(0, 6)}...` : username);
 </script>
 
-<div class="playerList">
+<div class="playerList container group">
+    <h3>Players</h3>
     {#each players as player}
         <div class="playerItem">
-            <span class="full-name">{player.username}</span>
-            <span class="short-name">{truncateUsername(player.username)}</span>
-            {#if player.isOnline || player.uid !== thisPlayerId}
+            {player.username}
+            <!-- {#if player.isOnline || player.uid !== thisPlayerId}
                 🟢
             {:else}
                 🔴
-            {/if}
+            {/if} -->
         </div>
     {/each}
 </div>
@@ -27,16 +27,18 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        padding: 10px 0px 10px 0px;
     }
 
     .playerItem {
-        background-color: #1e1e22;
+        background-color: #2424242c;
         border-radius: 20px;
-        border-color: #07050f;
+        border-color: #05580c;
         border-style: solid;
-        min-width: 300px;
-        padding: 10px 20px 10px 20px;
-        margin: 20px 0 15px 0;
+        border-width: 1px;
+        min-width: 200px;
+        padding: 10px 0px 10px 0px;
+        margin: 10px 0 10px 0;
         white-space: nowrap;
         position: relative;
     }
@@ -57,5 +59,11 @@
         .short-name {
             display: inline;
         }
+    }
+
+    h3 {
+        padding: 10px 60px;
+        margin: 0px;
+        border-bottom: solid #444 1.5px;
     }
 </style>

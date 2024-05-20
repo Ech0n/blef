@@ -5,6 +5,7 @@ import { Player } from '../../../common/player';
 import type { checkToServerPayload, checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
 
 let deckInitialization: Card[] = [];
+type Maybe<T> = NonNullable<T> | undefined;
 
 for (let card in Rank) {
     if (isNaN(Number(card))) {
@@ -61,7 +62,8 @@ export class GameServer extends Game {
         });
     }
 
-    check(data?: checkToPlayersPayload): void {
+    check(data?: checkToPlayersPayload): boolean {
+        let checkWasSucessful = true;
         if (!this.previousBet) {
             throw 'There is no bet';
         }
@@ -74,6 +76,7 @@ export class GameServer extends Game {
             const prevPlayer = (this.currentPlayerIndx - 1 + this.playerCount) % this.playerCount;
             this.currentPlayerIndx = prevPlayer;
             this.currentPlayer = this.players[this.currentPlayerIndx].uid;
+            checkWasSucessful = false;
         }
 
         this.players[this.currentPlayerIndx].loses += 1;
@@ -90,10 +93,11 @@ export class GameServer extends Game {
         }
 
         this.previousBet = null;
+        return checkWasSucessful;
     }
 
     validateCheck(): checkToServerPayload {
-        this.check();
+        let checkResult = this.check();
 
         this.dealCards();
 
@@ -102,11 +106,12 @@ export class GameServer extends Game {
             this.hand = newHand;
         }
 
-        let payload = {
+        let payload: checkToServerPayload = {
             newHands: Object.fromEntries(this.hands),
             players: this.players,
             roundStartingPlayerId: this.currentPlayer,
             eliminatedPlayers: this.eliminatedPlayers,
+            checkSuccesful: checkResult,
         };
 
         return payload;

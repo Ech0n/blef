@@ -22,26 +22,37 @@
     }
 </script>
 
-<div>
+<div class="container">
     <button
-        class="start-close"
+        class="button"
         on:click={() => {
             showModal = true;
             mode = 'join';
         }}>Join Game</button
     >
     <button
-        class="start-close"
+        class="button"
         on:click={() => {
             showModal = true;
             mode = 'create';
         }}>Create Game</button
     >
+    <button
+        class="button"
+        on:click={() => {
+            window.alert('not implemented!');
+        }}>How to play?</button
+    >
     <Modal {showModal} {mode} on:close={() => (showModal = false)} on:joinGame={joinGame} on:createGame={createGame} />
 </div>
 
 <style>
-    .start-close {
+    .container {
+        display: flex;
+        row-gap: 15px;
+        flex-direction: column;
+    }
+    .button {
         color: aliceblue;
         margin-bottom: 10px;
     }

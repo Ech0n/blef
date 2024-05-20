@@ -2,6 +2,9 @@ import type { Card, CardCountTable } from '../model/Card';
 import { Player } from '../../../common/player';
 import type { checkToServerPayload, checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
 import type { HandInfo } from './HandRankings';
+import type { OptionalTypeNode } from 'typescript';
+
+type Maybe<T> = NonNullable<T> | undefined;
 
 export class Game {
     playerCount: number;
@@ -51,9 +54,9 @@ export class Game {
         this.currentPlayer = this.players[this.currentPlayerIndx].uid;
     }
 
-    check(data?: checkToPlayersPayload): void {
+    check(data?: checkToPlayersPayload): boolean {
         if (!data) {
-            return;
+            throw 'Data field not present in check()';
         }
 
         this.hand = data.newHand;
@@ -65,6 +68,7 @@ export class Game {
             return pl.uid == this.currentPlayer;
         });
         this.previousBet = null;
+        return data.checkSuccesful;
     }
 
     validateCheck(): checkToServerPayload | undefined {

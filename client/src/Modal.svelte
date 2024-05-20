@@ -45,13 +45,13 @@
     <div class="modal-backdrop">
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div class="modal" on:click|stopPropagation>
+        <div class="modal p15" on:click|stopPropagation>
             <div class="modal-header">
                 <h2>
-                    {mode === 'join' ? 'Provide game ID:' : 'Enter Your Name:'}
+                    {mode === 'join' ? 'Join game:' : 'Create game:'}
                 </h2>
             </div>
-            <div class="modal-body">
+            <div class="container">
                 {#if errorMessage}
                     <p class="error">{errorMessage}</p>
                 {/if}
@@ -59,10 +59,9 @@
                     <input type="text" placeholder="Enter Game ID" bind:value={gameId} maxlength="10" />
                 {/if}
                 <input type="text" placeholder="Enter Your Name" bind:value={username} maxlength="14" />
-                <div>
-                    <button class="start-close" on:click={action}>{mode === 'join' ? 'Join Game' : 'Create Game'}</button>
-                    <button class="start-close" on:click={closeModal}>Close</button>
-                </div>
+
+                <button class="start-close" on:click={action}>{mode === 'join' ? 'Join Game' : 'Create Game'}</button>
+                <button class="start-close" on:click={closeModal}>Cancel</button>
             </div>
         </div>
     </div>
@@ -83,27 +82,15 @@
 
     .modal {
         background-color: rgb(31, 31, 31);
-        padding: 25px;
-        border-radius: 5px;
-        border-radius: 20px;
+        border-radius: 30px;
         border-width: 5px;
-    }
-
-    .start-close {
-        margin: 15px 5px;
-        color: aliceblue;
-    }
-
-    input {
-        color: rgb(15, 15, 15);
-        padding: 15px 10px;
-        font-size: 20px;
-        background-color: whitesmoke;
-        border-radius: 5px;
-        margin-right: 10px;
+        max-width: 400px;
+        margin: 10px;
     }
 
     h2 {
+        margin: 20px;
+        margin-top: 0px;
         font-size: 30px;
     }
 </style>
