@@ -37,7 +37,7 @@
     let showHelpModal: boolean = false;
     // let playerSiema = new Siema();
     let carouselNextPlayer: () => Promise<void>;
-    let carouselSetup: (number?) => Promise<void>;
+    let carouselSetup: (arg0: number) => Promise<void>;
 
     //TODO : When game ends tehere should be a cleanup of socket listeners
 
