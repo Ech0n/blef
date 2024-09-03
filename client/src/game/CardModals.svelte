@@ -193,9 +193,8 @@
         font-size: 45px;
     }
     .hand-ranking-image {
-        width: 18%;
-        padding: 1%;
         cursor: pointer;
+        padding: 10px;
         transition: transform 0.2s;
     }
     .hand-ranking-image:hover,
@@ -205,25 +204,15 @@
         transform: scale(1.05);
     }
     .hands-container {
-        widows: 100%;
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
-        justify-content: space-around;
-        align-items: center;
     }
     .auto-scale-image {
-        max-height: 100px;
-        max-width: 100%;
+        width: 6rem;
+        height: 3rem;
     }
     h3 {
-        font-size: 30px;
-    }
-
-    @media (max-width: 800px) {
-        .hand-ranking-image {
-            width: 97%;
-            margin: 3.5% auto;
-        }
+        font-size: 16px;
     }
 </style>

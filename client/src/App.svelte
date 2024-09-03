@@ -11,6 +11,7 @@
     import Navbar from './Navbar.svelte';
     import Home from './Home.svelte';
     import Account from './Account.svelte';
+    import CardModal from './game/CardModals.svelte';
 
     let gameView: Promise<any> | undefined;
     let activeView: string = 'menu';
@@ -182,6 +183,7 @@
     <!-- <Navbar on:viewChange={handleViewChange} {activeView} /> -->
     <div class="main-content">
         <h1 id="title">BLEF</h1>
+        <CardModal />
         {#if gameView}
             {#await gameView then { default: LobbyView }}
                 <LobbyView {gameId} usernameInput={username} on:gameClosed={leaveGame} {socket} {thisPlayerId} {players} {startedGameInfo} />

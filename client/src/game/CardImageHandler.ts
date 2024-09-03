@@ -54,7 +54,7 @@ import jackOfClubs from '../assets/svg_playing_cards/fronts/clubs_jack.svg';
 import queenOfClubs from '../assets/svg_playing_cards/fronts/clubs_queen.svg';
 import kingOfClubs from '../assets/svg_playing_cards/fronts/clubs_king.svg';
 
-import one from '../assets/svg_playing_cards/fronts/clubs_king.svg';
+import one from '../assets/svg_playing_cards/hands/one.svg';
 import pair from '../assets/svg_playing_cards/hands/pair.svg';
 import double from '../assets/svg_playing_cards/hands/double.svg';
 import three from '../assets/svg_playing_cards/hands/three.svg';

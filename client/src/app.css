@@ -137,10 +137,11 @@ input {
 .group {
     /* border-bottom: solid rgba(245, 245, 245, 0.699) 1px; */
     border-radius: 20px;
-    box-shadow: inset rgba(0, 0, 0, 0.247) 0px -1px 5px;
+    box-shadow: rgba(0, 0, 0, 0.466) 0px -0px 11px;
     padding-block: 0px;
     min-width: 320px;
     padding-bottom: 10px;
+    padding-top: 10px;
 }
 
 @media only screen and (max-width: 500px) {
