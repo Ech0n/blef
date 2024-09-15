@@ -1,195 +1,193 @@
 <script lang="ts">
-    import Menu from './Menu.svelte';
-    import { Player } from '../../common/player';
-    import { playerStore } from './game/stores';
-    import { config } from '../../config';
-    import { io, type Socket } from 'socket.io-client';
-    import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from '../../src/types/socketEvents';
-    import type { gameInfo, joinGameResponsePayload, joinRequest, reconnectRequestPayload, reconnectResponsePayload } from '../../common/payloads';
-    import { onMount } from 'svelte';
-    import session from 'express-session';
-    import Navbar from './Navbar.svelte';
-    import Home from './Home.svelte';
-    import Account from './Account.svelte';
-    import CardModal from './game/CardModals.svelte';
+    import { io, type Socket } from 'socket.io-client'
+    import { onMount } from 'svelte'
+    import type { gameInfo, joinGameResponsePayload, joinRequest, reconnectRequestPayload, reconnectResponsePayload } from '../../common/payloads'
+    import { Player } from '../../common/player'
+    import { config } from '../../config'
+    import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from '../../src/types/socketEvents'
+    import Account from './Account.svelte'
+    import CardModal from './game/CardModals.svelte'
+    import { playerStore } from './game/stores'
+    import Home from './Home.svelte'
+    import Menu from './Menu.svelte'
 
-    let gameView: Promise<any> | undefined;
-    let activeView: string = 'menu';
-    let gameId: string | null = null;
-    let player: Player | null = null;
-    let username = '';
-    const serverUrl: string = config.BACKEND_SERVER_ADDRESS;
-    let socket: Socket;
-    let players: Player[] = [];
-    let thisPlayerId: string;
-    let startedGameInfo: gameInfo['startedGameInfo'];
+    let gameView: Promise<any> | undefined
+    let activeView: string = 'menu'
+    let gameId: string | null = null
+    let player: Player | null = null
+    let username = ''
+    const serverUrl: string = config.BACKEND_SERVER_ADDRESS
+    let socket: Socket
+    let players: Player[] = []
+    let thisPlayerId: string
+    let startedGameInfo: gameInfo['startedGameInfo']
 
     let theme = {
         'primary-color': '#05580c',
         'secondary-color': '#01420d',
         'background-color': '#171c17',
-    };
+    }
     $: cssVarTheme = Object.entries(theme)
         .map(([key, value]) => `--${key}:${value}`)
-        .join(';');
+        .join(';')
 
     function commonListeners(socket: Socket) {
         socket.on(SocketEventsFromServer.playerReconnected, (data: { uid: string }) => {
             let player = players.find((pl) => {
-                return pl.uid === data.uid;
-            });
+                return pl.uid === data.uid
+            })
             if (!player) {
-                return;
+                return
             }
             //console.log('rejoined playere ', player);
 
-            player.isOnline = true;
-        });
+            player.isOnline = true
+        })
     }
 
     function loadClientGameView(gameInfo: gameInfo) {
         if (gameInfo.players) {
             players = gameInfo.players.map((el) => {
-                let newPlayer: Player = new Player(el.uid, el.username);
-                newPlayer.isOnline = el.isOnline;
-                return newPlayer;
-            });
+                let newPlayer: Player = new Player(el.uid, el.username)
+                newPlayer.isOnline = el.isOnline
+                return newPlayer
+            })
         }
-        thisPlayerId = gameInfo.thisPlayerId;
-        gameView = import('./lobby/LobbyClient.svelte');
+        thisPlayerId = gameInfo.thisPlayerId
+        gameView = import('./lobby/LobbyClient.svelte')
     }
 
     function joinGame(event: CustomEvent): void {
-        gameId = event.detail.gameId;
-        username = event.detail.username;
+        gameId = event.detail.gameId
+        username = event.detail.username
 
         if (!gameId) {
-            return; //TODO ensure that gameId is not undefined
+            return //TODO ensure that gameId is not undefined
         }
         if (!username) {
-            return;
+            return
         }
-        socket = io(serverUrl);
+        socket = io(serverUrl)
 
         // Listen for messages from the server
         socket.on(SocketEventsFromHost.joinResponse, (data: joinGameResponsePayload) => {
             //console.log('join response', data);
             if (!data || !data.didJoin || !data.gameInfo) {
                 //TODO: Some kind of toast saying "Could not connect to game" and possibly information why
-                return;
+                return
             }
 
             if (gameId) {
-                sessionStorage.setItem('gameId', gameId);
+                sessionStorage.setItem('gameId', gameId)
             }
-            sessionStorage.setItem('uid', data.gameInfo.thisPlayerId);
-            playerStore.set(player);
+            sessionStorage.setItem('uid', data.gameInfo.thisPlayerId)
+            playerStore.set(player)
 
-            thisPlayerId = data.gameInfo.thisPlayerId;
-            username = data.gameInfo.thisPlayerName;
+            thisPlayerId = data.gameInfo.thisPlayerId
+            username = data.gameInfo.thisPlayerName
 
-            player = new Player(thisPlayerId, username);
-            player.isOnline = true;
+            player = new Player(thisPlayerId, username)
+            player.isOnline = true
             // data.gameInfo.players = [...data.gameInfo.players, player];
 
-            commonListeners(socket);
-            startedGameInfo = data.gameInfo.startedGameInfo;
+            commonListeners(socket)
+            startedGameInfo = data.gameInfo.startedGameInfo
             //console.log(startedGameInfo);
-            loadClientGameView(data.gameInfo);
-        });
+            loadClientGameView(data.gameInfo)
+        })
 
         let requestPayload: joinRequest = {
             gameId: gameId,
             requesterUsername: username,
-        };
+        }
 
-        socket.emit(SocketEventsFromClient.joinRequest, requestPayload);
+        socket.emit(SocketEventsFromClient.joinRequest, requestPayload)
     }
 
     function hostGame(event: CustomEvent): void {
         //console.log(event.detail.username);
         if (!player) {
-            const newId = Date.now().toString(); // Placeholder ID generation TODO
-            username = event.detail.username;
-            player = new Player(newId, event.detail.username);
-            player.isOnline = true; // Set the player as online upon game creation
+            const newId = Date.now().toString() // Placeholder ID generation TODO
+            username = event.detail.username
+            player = new Player(newId, event.detail.username)
+            player.isOnline = true // Set the player as online upon game creation
         }
-        socket = io(serverUrl);
-        socket.emit(SocketEventsCommon.createGame, { username: username });
-        commonListeners(socket);
+        socket = io(serverUrl)
+        socket.emit(SocketEventsCommon.createGame, { username: username })
+        commonListeners(socket)
 
         socket.on(SocketEventsCommon.createGame, (data: { gameId: string; hostId: string }) => {
             // console.log('User created a game, its id is:', data.gameId);
-            gameId = data.gameId;
-            let host = new Player(data.hostId, username);
-            host.isOnline = true;
-            players = [host];
-            thisPlayerId = data.hostId;
-        });
-        playerStore.set(player);
-        gameView = import('./lobby/LobbyHost.svelte');
+            gameId = data.gameId
+            let host = new Player(data.hostId, username)
+            host.isOnline = true
+            players = [host]
+            thisPlayerId = data.hostId
+        })
+        playerStore.set(player)
+        gameView = import('./lobby/LobbyHost.svelte')
     }
 
     function leaveGame(): void {
-        gameView = undefined;
-        gameId = null;
-        player = null; // Reset player status or keep for reconnection purposes
-        playerStore.set(null);
+        gameView = undefined
+        gameId = null
+        player = null // Reset player status or keep for reconnection purposes
+        playerStore.set(null)
     }
 
     function checkForReconnect() {
         //TODO: consider using svelte builtin store for this
-        let sessionGameId = sessionStorage.getItem('gameId');
-        let sessionUid = sessionStorage.getItem('uid');
+        let sessionGameId = sessionStorage.getItem('gameId')
+        let sessionUid = sessionStorage.getItem('uid')
         if (!sessionUid || !sessionGameId) {
             // console.log('reconnection failed no data in session  ', sessionUid, sessionGameId);
-            return;
+            return
         }
 
-        socket = io(serverUrl);
+        socket = io(serverUrl)
         const request: reconnectRequestPayload = {
             requesterUid: sessionUid,
             gameId: sessionGameId,
-        };
-        socket.emit(SocketEventsFromClient.reconnectToGame, request);
+        }
+        socket.emit(SocketEventsFromClient.reconnectToGame, request)
         socket.on(SocketEventsFromHost.reconnectToGame, (response: reconnectResponsePayload) => {
             //console.log('reconnection response ', response);
 
             if (!response.didReconnect || !response.gameInfo) {
-                socket.disconnect();
-                return;
+                socket.disconnect()
+                return
             }
-            startedGameInfo = response.gameInfo.startedGameInfo;
+            startedGameInfo = response.gameInfo.startedGameInfo
             //console.log('app listener', startedGameInfo);
-            loadClientGameView(response.gameInfo);
-        });
+            loadClientGameView(response.gameInfo)
+        })
     }
 
     onMount(() => {
-        checkForReconnect();
-    });
+        checkForReconnect()
+    })
     function handleViewChange(data: any): void {
         // console.log("It doesnt get here");
         if (gameView !== undefined) {
             // Ignore calls from navbar methods in game.
-            return;
+            return
         }
-        const { newView } = data.detail.detail;
-        activeView = newView;
+        const { newView } = data.detail.detail
+        activeView = newView
     }
 </script>
 
-<main style={cssVarTheme}>
+<main style="{cssVarTheme}">
     <!-- <Navbar on:viewChange={handleViewChange} {activeView} /> -->
     <div class="main-content">
         <h1 id="title">BLEF</h1>
         <CardModal />
         {#if gameView}
             {#await gameView then { default: LobbyView }}
-                <LobbyView {gameId} usernameInput={username} on:gameClosed={leaveGame} {socket} {thisPlayerId} {players} {startedGameInfo} />
+                <LobbyView {gameId} usernameInput="{username}" on:gameClosed="{leaveGame}" {socket} {thisPlayerId} {players} {startedGameInfo} />
             {/await}
         {:else if activeView === 'menu'}
-            <Menu on:joinGame={joinGame} on:createGame={hostGame} />
+            <Menu on:joinGame="{joinGame}" on:createGame="{hostGame}" />
         {:else if activeView === 'settings'}
             <Account />
         {:else if activeView === 'info'}

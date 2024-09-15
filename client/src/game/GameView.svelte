@@ -1,47 +1,47 @@
 <script lang="ts">
-    import { onMount, createEventDispatcher, onDestroy } from 'svelte';
-    import { io } from 'socket.io-client';
-    import type { Socket } from 'socket.io-client';
-    import { SocketEventsCommon, SocketEventsFromHost } from '../../../src/types/socketEvents';
-    import CardModal from './CardModals.svelte';
-    import { Game } from './Game';
-    import type { checkToPlayersPayload, hitPayload } from '../../../common/payloads';
-    import { cardCountTableToIterableArray, type CardCountTable, cardToRankTranslation } from '../model/Card';
-    import CardImageHandler from './CardImageHandler';
-    import { config } from '../../../config';
-    import HelpModal from '../HelpModal.svelte';
-    import CardsInHand from './CardsInHand.svelte';
-    import PlayerCarousel from './components/PlayerCarousel.svelte';
+    import { onMount, createEventDispatcher, onDestroy } from 'svelte'
+    import { io } from 'socket.io-client'
+    import type { Socket } from 'socket.io-client'
+    import { SocketEventsCommon, SocketEventsFromHost } from '../../../src/types/socketEvents'
+    import CardModal from './CardModals.svelte'
+    import { Game } from './Game'
+    import type { checkToPlayersPayload, hitPayload } from '../../../common/payloads'
+    import { cardCountTableToIterableArray, type CardCountTable, cardToRankTranslation } from '../model/Card'
+    import CardImageHandler from './CardImageHandler'
+    import { config } from '../../../config'
+    import HelpModal from '../HelpModal.svelte'
+    import CardsInHand from './CardsInHand.svelte'
+    import PlayerCarousel from './components/PlayerCarousel.svelte'
     // import { Siema } from 'siema/dist/siema.min';
 
-    export let gameId: string;
-    export let socket: Socket;
-    export let kickPlayer: (uid: string) => void | undefined;
-    export let closeGame: () => void | undefined;
+    export let gameId: string
+    export let socket: Socket
+    export let kickPlayer: (uid: string) => void | undefined
+    export let closeGame: () => void | undefined
 
-    export let thisPlayerId: string;
-    export let isHost: boolean | undefined = false;
-    export let game: Game;
+    export let thisPlayerId: string
+    export let isHost: boolean | undefined = false
+    export let game: Game
 
-    const dispatch = createEventDispatcher();
-    const serverUrl: string = config.BACKEND_SERVER_ADDRESS;
-    let eliminated = false;
-    let showModal: boolean = false;
-    let betName: string = '';
-    let selectedHand;
-    let countdown: number = 45;
-    let roundTimer: ReturnType<typeof setInterval> | undefined;
-    let showButtons: boolean = true;
-    let previousCards: CardCountTable;
-    let readyPreviousCards: any = [];
-    let showHelpModal: boolean = false;
+    const dispatch = createEventDispatcher()
+    const serverUrl: string = config.BACKEND_SERVER_ADDRESS
+    let eliminated = false
+    let showModal: boolean = false
+    let betName: string = ''
+    let selectedHand
+    let countdown: number = 45
+    let roundTimer: ReturnType<typeof setInterval> | undefined
+    let showButtons: boolean = true
+    let previousCards: CardCountTable
+    let readyPreviousCards: any = []
+    let showHelpModal: boolean = false
     // let playerSiema = new Siema();
-    let carouselNextPlayer: () => Promise<void>;
-    let carouselSetup: (arg0: number) => Promise<void>;
+    let carouselNextPlayer: () => Promise<void>
+    let carouselSetup: (arg0: number) => Promise<void>
 
     //TODO : When game ends tehere should be a cleanup of socket listeners
 
-    const cardImageHandler = new CardImageHandler();
+    const cardImageHandler = new CardImageHandler()
     const cardFullNames: { [key: string]: string } = {
         '2': 'Two',
         '3': 'Three',
@@ -56,58 +56,58 @@
         'Q': 'Queen',
         'K': 'King',
         'A': 'Ace',
-    };
+    }
 
     onDestroy(() => {
         // console.log('Im destroun this !!!');
-        socket.removeAllListeners(SocketEventsCommon.hit);
-        socket.removeAllListeners(SocketEventsCommon.checkToServer);
-        socket.removeAllListeners(SocketEventsCommon.checkToPlayers);
-        socket.removeAllListeners(SocketEventsCommon.kickPlayer);
-        socket.removeAllListeners(SocketEventsCommon.checkToPlayers);
-        socket.removeAllListeners(SocketEventsCommon.checkToPlayers);
-    });
+        socket.removeAllListeners(SocketEventsCommon.hit)
+        socket.removeAllListeners(SocketEventsCommon.checkToServer)
+        socket.removeAllListeners(SocketEventsCommon.checkToPlayers)
+        socket.removeAllListeners(SocketEventsCommon.kickPlayer)
+        socket.removeAllListeners(SocketEventsCommon.checkToPlayers)
+        socket.removeAllListeners(SocketEventsCommon.checkToPlayers)
+    })
 
     onMount(() => {
         if (!socket) {
-            socket = io(serverUrl);
+            socket = io(serverUrl)
         }
 
         socket.on(SocketEventsCommon.hit, (data: hitPayload) => {
-            countdown = 45;
+            countdown = 45
             //console.log('hit data is here', data);
             if (isHost) {
-                stopRoundTimer();
+                stopRoundTimer()
                 sleep(2000).then(() => {
                     if (!game.gameClosed) {
-                        startRoundTimer();
+                        startRoundTimer()
                     }
-                });
+                })
             }
             //console.log('is gameCLosed: ', game.gameClosed);
             if (!game.gameClosed) {
-                game.hit(data.move);
-                carouselNextPlayer();
-                game = game;
+                game.hit(data.move)
+                carouselNextPlayer()
+                game = game
                 // showButtons = false; // This is necessary to avoid spamming check
                 // sleep(3000).then(() => {
                 //     showButtons = true;
                 // });
-                showButtons = true;
+                showButtons = true
             } else {
-                stopRoundTimer();
+                stopRoundTimer()
             }
-        });
+        })
 
         socket.on(SocketEventsCommon.kickPlayer, (playerId: string) => {
             if (playerId === thisPlayerId) {
-                dispatch('leave');
+                dispatch('leave')
             } else {
-                game.removePlayer(playerId);
-                game = game;
-                dispatch('playerLeft', playerId);
+                game.removePlayer(playerId)
+                game = game
+                dispatch('playerLeft', playerId)
             }
-        });
+        })
 
         if (isHost) {
             // ********************************************
@@ -116,39 +116,39 @@
 
             //console.log('host');
 
-            game.gameClosed = false;
-            startRoundTimer();
+            game.gameClosed = false
+            startRoundTimer()
 
             socket.on(SocketEventsCommon.checkToServer, (data) => {
                 if (game.previousBet) {
-                    previousCards = game.getCardCount();
-                    constructReadyCards();
+                    previousCards = game.getCardCount()
+                    constructReadyCards()
                 }
 
-                let checkResult = game.validateCheck();
-                game = game;
-                socket.emit(SocketEventsCommon.checkToPlayers, checkResult);
+                let checkResult = game.validateCheck()
+                game = game
+                socket.emit(SocketEventsCommon.checkToPlayers, checkResult)
                 // console.log(previousCards);
-                socket.emit(SocketEventsFromHost.cardListToPlayers, previousCards);
+                socket.emit(SocketEventsFromHost.cardListToPlayers, previousCards)
                 //console.log('sending to players: ', previousCards, checkResult);
                 game.eliminatedPlayers.forEach((pl) => {
                     if (pl.uid == thisPlayerId) {
-                        eliminated = true;
+                        eliminated = true
                     }
-                });
+                })
 
                 if (game.players.length == 1) {
-                    game.gameClosed = true;
-                    stopRoundTimer();
-                    dispatch('gameFinished', game.players[0]);
+                    game.gameClosed = true
+                    stopRoundTimer()
+                    dispatch('gameFinished', game.players[0])
                 }
 
                 if (!game.gameClosed) {
-                    stopRoundTimer();
-                    startRoundTimer();
+                    stopRoundTimer()
+                    startRoundTimer()
                 }
-                carouselSetup(game.currentPlayerIndx);
-            });
+                carouselSetup(game.currentPlayerIndx)
+            })
         } else {
             // ********************************************
             // |      NON-HOST SOCKET FUNCTIONALITY       |
@@ -156,45 +156,45 @@
             //console.log('non host');
             socket.on(SocketEventsCommon.checkToPlayers, (data: checkToPlayersPayload) => {
                 //console.log('recieved check', data);
-                game.check(data);
-                game = game;
+                game.check(data)
+                game = game
                 game.eliminatedPlayers.forEach((pl) => {
                     if (pl.uid == thisPlayerId) {
-                        eliminated = true;
+                        eliminated = true
                     }
-                });
+                })
 
                 if (game.players.length == 1) {
-                    dispatch('gameFinished', game.players[0]);
+                    dispatch('gameFinished', game.players[0])
                 }
 
-                carouselSetup(game.currentPlayerIndx);
-                countdown = 15; // Not necessary but let it stay // What do u mean not necessarey?
-            });
+                carouselSetup(game.currentPlayerIndx)
+                countdown = 15 // Not necessary but let it stay // What do u mean not necessarey?
+            })
 
             socket.on(SocketEventsCommon.kickPlayer, (playerId: string) => {
-                game.removePlayer(playerId);
-                game = game;
-                dispatch('playerLeft', playerId);
-            });
+                game.removePlayer(playerId)
+                game = game
+                dispatch('playerLeft', playerId)
+            })
 
             socket.on(SocketEventsCommon.updateTimerToPlayers, (update: number) => {
-                countdown = update;
-            });
+                countdown = update
+            })
 
             socket.on(SocketEventsCommon.updateCardCountToPlayers, (oldCards: CardCountTable) => {
-                previousCards = oldCards;
-                constructReadyCards();
-            });
+                previousCards = oldCards
+                constructReadyCards()
+            })
         }
-    });
+    })
 
     function endOfTimerHandler() {
         if (countdown <= 0) {
             sleep(2000).then(() => {
                 if (countdown <= 0) {
                     if (game.previousBet) {
-                        check();
+                        check()
                     } else {
                         const forcedBet = {
                             selectedRanking: 'royal',
@@ -202,13 +202,13 @@
                             secondaryCard: '',
                             selectedColor: 'spade',
                             startingCard: '',
-                        };
+                        }
 
-                        socket.emit(SocketEventsCommon.hit, { move: forcedBet });
-                        showModal = false;
+                        socket.emit(SocketEventsCommon.hit, { move: forcedBet })
+                        showModal = false
                     }
                 }
-            });
+            })
         }
     }
 
@@ -216,119 +216,119 @@
     // This function is called when the modal is closed and we have selected a bet
     function handleBetSelection(event: CustomEvent) {
         if (countdown > 0) {
-            const { detail } = event;
-            selectedHand = detail;
-            socket.emit(SocketEventsCommon.hit, { move: selectedHand });
+            const { detail } = event
+            selectedHand = detail
+            socket.emit(SocketEventsCommon.hit, { move: selectedHand })
         }
-        showModal = false;
+        showModal = false
     }
 
     function check(): void {
         //console.log(isHost);
-        socket.emit(SocketEventsCommon.checkToServer);
+        socket.emit(SocketEventsCommon.checkToServer)
     }
 
     function getBetName(): string {
         if (!game.previousBet) {
-            return 'Error has occured.';
+            return 'Error has occured.'
         }
 
-        const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-        let { selectedRanking, primaryCard, secondaryCard, selectedColor, startingCard } = game.previousBet;
-        selectedRanking = capitalize(selectedRanking);
-        primaryCard = capitalize(primaryCard);
-        secondaryCard = capitalize(secondaryCard);
-        selectedColor = capitalize(selectedColor);
-        startingCard = capitalize(startingCard);
+        const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
+        let { selectedRanking, primaryCard, secondaryCard, selectedColor, startingCard } = game.previousBet
+        selectedRanking = capitalize(selectedRanking)
+        primaryCard = capitalize(primaryCard)
+        secondaryCard = capitalize(secondaryCard)
+        selectedColor = capitalize(selectedColor)
+        startingCard = capitalize(startingCard)
 
-        let currentBet: string = selectedRanking;
+        let currentBet: string = selectedRanking
 
         if (['One', 'Pair', 'Three', 'Four'].includes(selectedRanking)) {
-            let cardName = cardFullNames[primaryCard];
-            return currentBet + (selectedRanking === 'Pair' ? ' of ' : ' ') + cardName + (selectedRanking !== 'One' ? 's' : '');
+            let cardName = cardFullNames[primaryCard]
+            return currentBet + (selectedRanking === 'Pair' ? ' of ' : ' ') + cardName + (selectedRanking !== 'One' ? 's' : '')
         }
 
         if (['Double', 'Full'].includes(selectedRanking)) {
-            let primaryCardName = cardFullNames[primaryCard];
-            let secondaryCardName = cardFullNames[secondaryCard];
-            return currentBet + (selectedRanking === 'Full' ? ' of 3 ' : ' of 2 ') + primaryCardName + 's and 2 ' + secondaryCardName + 's';
+            let primaryCardName = cardFullNames[primaryCard]
+            let secondaryCardName = cardFullNames[secondaryCard]
+            return currentBet + (selectedRanking === 'Full' ? ' of 3 ' : ' of 2 ') + primaryCardName + 's and 2 ' + secondaryCardName + 's'
         }
 
         if (['Flush', 'Street'].includes(selectedRanking)) {
-            let cardName = cardFullNames[startingCard];
-            return currentBet + ' starting from ' + cardName + (selectedRanking === 'Flush' ? ' in color ' + selectedColor : 's');
+            let cardName = cardFullNames[startingCard]
+            return currentBet + ' starting from ' + cardName + (selectedRanking === 'Flush' ? ' in color ' + selectedColor : 's')
         }
 
         if (selectedRanking === 'Royal') {
-            return selectedRanking + ' Flush of ' + selectedColor + 's';
+            return selectedRanking + ' Flush of ' + selectedColor + 's'
         }
 
-        return selectedRanking + ' ' + selectedColor + 's';
+        return selectedRanking + ' ' + selectedColor + 's'
     }
 
     function startRoundTimer(): void {
         if (roundTimer) {
-            return;
+            return
         }
-        countdown = 45;
+        countdown = 45
         roundTimer = setInterval(() => {
             if (countdown > 0) {
-                countdown--;
+                countdown--
             } else {
-                endOfTimerHandler();
-                clearInterval(roundTimer);
-                roundTimer = undefined;
+                endOfTimerHandler()
+                clearInterval(roundTimer)
+                roundTimer = undefined
             }
-            socket.emit(SocketEventsFromHost.timerUpdate, countdown);
-        }, 100000);
+            socket.emit(SocketEventsFromHost.timerUpdate, countdown)
+        }, 100000)
     }
 
     function stopRoundTimer(): void {
         if (roundTimer) {
-            clearInterval(roundTimer);
+            clearInterval(roundTimer)
         }
-        roundTimer = undefined;
+        roundTimer = undefined
     }
 
     function sleep(ms: number) {
         // console.log('prevbet', game.previousBet);
-        return new Promise((resolve) => setTimeout(resolve, ms));
+        return new Promise((resolve) => setTimeout(resolve, ms))
     }
 
     function constructReadyCards() {
-        let iterableCards = cardCountTableToIterableArray(previousCards);
-        readyPreviousCards = [];
+        let iterableCards = cardCountTableToIterableArray(previousCards)
+        readyPreviousCards = []
 
         const cardNumberToString: { [key: number]: string } = {
             11: 'j',
             12: 'q',
             13: 'k',
             14: 'a',
-        };
+        }
         const IndexToColor: { [key: number]: string } = {
             4: 'spade',
             3: 'heart',
             2: 'club',
             1: 'diamond',
-        };
+        }
 
         for (let [cardNumber, colorCounts] of iterableCards) {
             for (let [color, isThereColor] of colorCounts) {
                 if (isThereColor == 1) {
-                    let stringCardNumber = cardNumberToString[cardNumber] || cardNumber.toString();
-                    let readyCardNumber = cardToRankTranslation[stringCardNumber].string;
-                    readyPreviousCards.push(readyCardNumber + ' ' + IndexToColor[color]);
+                    let stringCardNumber = cardNumberToString[cardNumber] || cardNumber.toString()
+                    let readyCardNumber = cardToRankTranslation[stringCardNumber].string
+                    readyPreviousCards.push(readyCardNumber + ' ' + IndexToColor[color])
                 }
             }
         }
     }
 
     const shortenUsername = (username: string) => {
-        return username.length > 6 ? `${username.slice(0, 6)}...` : username;
-    };
+        return username.length > 6 ? `${username.slice(0, 6)}...` : username
+    }
 
     $: if (game.previousBet) {
-        betName = getBetName();
+        betName = getBetName()
     }
 </script>
 
@@ -340,9 +340,9 @@
     <div id="relatives">
         <div
             class="helper"
-            on:click={() => {
-                showHelpModal = true;
-            }}
+            on:click="{() => {
+                showHelpModal = true
+            }}"
         >
             <!-- Man autoformatter... what the fuck is this-->
             ❔
@@ -378,7 +378,7 @@
             </div>
         </div>
 
-        <PlayerCarousel users={game.players} bind:next={carouselNextPlayer} bind:setup={carouselSetup} />
+        <PlayerCarousel users="{game.players}" bind:next="{carouselNextPlayer}" bind:setup="{carouselSetup}" />
         <div>
             {#if !eliminated}
                 <div class="cards-container">
@@ -388,7 +388,7 @@
                             <div class="prev-cards-container">
                                 {#each readyPreviousCards as card}
                                     <!-- svelte-ignore a11y-missing-attribute -->
-                                    <img src={cardImageHandler.getCardImage(card)} />
+                                    <img src="{cardImageHandler.getCardImage(card)}" />
                                     <br />
                                 {/each}
                             </div>
@@ -401,19 +401,19 @@
         {#if game.currentPlayer == thisPlayerId && showButtons}
             <p>Your turn</p>
             <div style="responsive">
-                <button class="start-close" on:click={() => (showModal = true)}>Raise</button>
-                <button id="check-button" class="start-close" on:click={check}>Check</button>
+                <button class="start-close" on:click="{() => (showModal = true)}">Raise</button>
+                <button id="check-button" class="start-close" on:click="{check}">Check</button>
             </div>
         {/if}
         <div class="cardsPlaceHolder"></div>
     </div>
-    <CardsInHand hand={game.hand} />
+    <CardsInHand hand="{game.hand}" />
 
     {#if showModal}
-        <CardModal on:close={() => (showModal = false)} on:select={handleBetSelection} previousBet={game.previousBet} />
+        <CardModal on:close="{() => (showModal = false)}" on:select="{handleBetSelection}" previousBet="{game.previousBet}" />
     {/if}
     {#if showHelpModal}
-        <HelpModal on:close={() => (showHelpModal = false)} />
+        <HelpModal on:close="{() => (showHelpModal = false)}" />
     {/if}
 </div>
 

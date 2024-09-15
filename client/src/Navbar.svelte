@@ -1,23 +1,23 @@
 <!-- Navbar.svelte -->
 <script lang="ts">
-    import { createEventDispatcher } from 'svelte';
+    import { createEventDispatcher } from 'svelte'
 
-    export let activeView: string;
-    const dispatch = createEventDispatcher();
+    export let activeView: string
+    const dispatch = createEventDispatcher()
 
     function changeView(newView: string) {
         const event = new CustomEvent('viewChange', {
             detail: { newView },
-        });
-        dispatch('viewChange', event);
+        })
+        dispatch('viewChange', event)
     }
 
-    $: dummyUsage = activeView;
+    $: dummyUsage = activeView
 </script>
 
 <nav>
-    <button on:click={() => changeView('info')}>What's Blef?</button>
-    <button on:click={() => changeView('menu')}>Play</button>
+    <button on:click="{() => changeView('info')}">What's Blef?</button>
+    <button on:click="{() => changeView('menu')}">Play</button>
 </nav>
 
 <style>

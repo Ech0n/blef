@@ -1,42 +1,42 @@
 <script lang="ts">
-    import { createEventDispatcher, onMount } from 'svelte';
+    import { createEventDispatcher, onMount } from 'svelte'
 
-    const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher()
 
-    export let showModal: boolean = false;
-    export let mode: 'join' | 'create' = 'join'; // Add a mode prop to determine which form to show
-    let gameId: string = '';
-    let username: string = '';
-    let errorMessage: string = ''; // Add an error message state
+    export let showModal: boolean = false
+    export let mode: 'join' | 'create' = 'join' // Add a mode prop to determine which form to show
+    let gameId: string = ''
+    let username: string = ''
+    let errorMessage: string = '' // Add an error message state
 
     onMount(() => {
-        let usernameFromStorage = sessionStorage.getItem('username');
+        let usernameFromStorage = sessionStorage.getItem('username')
         if (usernameFromStorage) {
-            username = usernameFromStorage;
+            username = usernameFromStorage
         }
-    });
+    })
 
     function closeModal() {
-        showModal = false;
-        dispatch('close');
+        showModal = false
+        dispatch('close')
     }
 
     function action() {
         if (username.trim() === '') {
-            errorMessage = 'Please enter your name.';
-            return; // Stop the action if username is empty
+            errorMessage = 'Please enter your name.'
+            return // Stop the action if username is empty
         }
-        sessionStorage.setItem('username', username);
+        sessionStorage.setItem('username', username)
         if (mode === 'join') {
             if (gameId.trim() === '') {
-                errorMessage = 'Please enter a game ID.';
-                return; // Stop the action if gameId is empty
+                errorMessage = 'Please enter a game ID.'
+                return // Stop the action if gameId is empty
             }
-            dispatch('joinGame', { username, gameId });
+            dispatch('joinGame', { username, gameId })
         } else {
-            dispatch('createGame', { username });
+            dispatch('createGame', { username })
         }
-        closeModal(); // Close the modal only if everything is correct
+        closeModal() // Close the modal only if everything is correct
     }
 </script>
 
@@ -56,12 +56,12 @@
                     <p class="error">{errorMessage}</p>
                 {/if}
                 {#if mode === 'join'}
-                    <input type="text" placeholder="Enter Game ID" bind:value={gameId} maxlength="10" />
+                    <input type="text" placeholder="Enter Game ID" bind:value="{gameId}" maxlength="10" />
                 {/if}
-                <input type="text" placeholder="Enter Your Name" bind:value={username} maxlength="14" />
+                <input type="text" placeholder="Enter Your Name" bind:value="{username}" maxlength="14" />
 
-                <button class="start-close" on:click={action}>{mode === 'join' ? 'Join Game' : 'Create Game'}</button>
-                <button class="start-close" on:click={closeModal}>Cancel</button>
+                <button class="start-close" on:click="{action}">{mode === 'join' ? 'Join Game' : 'Create Game'}</button>
+                <button class="start-close" on:click="{closeModal}">Cancel</button>
             </div>
         </div>
     </div>
