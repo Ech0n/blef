@@ -2,7 +2,9 @@ import type { Player } from './player';
 import type { Card } from '../client/src/model/Card';
 import { HandInfo } from '../client/src/game/HandRankings';
 
-export interface checkToServerPayload {
+export interface Payload{}
+
+export interface checkToServerPayload extends Payload{
     newHands: { [key: string]: Card[] };
     roundStartingPlayerId: string;
     eliminatedPlayers: Player[];
@@ -10,7 +12,7 @@ export interface checkToServerPayload {
     checkSuccesful: boolean;
 }
 
-export interface checkToPlayersPayload {
+export interface checkToPlayersPayload extends Payload{
     newHand: Card[];
     players: Player[];
     roundStartingPlayerId: string;
@@ -18,16 +20,16 @@ export interface checkToPlayersPayload {
     checkSuccesful: boolean;
 }
 
-export interface gameStartPayload {
+export interface gameStartPayload extends Payload{
     startingPlayerId: string;
     newHands: { [key: string]: Card[] };
 }
 
-export interface hitPayload {
+export interface hitPayload extends Payload{
     move: HandInfo;
 }
 
-export interface gameInfo {
+export interface gameInfo extends Payload{
     players: Player[];
     thisPlayerId: string;
     thisPlayerName: string;
@@ -39,26 +41,26 @@ export interface gameInfo {
     };
 }
 
-export interface joinRequest {
+export interface joinRequest extends Payload{
     requesterSocketId?: string;
     requesterUid?: string;
     requesterUsername: string;
     gameId: string;
 }
 
-export interface joinGameResponsePayload {
+export interface joinGameResponsePayload extends Payload{
     didJoin: boolean;
     gameInfo?: gameInfo;
     request?: joinRequest;
 }
 
-export interface reconnectRequestPayload {
+export interface reconnectRequestPayload extends Payload{
     requesterSocketId?: string;
     requesterUid: string;
     gameId: string;
 }
 
-export interface reconnectResponsePayload {
+export interface reconnectResponsePayload extends Payload{
     reconnectRequest: reconnectRequestPayload;
     didReconnect: boolean;
     gameInfo?: gameInfo;

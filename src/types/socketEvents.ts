@@ -41,3 +41,5 @@ export enum SocketEventsFromClient {
     playerReady = 'playerReady',
     joinRequest = 'joinRequest',
 }
+
+export type anySocketEvent = SocketEventsCommon| SocketEventsFromClient | SocketEventsFromHost | SocketEventsFromHostAndClient | SocketEventsFromServer 

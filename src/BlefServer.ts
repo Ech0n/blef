@@ -2,7 +2,7 @@ import { SessionData } from 'express-session'
 import http, { IncomingMessage } from 'http'
 import { Server, Socket } from 'socket.io'
 import { v4 as uuidv4 } from 'uuid'
-import { reconnectRequestPayload, reconnectResponsePayload } from '../common/payloads'
+import { Payload, reconnectRequestPayload, reconnectResponsePayload } from '../common/payloads'
 import { Player, createPlayerFromIPlayer } from '../common/player'
 import { config } from '../config'
 import { SessionSocket, socketEventsListeners } from './socketEventListeners'
@@ -52,7 +52,7 @@ export class BlefServer {
     // So doing it this way we can alawys expect client to emit a callback with same event (or not if smthng went wrong)
     passToEveryoneExceptSender(
         event: SocketEventsCommon,
-        payload: any, // payload in futer of payload type
+        payload: Payload, 
         socket: Socket
     ) {
         let gameId = this.getRoomId(socket)
@@ -61,7 +61,7 @@ export class BlefServer {
 
     passToHost(
         event: SocketEventsCommon,
-        payload: any, // payload in futer of payload type
+        payload: Payload,
         socket: Socket
     ) {
         let gameId = this.getRoomId(socket)
@@ -75,7 +75,7 @@ export class BlefServer {
 
     passToClientAndHost(
         event: SocketEventsCommon,
-        payload: any, // payload in futer of payload type
+        payload: Payload,
         socket: Socket
     ) {
         let gameId = this.getRoomId(socket)
@@ -146,13 +146,9 @@ export class BlefServer {
             }
         }
 
-        // let playersInRoom: Player[] = this.getPlayersInRoom(responsePayload.reconnectRequest.gameId);
-        // const gameInfoPayload: gameInfo = { players: playersInRoom, thisPlayerId: req.session.uid, thisPlayerName: req.session.username, gameStarted: false };
-        // responsePayload.gameInfo = gameInfoPayload;
         clientSocket.emit(SocketEventsFromHost.reconnectToGame, responsePayload)
 
         this.io.in(responsePayload.reconnectRequest.gameId).emit(SocketEventsFromServer.playerReconnected, { uid: responsePayload.reconnectRequest.requesterUid })
-        //console.log('was here');
         clientSocket.join(responsePayload.reconnectRequest.gameId)
     }
 
@@ -167,13 +163,13 @@ export class BlefServer {
     getPlayersInRoom(roomId: string) {
         let clientsInRoom = this.io.sockets.adapter.rooms.get(roomId)
         if (!clientsInRoom) {
-            throw 'Huh!?'
+            throw 'no players in da room!?' + roomId
         }
         let playersInRoom: Player[] = []
         for (const clientId of clientsInRoom) {
             const clientSocket = this.io.sockets.sockets.get(clientId)
             if (!clientSocket) {
-                throw 'Bruh'
+                throw 'Couldnt find socket for player' + clientId
             }
             if (clientSocket.player) {
                 playersInRoom.push(createPlayerFromIPlayer(clientSocket.player))
