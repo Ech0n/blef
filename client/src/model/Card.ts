@@ -5,7 +5,6 @@ export type Card = [string, string];
 export type CardCountTable = { [cardKey: number]: { [colorKey: number]: number } };
 
 export function initalizeCountTable(): CardCountTable {
-    // let table = new Map<Number, Map<Number, Number>>();
     let table: { [key: number]: { [key: number]: number } } = {};
 
     const colorTable: { [key: number]: number } = {};
@@ -105,25 +104,11 @@ export function initalizeGame(players: IPlayer[]): { cardCounts: CardCountTable;
     }
 
     let hands: { [key: string]: Card[] } = {};
-    //         let cards: any = [];
-    // for (let i = 0; i < 5; i++) {
-    //     let randomIndex: number = Math.floor(Math.random() * deckInitialization.length);
-    //     let randomCard = deckInitialization.splice(randomIndex, 1);
-    //     cardCounts[fullCardNameToNumeric[randomCard[0][0]].numeric][ColorToIndex[randomCard[0][1]]] += 1;
-    //     cards = [...cards, randomCard];
-    // }
     players.map((player) => {
         let randomIndex: number = Math.floor(Math.random() * deckInitialization.length);
         let randomCard = deckInitialization.splice(randomIndex, 1);
         cardCounts[fullCardNameToNumeric[randomCard[0][0]].numeric][ColorToIndex[randomCard[0][1]]] += 1;
 
-        // let cards: any = [];
-        // for (let i = 0; i < 5; i++) {
-        //     let randomIndex: number = Math.floor(Math.random() * deckInitialization.length);
-        //     let randomCard = deckInitialization.splice(randomIndex, 1);
-        //     cardCounts[fullCardNameToNumeric[randomCard[0][0]].numeric][ColorToIndex[randomCard[0][1]]] += 1;
-        //     cards = [...cards, randomCard[0]];
-        // }
         hands[player.uid] = randomCard;
     });
 

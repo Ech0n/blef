@@ -62,7 +62,6 @@
     </div>
 </div>
 
-<!-- <button on:click={next}> next </button> -->
 
 <style>
     .item {

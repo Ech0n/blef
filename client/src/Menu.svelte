@@ -8,7 +8,6 @@
     let mode: 'join' | 'create' = 'join' // Default mode
 
     function joinGame(event: any): void {
-        //console.log('Joining game with ID:', event.detail.gameId);
         dispatch('joinGame', {
             gameId: event.detail.gameId,
             username: event.detail.username,
@@ -17,7 +16,6 @@
     }
 
     function createGame(event: any): void {
-        //console.log('Creating game with user name:', event.detail.username);
         dispatch('createGame', { username: event.detail.username })
     }
 </script>

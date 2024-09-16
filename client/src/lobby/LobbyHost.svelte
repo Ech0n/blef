@@ -26,7 +26,6 @@
 
     onMount(() => {
         socket.on(SocketEventsCommon.newPlayerJoined, (data: { username: string; uid: string; isOnline: boolean }) => {
-            //console.log('Join event', data);
             if (!data) {
                 throw 'No data from server'
             }
@@ -44,10 +43,8 @@
 
             players = [...players, newPlayer]
 
-            //console.log(players);
         })
         socket.on(SocketEventsFromClient.joinRequest, (data: joinRequest) => {
-            //console.log('recevied request to join: ', data);
             let response: joinGameResponsePayload = {
                 didJoin: false,
                 request: data,
@@ -62,7 +59,6 @@
                 return el.username === data.requesterUsername
             })
 
-            //console.log('Found player : ', wasPlayerFound, 'players', playersList);
             if (!wasPlayerFound) {
                 if (gameView) {
                     socket.emit(SocketEventsFromHost.joinResponse, response)
@@ -91,7 +87,6 @@
             if (gameView) {
                 let hand = game.hands.get(data.requesterUid)
                 if (hand) {
-                    //console.log('Couldnt find cards for reconnecting player');
                     gameInfo.gameStarted = true
 
                     gameInfo.startedGameInfo = {
@@ -103,11 +98,9 @@
             }
             response.gameInfo = gameInfo
 
-            //console.log('sent response: ', response);
             socket.emit(SocketEventsFromHost.joinResponse, response)
         })
         socket.on(SocketEventsFromClient.reconnectToGame, (reconnectRequestPayload: reconnectRequestPayload) => {
-            //console.log('request here ', reconnectRequestPayload);
             let reconnectingPlayer = players.find((pl) => {
                 return pl.uid === reconnectRequestPayload.requesterUid
             })
@@ -126,7 +119,6 @@
                 if (gameView) {
                     let hand = game.hands.get(reconnectingPlayer.uid)
                     if (!hand) {
-                        //console.log('Couldnt find cards for reconnecting player');
                         return
                     }
                     gameInfo.gameStarted = true
@@ -140,12 +132,10 @@
 
                 response.gameInfo = gameInfo
             }
-            //console.log('response to request ', response);
             socket.emit(SocketEventsFromHost.reconnectToGame, response)
         })
 
         socket.on(SocketEventsCommon.playerLeftGame, (data: { uid: string }) => {
-            //console.log('player disconnected', data.uid);
             if (!data) {
                 return
             }
@@ -176,7 +166,6 @@
         })
 
         socket.on(SocketEventsCommon.playerReady, (readyPlayerId: string) => {
-            //console.log('this player ready here!');
             readyPlayers++
         })
 
@@ -193,7 +182,6 @@
                     playerThatLeft.isOnline = false
                 }
                 players = players
-                //console.log(players);
             } else {
                 let wasInLobby: boolean = false
                 for (let player of players) {
@@ -219,7 +207,6 @@
             let startPayload = initializationData.payload
             socket.emit(SocketEventsCommon.gameStarted, startPayload)
         } else {
-            //console.log(readyPlayers);
             throw 'Invalid amount of players to start the game or not everyone is ready'
         }
     }

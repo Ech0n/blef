@@ -6,7 +6,6 @@
     import { config } from '../../config'
     import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from '../../src/types/socketEvents'
     import Account from './Account.svelte'
-    import CardModal from './game/CardModals.svelte'
     import { playerStore } from './game/stores'
     import Home from './Home.svelte'
     import Menu from './Menu.svelte'
@@ -39,7 +38,6 @@
             if (!player) {
                 return
             }
-            //console.log('rejoined playere ', player);
 
             player.isOnline = true
         })
@@ -71,7 +69,6 @@
 
         // Listen for messages from the server
         socket.on(SocketEventsFromHost.joinResponse, (data: joinGameResponsePayload) => {
-            //console.log('join response', data);
             if (!data || !data.didJoin || !data.gameInfo) {
                 //TODO: Some kind of toast saying "Could not connect to game" and possibly information why
                 return
@@ -88,11 +85,9 @@
 
             player = new Player(thisPlayerId, username)
             player.isOnline = true
-            // data.gameInfo.players = [...data.gameInfo.players, player];
 
             commonListeners(socket)
             startedGameInfo = data.gameInfo.startedGameInfo
-            //console.log(startedGameInfo);
             loadClientGameView(data.gameInfo)
         })
 
@@ -105,7 +100,6 @@
     }
 
     function hostGame(event: CustomEvent): void {
-        //console.log(event.detail.username);
         if (!player) {
             const newId = Date.now().toString() // Placeholder ID generation TODO
             username = event.detail.username
@@ -117,7 +111,6 @@
         commonListeners(socket)
 
         socket.on(SocketEventsCommon.createGame, (data: { gameId: string; hostId: string }) => {
-            // console.log('User created a game, its id is:', data.gameId);
             gameId = data.gameId
             let host = new Player(data.hostId, username)
             host.isOnline = true
@@ -136,11 +129,9 @@
     }
 
     function checkForReconnect() {
-        //TODO: consider using svelte builtin store for this
         let sessionGameId = sessionStorage.getItem('gameId')
         let sessionUid = sessionStorage.getItem('uid')
         if (!sessionUid || !sessionGameId) {
-            // console.log('reconnection failed no data in session  ', sessionUid, sessionGameId);
             return
         }
 
@@ -151,14 +142,11 @@
         }
         socket.emit(SocketEventsFromClient.reconnectToGame, request)
         socket.on(SocketEventsFromHost.reconnectToGame, (response: reconnectResponsePayload) => {
-            //console.log('reconnection response ', response);
-
             if (!response.didReconnect || !response.gameInfo) {
                 socket.disconnect()
                 return
             }
             startedGameInfo = response.gameInfo.startedGameInfo
-            //console.log('app listener', startedGameInfo);
             loadClientGameView(response.gameInfo)
         })
     }
@@ -166,22 +154,13 @@
     onMount(() => {
         checkForReconnect()
     })
-    function handleViewChange(data: any): void {
-        // console.log("It doesnt get here");
-        if (gameView !== undefined) {
-            // Ignore calls from navbar methods in game.
-            return
-        }
-        const { newView } = data.detail.detail
-        activeView = newView
-    }
+
+    
 </script>
 
 <main style="{cssVarTheme}">
-    <!-- <Navbar on:viewChange={handleViewChange} {activeView} /> -->
     <div class="main-content">
-        <h1 id="title">BLEF</h1>
-        <CardModal />
+        <h1 id="title">BLEF</h1>                
         {#if gameView}
             {#await gameView then { default: LobbyView }}
                 <LobbyView {gameId} usernameInput="{username}" on:gameClosed="{leaveGame}" {socket} {thisPlayerId} {players} {startedGameInfo} />

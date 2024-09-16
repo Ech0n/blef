@@ -9,7 +9,6 @@ interface hitPayload {
 }
 
 export function compareRankingAGreaterThanB(oldRanking: hitPayload, newRanking: hitPayload): boolean {
-    // console.log(compareHierarchy[oldRanking.selectedRanking], compareHierarchy[newRanking.selectedRanking]);
 
     if (compareHierarchy[oldRanking.selectedRanking] === compareHierarchy[newRanking.selectedRanking]) {
         // console.log('Ranks are equal, checking cards ');

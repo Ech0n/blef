@@ -234,7 +234,6 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
 
     clientSocket.on(SocketEventsFromHost.timerUpdate, (update: number) => {
         if (roomHosts.get(blefServer.getRoomId(clientSocket)) != clientSocket.id) {
-            //console.log('Could not update timer, (user is not a host)');
             return
         }
 
@@ -254,7 +253,6 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
 
     clientSocket.on(SocketEventsFromHost.cardListToPlayers, (cardCount: CardCountTable) => {
         if (roomHosts.get(blefServer.getRoomId(clientSocket)) != clientSocket.id) {
-            //console.log('Could not send cardCountTable, (user is not a host)');
             return
         }
 

@@ -88,7 +88,6 @@
             startingCard,
         };
 
-        // console.log(newBet);
 
         // @ts-ignore
         if (previousBet) {

@@ -6,13 +6,10 @@
     import { SocketEventsCommon, SocketEventsFromClient } from '../../../src/types/socketEvents';
     import { Player } from '../../../common/player';
     import type { gameInfo, gameStartPayload } from '../../../common/payloads';
-    import type { Card, CardCountTable } from '../model/Card';
+    import type { Card } from '../model/Card';
     import LobbyPlayerList from './LobbyPlayerList.svelte';
-    import { config } from '../../../config';
     import WinnerModal from './WinnerModal.svelte';
     import { Game } from '../game/Game';
-    import { start } from 'repl';
-    import { getDefaultFormatCodeSettings } from 'typescript';
 
     export let gameId: string;
     export let socket: Socket;
@@ -38,7 +35,6 @@
     });
 
     onMount(() => {
-        //console.log('started game info? ', startedGameInfo);
         if (startedGameInfo) {
             let hands: { [key: string]: Card[] } = {};
             hands[thisPlayerId] = startedGameInfo.newHand;
@@ -48,15 +44,10 @@
             };
             game = new Game(players, gameStartData, thisPlayerId);
             game.previousBet = startedGameInfo.currentBet;
-            //console.log('players ', game.players, players);
             gameView = import('../game/GameView.svelte');
         }
 
         socket.on(SocketEventsCommon.newPlayerJoined, (data: { username: string; uid: string }) => {
-            // let searchForPlayer = players.find((el) => el.username === data.username);
-            // if (searchForPlayer) {
-            //     return;
-            // }
             console.debug('New player in lobby name:', data.username);
             let newPlayer = new Player(data.uid, data.username);
             newPlayer.isOnline = true;
@@ -67,7 +58,6 @@
             console.debug('reveived game start message', data);
             if (data && data.startingPlayerId) {
                 gameStartData = data;
-                //console.log('gsdata ', gameStartData, thisPlayerId, gameStartData.newHands[thisPlayerId]);
                 game = new Game(players, gameStartData, thisPlayerId);
                 game.gameClosed = false;
 
@@ -95,14 +85,12 @@
     });
 
     function handlePlayerLeaving(playerId: string){
-            // Players = Host and Clients
             console.log(playerId, thisPlayerId)
             if (playerId === thisPlayerId) {
                     cleanUpGame();
                 return;
             }
 
-            //if game is started
             if (gameView) {
                 let playerThatLeft = players.find((pl) => pl.uid === playerId   );
                 if (playerThatLeft) {   
@@ -135,7 +123,6 @@
     }
 
     function notifyHostThatPlayerReady() {
-        //console.log('why twice?');
         socket.emit(SocketEventsFromClient.playerReady, thisPlayerId);
     }
 </script>
@@ -169,24 +156,4 @@
 />
 
 <style>
-    .main-content {
-        position: absolute;
-        min-height: calc(95% - 100px);
-        font-size: 40px;
-        font-weight: bold;
-        margin-bottom: 0.67em;
-        margin-left: 0;
-        margin-right: 0;
-        font-family: inherit;
-        line-height: 1.2;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        width: 100%;
-    }
-
-    .start-close {
-        margin-bottom: 10px;
-        color: aliceblue;
-    }
 </style>

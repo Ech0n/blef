@@ -12,7 +12,6 @@
     import HelpModal from '../HelpModal.svelte'
     import CardsInHand from './CardsInHand.svelte'
     import PlayerCarousel from './components/PlayerCarousel.svelte'
-    // import { Siema } from 'siema/dist/siema.min';
 
     export let gameId: string
     export let socket: Socket
@@ -35,7 +34,6 @@
     let previousCards: CardCountTable
     let readyPreviousCards: any = []
     let showHelpModal: boolean = false
-    // let playerSiema = new Siema();
     let carouselNextPlayer: () => Promise<void>
     let carouselSetup: (arg0: number) => Promise<void>
 
@@ -75,7 +73,6 @@
 
         socket.on(SocketEventsCommon.hit, (data: hitPayload) => {
             countdown = 45
-            //console.log('hit data is here', data);
             if (isHost) {
                 stopRoundTimer()
                 sleep(2000).then(() => {
@@ -89,10 +86,8 @@
                 game.hit(data.move)
                 carouselNextPlayer()
                 game = game
-                // showButtons = false; // This is necessary to avoid spamming check
-                // sleep(3000).then(() => {
-                //     showButtons = true;
-                // });
+                // showButtons = false; // This is necessary to avoid spamming check // so why is it commented out?
+
                 showButtons = true
             } else {
                 stopRoundTimer()
@@ -128,9 +123,7 @@
                 let checkResult = game.validateCheck()
                 game = game
                 socket.emit(SocketEventsCommon.checkToPlayers, checkResult)
-                // console.log(previousCards);
                 socket.emit(SocketEventsFromHost.cardListToPlayers, previousCards)
-                //console.log('sending to players: ', previousCards, checkResult);
                 game.eliminatedPlayers.forEach((pl) => {
                     if (pl.uid == thisPlayerId) {
                         eliminated = true
@@ -155,7 +148,6 @@
             // ********************************************
             //console.log('non host');
             socket.on(SocketEventsCommon.checkToPlayers, (data: checkToPlayersPayload) => {
-                //console.log('recieved check', data);
                 game.check(data)
                 game = game
                 game.eliminatedPlayers.forEach((pl) => {
@@ -224,7 +216,6 @@
     }
 
     function check(): void {
-        //console.log(isHost);
         socket.emit(SocketEventsCommon.checkToServer)
     }
 
@@ -291,7 +282,6 @@
     }
 
     function sleep(ms: number) {
-        // console.log('prevbet', game.previousBet);
         return new Promise((resolve) => setTimeout(resolve, ms))
     }
 
@@ -467,11 +457,6 @@
     p {
         font-size: 20px;
     }
-    .your-turn-container {
-        background-color: rgb(117, 25, 25);
-        padding: 0 8px 3px 8px;
-        border-radius: 10px;
-    }
 
     .start-close {
         margin: 10px 15px;
@@ -511,10 +496,6 @@
     @media (max-width: 800px) {
         .prev-cards-container img {
             width: 45px;
-        }
-
-        .player-names {
-            font-size: 24px;
         }
 
         .stronger {
