@@ -277,6 +277,6 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
     })
 
     clientSocket.on(SocketEventsFromHost.kickPlayer, (playerId: string) => {
-        blefServer.passToClientAndHost(SocketEventsCommon.kickPlayer, playerId, clientSocket)
+        blefServer.passToClientAndHost(SocketEventsCommon.kickPlayer, {uid:playerId}, clientSocket)
     })
 }

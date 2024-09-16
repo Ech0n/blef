@@ -150,30 +150,20 @@
                 return
             }
 
-            //if game is started
-            if (gameView) {
-                let playerThatLeft = players.find((pl) => pl.uid === data.uid)
-                if (playerThatLeft) {
-                    playerThatLeft.isOnline = false
-                }
-                players = players
-                //console.log(players);
-            } else {
-                let wasInLobby: boolean = false
-                for (let player of players) {
-                    if (player.uid === data.uid) {
-                        wasInLobby = true
-                        break
-                    }
-                }
+            handlePlayerLeaving(data.uid)
+        })
 
-                players = players.filter((pl) => {
-                    return pl.uid !== data.uid
-                })
-                players = players
-
-                if (wasInLobby) readyPlayers--
+        socket.on(SocketEventsCommon.playerLeftGame, (data: { uid: string }) => {
+            if (!data) {
+                return;
             }
+            handlePlayerLeaving(data.uid)
+        })
+        socket.on(SocketEventsCommon.kickPlayer, (data: { uid: string }) => {
+            if (!data) {
+                return;
+            }
+            handlePlayerLeaving(data.uid)
         })
 
         socket.on(SocketEventsCommon.gameStarted, (data: gameStartPayload) => {
@@ -195,6 +185,33 @@
         })
     })
 
+    function handlePlayerLeaving(playerId: string):void{
+        //if game is started
+        if (gameView) {
+                let playerThatLeft = players.find((pl) => pl.uid === data.uid)
+                if (playerThatLeft) {
+                    playerThatLeft.isOnline = false
+                }
+                players = players
+                //console.log(players);
+            } else {
+                let wasInLobby: boolean = false
+                for (let player of players) {
+                    if (player.uid === playerId) {
+                        wasInLobby = true
+                        break
+                    }
+                }
+
+                players = players.filter((pl) => {
+                    return pl.uid !== playerId
+                })
+                players = players
+
+                if (wasInLobby) readyPlayers--
+            }
+    }
+
     function startGame(): void {
         if (players.length >= 2 && players.length <= 5 && readyPlayers == players.length) {
             let initializationData = initalizeGame(players)
@@ -214,9 +231,12 @@
         players = []
     }
 
+
     function kickPlayer(uid: string) {
         socket.emit(SocketEventsFromHost.kickPlayer, uid)
         players = players.filter((player) => player.uid !== uid)
+
+        return null
     }
 
     function showWinner(winner: any): void {
@@ -245,7 +265,7 @@
             {/if}
         </div>
         <br />
-        <LobbyPlayerList {players} {thisPlayerId} />
+        <LobbyPlayerList {players} {thisPlayerId} isHost={true} handlePlayerKick={kickPlayer} />
         <div class="responsive">
             <button on:click="{closeGame}">Close Game</button>
             <button on:click="{startGame}">Start Game</button>

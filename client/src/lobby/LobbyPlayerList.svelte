@@ -3,6 +3,9 @@
 
     export let players: Player[];
     export let thisPlayerId: string;
+    export let isHost : boolean = false;
+    export let handlePlayerKick: (playerId:string) => null = (_)=>{return null};
+
 
     // Function to truncate usernames
     const truncateUsername = (username: string) => (username.length > 6 ? `${username.slice(0, 6)}...` : username);
@@ -18,11 +21,18 @@
             {:else}
                 🔴
             {/if} -->
+            {#if isHost && player.uid != thisPlayerId}
+                <button class="kick-button" on:click={handlePlayerKick(player.uid)}>x</button>
+            {/if}
         </div>
     {/each}
 </div>
 
 <style>
+    .kick-button{
+        min-width: 1rem;
+        color:red;
+    }
     .playerList {
         display: flex;
         flex-direction: column;

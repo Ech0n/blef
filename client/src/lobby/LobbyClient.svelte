@@ -80,38 +80,50 @@
         });
 
         socket.on(SocketEventsCommon.playerLeftGame, (data: { uid: string }) => {
-            // Players = Host and Clients
             if (!data) {
                 return;
             }
-            if (data.uid == thisPlayerId) {
-                players = [];
-                dispatch('gameClosed'); // To parent
+            handlePlayerLeaving(data.uid)
+        })
+        socket.on(SocketEventsCommon.kickPlayer, (data: { uid: string }) => {
+            if (!data) {    
+                return;
+            }
+            handlePlayerLeaving(data.uid)
+        })
+        
+    });
+
+    function handlePlayerLeaving(playerId: string){
+            // Players = Host and Clients
+            console.log(playerId, thisPlayerId)
+            if (playerId === thisPlayerId) {
+                    cleanUpGame();
                 return;
             }
 
             //if game is started
             if (gameView) {
-                let playerThatLeft = players.find((pl) => pl.uid === data.uid);
-                if (playerThatLeft) {
+                let playerThatLeft = players.find((pl) => pl.uid === playerId   );
+                if (playerThatLeft) {   
                     playerThatLeft.isOnline = false;
                 }
             } else {
                 // Tag the disconnected player as not connected
                 players = players.filter((pl) => {
-                    return pl.uid !== data.uid;
+                    return pl.uid !== playerId;
                 });
                 players = players;
             }
-        });
-
-        socket.on(SocketEventsCommon.kickPlayer, (uid: string) => {
-            players = players.filter((player) => player.uid !== uid);
-        });
-    });
+    }
 
     function leaveGame(): void {
         socket.emit(SocketEventsFromClient.leaveGame);
+    }
+
+    function cleanUpGame():void{
+        players = [];
+        dispatch('gameClosed'); // To parent
     }
 
     function showWinner(winner: any): void {
