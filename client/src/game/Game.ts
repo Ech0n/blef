@@ -1,83 +1,84 @@
-import type { Card, CardCountTable } from '../model/Card';
-import { Player } from '../../../common/player';
-import type { checkToServerPayload, checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
-import type { HandInfo } from './HandRankings';
-import type { OptionalTypeNode } from 'typescript';
+import type { checkToPlayersPayload, checkToServerPayload, gameStartPayload } from '../../../common/payloads'
+import { Player } from '../../../common/player'
+import type { Card, CardCountTable } from '../model/Card'
+import type { HandInfo } from './HandRankings'
 
-type Maybe<T> = NonNullable<T> | undefined;
+type Maybe<T> = NonNullable<T> | undefined
 
 export class Game {
-    playerCount: number;
-    players: Player[];
-    eliminatedPlayers: Player[];
-    currentPlayer: string;
-    hand: Card[];
-    currentPlayerIndx: number;
-    previousBet: HandInfo | null;
-    thisPlayerId: string;
-    gameClosed: boolean;
+    playerCount: number
+    players: Player[]
+    eliminatedPlayers: Player[]
+    currentPlayer: string
+    hand: Card[]
+    currentPlayerIndx: number
+    previousBet: HandInfo | null
+    thisPlayerId: string
+    gameClosed: boolean
+    playerThatLost!: Player
 
     constructor(players: Player[], gameStartData: gameStartPayload, thisPlayerId: string) {
-        this.playerCount = players.length;
-        this.players = structuredClone(players);
-        this.hand = gameStartData.newHands[thisPlayerId];
-        this.previousBet = null;
-        this.currentPlayer = gameStartData.startingPlayerId;
-        this.eliminatedPlayers = [];
-        this.currentPlayerIndx = this.players.findIndex((el) => gameStartData.startingPlayerId == el.uid);
-        this.thisPlayerId = thisPlayerId;
-        this.gameClosed = false;
+        this.playerCount = players.length
+        this.players = structuredClone(players)
+        this.hand = gameStartData.newHands[thisPlayerId]
+        this.previousBet = null
+        this.currentPlayer = gameStartData.startingPlayerId
+        this.eliminatedPlayers = []
+        this.currentPlayerIndx = this.players.findIndex((el) => gameStartData.startingPlayerId == el.uid)
+        this.thisPlayerId = thisPlayerId
+        this.gameClosed = false
     }
 
     removePlayer(playerUid: string) {
         this.players = this.players.filter((pl) => {
-            return pl.uid !== playerUid;
-        });
+            return pl.uid !== playerUid
+        })
         this.eliminatedPlayers = this.eliminatedPlayers.filter((pl) => {
-            return pl.uid !== playerUid;
-        });
-        this.playerCount -= 1;
+            return pl.uid !== playerUid
+        })
+        this.playerCount -= 1
         if (this.currentPlayerIndx > this.playerCount) {
-            this.currentPlayerIndx = 0;
-            this.currentPlayer = this.players[0].uid;
+            this.currentPlayerIndx = 0
+            this.currentPlayer = this.players[0].uid
         }
     }
 
     hit(bet: HandInfo): void {
         //TODO: consider validation if bet is possible?
-        this.previousBet = bet;
-        this.nextPlayer();
+        this.previousBet = bet
+        this.nextPlayer()
     }
 
     nextPlayer(): void {
-        this.currentPlayerIndx = (this.currentPlayerIndx + 1) % this.playerCount;
-        this.currentPlayer = this.players[this.currentPlayerIndx].uid;
+        this.currentPlayerIndx = (this.currentPlayerIndx + 1) % this.playerCount
+        this.currentPlayer = this.players[this.currentPlayerIndx].uid
     }
 
     check(data?: checkToPlayersPayload): boolean {
         if (!data) {
-            throw 'Data field not present in check()';
+            throw 'Data field not present in check()'
         }
 
-        this.hand = data.newHand;
-        this.players = data.players;
-        this.eliminatedPlayers = data.eliminatedPlayers;
-        this.playerCount = this.players.length;
-        this.currentPlayer = data.roundStartingPlayerId;
+        this.hand = data.newHand
+        this.players = data.players
+        this.eliminatedPlayers = data.eliminatedPlayers
+        this.playerCount = this.players.length
+        this.currentPlayer = data.roundStartingPlayerId
         this.currentPlayerIndx = this.players.findIndex((pl) => {
-            return pl.uid == this.currentPlayer;
-        });
-        this.previousBet = null;
-        return data.checkSuccesful;
+            return pl.uid == this.currentPlayer
+        })
+        this.previousBet = null
+        this.playerThatLost = data.playerThatLost
+        return data.checkSuccesful
     }
 
     validateCheck(): checkToServerPayload | undefined {
-        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
-        return;
+        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!')
+        return
     }
 
     getCardCount(): CardCountTable {
-        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!');
-        return {};
+        console.warn('CLIENT SHOULDNT CALL HOST ONLY FUNCTIONS!')
+        return {}
     }
 }

@@ -1,6 +1,8 @@
 <script lang="ts">
     import { io, type Socket } from 'socket.io-client'
     import { onMount } from 'svelte'
+    import { FlatToast, ToastContainer, toasts } from 'svelte-toasts'
+    import { ToastProps } from 'svelte-toasts/types/common'
     import type { gameInfo, joinGameResponsePayload, joinRequest, reconnectRequestPayload, reconnectResponsePayload } from '../../common/payloads'
     import { Player } from '../../common/player'
     import { config } from '../../config'
@@ -155,12 +157,22 @@
         checkForReconnect()
     })
 
-    
+    export const showToast = (props: Partial<ToastProps>) => {
+        toasts.add({
+            duration: 10000,
+            placement: 'top-right',
+            theme: 'dark',
+            ...props,
+        })
+    }
 </script>
 
 <main style="{cssVarTheme}">
+    <ToastContainer placement="bottom-right" let:data>
+        <FlatToast {data} />
+    </ToastContainer>
     <div class="main-content">
-        <h1 id="title">BLEF</h1>                
+        <h1 class="glowing title">BLEF</h1>
         {#if gameView}
             {#await gameView then { default: LobbyView }}
                 <LobbyView {gameId} usernameInput="{username}" on:gameClosed="{leaveGame}" {socket} {thisPlayerId} {players} {startedGameInfo} />
@@ -179,13 +191,11 @@
     main {
         background-color: var(--background-color);
     }
-    #title {
+    .title {
+        text-transform: uppercase;
+        display: inline-block;
         font-size: 128px;
-        text-shadow:
-            1px 1px 8px var(--theme-color),
-            -1px -1px 8px var(--theme-color),
-            1px -1px 8px var(--theme-color),
-            -1px 1px 8px var(--theme-color);
+        padding: 10px 10px 10px 20px;
     }
     .main-content {
         height: calc(100% - 70px);

@@ -1,25 +1,25 @@
 <script lang="ts">
-    import type { Card } from '../model/Card';
-    import CardImageHandler from './CardImageHandler';
+    import type { Card } from '../model/Card'
+    import CardImageHandler from './CardImageHandler'
 
-    export let hand: Card[];
+    export let hand: Card[]
 
-    const cardImageHandler = new CardImageHandler();
-    console.log(hand);
-    let spread = '15px';
+    const cardImageHandler = new CardImageHandler()
+    //console.log(hand)
+    let spread = '15px'
 </script>
 
 <div class="hand">
     {#each hand as card, index}
         <!-- svelte-ignore a11y-missing-attribute -->
-        <img style="--spread:{spread}" class="karta" id="card{index}" src={cardImageHandler.getCardImage(card[0] + ' ' + card[1])} />
+        <img style="--spread:{spread}" class="karta" id="card{index}" src="{cardImageHandler.getCardImage(card[0] + ' ' + card[1])}" />
     {/each}
 </div>
 
 <style>
     .karta {
         position: absolute;
-        width: 120px;
+        width: 16rem;
         box-shadow: -1px 1px 12px black;
         border-radius: 7px;
         left: calc(50% - 60px);

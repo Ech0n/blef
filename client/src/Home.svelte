@@ -1,13 +1,13 @@
 <!-- Home or Info -->
 <script lang="ts">
-    import CardImageHandler from './game/CardImageHandler';
+    import CardImageHandler from './game/CardImageHandler'
 
-    const cardImageHandler = new CardImageHandler();
-    const handRankings: string[] = ['one', 'pair', 'three', 'double', 'street', 'full', 'color', 'four', 'flush', 'royal'];
+    const cardImageHandler = new CardImageHandler()
+    const handRankings: string[] = ['one', 'pair', 'three', 'double', 'street', 'full', 'color', 'four', 'flush', 'royal']
     const linkedInUrls = {
         mateusz: 'https://www.linkedin.com/in/mateusz-dyszewski-56a40726a/',
         milosz: 'https://www.linkedin.com/in/miloszjunak/',
-    };
+    }
 </script>
 
 <div class="main-container">
@@ -44,7 +44,7 @@
                 <li>
                     <span>{ranking.charAt(0).toUpperCase() + ranking.slice(1)}</span>
                     <br />
-                    <img src={cardImageHandler.getCardImage(ranking)} alt={ranking} />
+                    <img src="{cardImageHandler.getCardImage(ranking)}" alt="{ranking}" />
                 </li>
             {/each}
         </ul>
@@ -52,8 +52,8 @@
     <div class="authors-container">
         <h3>
             Made by:
-            <a href={linkedInUrls.mateusz}>Mateusz Dyszewski</a> and
-            <a href={linkedInUrls.milosz}>Miłosz Junak</a>
+            <a href="{linkedInUrls.mateusz}">Mateusz Dyszewski</a> and
+            <a href="{linkedInUrls.milosz}">Miłosz Junak</a>
         </h3>
     </div>
 </div>

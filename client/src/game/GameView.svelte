@@ -1,21 +1,23 @@
 <script lang="ts">
-    import { onMount, createEventDispatcher, onDestroy } from 'svelte'
-    import { io } from 'socket.io-client'
     import type { Socket } from 'socket.io-client'
-    import { SocketEventsCommon, SocketEventsFromHost } from '../../../src/types/socketEvents'
-    import CardModal from './CardModals.svelte'
-    import { Game } from './Game'
+    import { io } from 'socket.io-client'
+    import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+    import { toasts } from 'svelte-toasts'
     import type { checkToPlayersPayload, hitPayload } from '../../../common/payloads'
-    import { cardCountTableToIterableArray, type CardCountTable, cardToRankTranslation } from '../model/Card'
-    import CardImageHandler from './CardImageHandler'
     import { config } from '../../../config'
+    import { SocketEventsCommon, SocketEventsFromHost } from '../../../src/types/socketEvents'
     import HelpModal from '../HelpModal.svelte'
+    import { cardCountTableToIterableArray, cardToRankTranslation, type CardCountTable } from '../model/Card'
+    import CardImageHandler from './CardImageHandler'
+    import CardModal from './CardModals.svelte'
     import CardsInHand from './CardsInHand.svelte'
+    import GameClock from './components/GameClock.svelte'
     import PlayerCarousel from './components/PlayerCarousel.svelte'
+    import { Game } from './Game'
 
     export let gameId: string
     export let socket: Socket
-    export let kickPlayer: (uid: string) => void | undefined
+    export let kickPlayer: (uid: string) => null
     export let closeGame: () => void | undefined
 
     export let thisPlayerId: string
@@ -28,14 +30,14 @@
     let showModal: boolean = false
     let betName: string = ''
     let selectedHand
-    let countdown: number = 45
+    let countdown: number = 60
     let roundTimer: ReturnType<typeof setInterval> | undefined
     let showButtons: boolean = true
     let previousCards: CardCountTable
     let readyPreviousCards: any = []
     let showHelpModal: boolean = false
     let carouselNextPlayer: () => Promise<void>
-    let carouselSetup: (arg0: number) => Promise<void>
+    let carouselSetup: (arg?: number) => void
 
     //TODO : When game ends tehere should be a cleanup of socket listeners
 
@@ -56,8 +58,11 @@
         'A': 'Ace',
     }
 
+    const turnNotification = (username: string) => {
+        toasts.info({ placement: 'top-right', description: `${username}, lost this round!` })
+    }
+
     onDestroy(() => {
-        // console.log('Im destroun this !!!');
         socket.removeAllListeners(SocketEventsCommon.hit)
         socket.removeAllListeners(SocketEventsCommon.checkToServer)
         socket.removeAllListeners(SocketEventsCommon.checkToPlayers)
@@ -72,12 +77,20 @@
         }
 
         socket.on(SocketEventsCommon.hit, (data: hitPayload) => {
-            countdown = 45
+            countdown = 60
+            showButtons = false
             if (isHost) {
                 stopRoundTimer()
                 sleep(2000).then(() => {
                     if (!game.gameClosed) {
                         startRoundTimer()
+                        showButtons = true
+                    }
+                })
+            } else {
+                sleep(2000).then(() => {
+                    if (!game.gameClosed) {
+                        showButtons = true
                     }
                 })
             }
@@ -86,9 +99,7 @@
                 game.hit(data.move)
                 carouselNextPlayer()
                 game = game
-                // showButtons = false; // This is necessary to avoid spamming check // so why is it commented out?
-
-                showButtons = true
+                // showButtons = false; // This is necessary to avoid spamming check // so why is it commented out? // i dont remember maybe it wasnt necessary later on?
             } else {
                 stopRoundTimer()
             }
@@ -108,9 +119,6 @@
             // ********************************************
             // |         HOST SOCKET FUNCTIONALITY        |
             // ********************************************
-
-            //console.log('host');
-
             game.gameClosed = false
             startRoundTimer()
 
@@ -122,6 +130,7 @@
 
                 let checkResult = game.validateCheck()
                 game = game
+                //console.log(game)
                 socket.emit(SocketEventsCommon.checkToPlayers, checkResult)
                 socket.emit(SocketEventsFromHost.cardListToPlayers, previousCards)
                 game.eliminatedPlayers.forEach((pl) => {
@@ -140,28 +149,30 @@
                     stopRoundTimer()
                     startRoundTimer()
                 }
+
+                turnNotification(game.playerThatLost?.username ?? 'no one lost? WHAT IS GOING ON!?!')
                 carouselSetup(game.currentPlayerIndx)
             })
         } else {
             // ********************************************
             // |      NON-HOST SOCKET FUNCTIONALITY       |
             // ********************************************
-            //console.log('non host');
             socket.on(SocketEventsCommon.checkToPlayers, (data: checkToPlayersPayload) => {
                 game.check(data)
                 game = game
+                //console.log(game)
                 game.eliminatedPlayers.forEach((pl) => {
-                    if (pl.uid == thisPlayerId) {
+                    if (pl.uid === thisPlayerId) {
                         eliminated = true
                     }
                 })
 
-                if (game.players.length == 1) {
+                if (game.players.length === 1) {
                     dispatch('gameFinished', game.players[0])
                 }
 
+                turnNotification(game.playerThatLost?.username ?? 'no one lost? WHAT IS GOING ON!?!')
                 carouselSetup(game.currentPlayerIndx)
-                countdown = 15 // Not necessary but let it stay // What do u mean not necessarey?
             })
 
             socket.on(SocketEventsCommon.kickPlayer, (playerId: string) => {
@@ -261,7 +272,7 @@
         if (roundTimer) {
             return
         }
-        countdown = 45
+        countdown = 60
         roundTimer = setInterval(() => {
             if (countdown > 0) {
                 countdown--
@@ -271,7 +282,7 @@
                 roundTimer = undefined
             }
             socket.emit(SocketEventsFromHost.timerUpdate, countdown)
-        }, 100000)
+        }, 1000)
     }
 
     function stopRoundTimer(): void {
@@ -313,10 +324,6 @@
         }
     }
 
-    const shortenUsername = (username: string) => {
-        return username.length > 6 ? `${username.slice(0, 6)}...` : username
-    }
-
     $: if (game.previousBet) {
         betName = getBetName()
     }
@@ -327,46 +334,21 @@
 <!-- -------------------------------------------- -->
 <div class="game-container main">
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div id="relatives">
-        <div
-            class="helper"
-            on:click="{() => {
-                showHelpModal = true
-            }}"
-        >
-            <!-- Man autoformatter... what the fuck is this-->
-            ❔
-        </div>
-
-        {#if gameId}
-            <h3 id="gamecode">#{gameId}</h3>
-            <!-- {#if isHost && kickPlayer !== undefined}
-                <button class="kick-button" style="padding: 7px 4px 1px 4px; font-size: 32px" on:click={() => closeGame()}>Close Game</button>
-            {/if} -->
-        {/if}
-    </div>
-    <div class="main view mainviewview">
-        <div class="container">
-            <p>
-                time left: 0:{countdown < 10 ?
-                    countdown < 0 ?
-                        '00'
-                    :   '0' + countdown
-                :   countdown}
-            </p>
-        </div>
-        <div class="group">
-            <div>
-                <h4>Previous bet:</h4>
-                <div class="container">
-                    {#if game.previousBet}
-                        {betName}
-                    {:else}
-                        <p class="stronger">No bet has been made yet</p>
-                    {/if}
-                </div>
-            </div>
-        </div>
+    {#if gameId}
+        <h2 id="gamecode">#{gameId}</h2>
+    {/if}
+    <div class="main view">
+        <GameClock currentTime="{countdown}" />
+        <span class="group default-area-background p20">
+            <h2 class="header-underline bet-header">Current Bet</h2>
+            <h3 class="bet">
+                {#if game.previousBet}
+                    {betName}
+                {:else}
+                    No bet has been made yet
+                {/if}
+            </h3>
+        </span>
 
         <PlayerCarousel users="{game.players}" bind:next="{carouselNextPlayer}" bind:setup="{carouselSetup}" />
         <div>
@@ -377,8 +359,7 @@
                             <p style="font-size: 15px">Cards from previous round:</p>
                             <div class="prev-cards-container">
                                 {#each readyPreviousCards as card}
-                                    <!-- svelte-ignore a11y-missing-attribute -->
-                                    <img src="{cardImageHandler.getCardImage(card)}" />
+                                    <img src="{cardImageHandler.getCardImage(card)}" alt="uh" />
                                     <br />
                                 {/each}
                             </div>
@@ -388,14 +369,12 @@
             {/if}
         </div>
 
-        {#if game.currentPlayer == thisPlayerId && showButtons}
-            <p>Your turn</p>
-            <div style="responsive">
-                <button class="start-close" on:click="{() => (showModal = true)}">Raise</button>
-                <button id="check-button" class="start-close" on:click="{check}">Check</button>
+        {#if game.currentPlayer === thisPlayerId && showButtons}
+            <div class="container above-cards-in-hand">
+                <button class="default-button start-close" on:click="{() => (showModal = true)}">Raise</button>
+                <button id="check-button" class="default-button start-close" on:click="{check}">Check</button>
             </div>
         {/if}
-        <div class="cardsPlaceHolder"></div>
     </div>
     <CardsInHand hand="{game.hand}" />
 
@@ -408,16 +387,14 @@
 </div>
 
 <style>
-    /* FIXME change name */
-    .mainviewview {
+    .view {
+        height: 100%;
         display: flex;
-        justify-content: space-between;
+        justify-content: top;
         align-items: center;
         flex-direction: column;
         width: 100%;
-    }
-    .view {
-        height: 100%;
+        row-gap: 1rem;
     }
     .game-container {
         position: absolute;
@@ -436,16 +413,6 @@
         align-items: center;
     }
 
-    .helper {
-        position: absolute;
-        top: 1%;
-        right: 1%;
-        cursor: pointer;
-        color: black;
-        border: 2px solid gray;
-        padding: 3px 0;
-        border-radius: 100px;
-    }
     #gamecode {
         position: absolute;
         top: 1%;
@@ -453,15 +420,25 @@
         margin: 10px;
     }
 
-    /* FIXME */
-    p {
-        font-size: 20px;
+    .bet-header {
+        font-size: 4rem;
+    }
+    .bet {
+        margin-bottom: 1rem;
     }
 
     .start-close {
         margin: 10px 15px;
         color: aliceblue;
         max-height: 100px;
+    }
+
+    .above-cards-in-hand {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        position: fixed;
+        bottom: 20rem;
     }
 
     .cardsPlaceHolder {
@@ -489,22 +466,9 @@
         width: 80px;
     }
 
-    .stronger {
-        font-size: 45px;
-    }
-
     @media (max-width: 800px) {
         .prev-cards-container img {
             width: 45px;
-        }
-
-        .stronger {
-            font-size: 20px;
-        }
-        .helper {
-            top: 0;
-            font-size: 30px;
-            padding: 2px 0px;
         }
     }
 </style>
