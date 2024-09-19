@@ -2,7 +2,6 @@ import type { Card, CardCountTable } from '../model/Card';
 import { Player } from '../../../common/player';
 import type { checkToServerPayload, checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
 import type { HandInfo } from './HandRankings';
-import type { OptionalTypeNode } from 'typescript';
 
 type Maybe<T> = NonNullable<T> | undefined;
 

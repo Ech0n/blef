@@ -6,7 +6,7 @@ import { Payload, reconnectRequestPayload, reconnectResponsePayload } from '../c
 import { Player, createPlayerFromIPlayer } from '../common/player'
 import { config } from '../config'
 import { SessionSocket, socketEventsListeners } from './socketEventListeners'
-import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from './types/socketEvents'
+import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer    } from './types/socketEvents'
 
 declare module 'http' {
     interface IncomingMessage {
