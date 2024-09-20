@@ -168,7 +168,7 @@
 </script>
 
 <main style="{cssVarTheme}">
-    <ToastContainer placement="bottom-right" let:data>
+    <ToastContainer placement="top-right" let:data>
         <FlatToast {data} />
     </ToastContainer>
     <div class="main-content">

@@ -47,7 +47,7 @@
 
     .countdown {
         display: grid;
-        margin: 1em auto;
+        margin: 0.5rem 2rem;
         width: $d;
         height: $d;
         position: relative;

@@ -169,7 +169,7 @@
 
     function handlePlayerLeaving(playerId: string): void {
         if (gameView) {
-            // let playerThatLeft = players.find((pl) => pl.uid === data.uid) // Why is data undefined
+            // let playerThatLeft = players.find((pl) => pl.uid === data.uid) // Why is data undefined now
             // if (playerThatLeft) {
             //     playerThatLeft.isOnline = false
             // }
@@ -235,7 +235,7 @@
 <div class="container view">
     {#if gameView}
         {#await gameView then { default: GameView }}
-            <GameView on:leave="{closeGame}" on:gameFinished="{showWinner}" {gameId} {socket} {thisPlayerId} isHost {kickPlayer} {game} {closeGame} />
+            <GameView on:leave="{closeGame}" on:gameFinished="{showWinner}" {gameId} {socket} {thisPlayerId} isHost {game} />
         {/await}
     {:else}
         <LobbyCodeContainer {gameId} />

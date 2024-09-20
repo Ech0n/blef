@@ -17,8 +17,6 @@
 
     export let gameId: string
     export let socket: Socket
-    export let kickPlayer: (uid: string) => null
-    export let closeGame: () => void | undefined
 
     export let thisPlayerId: string
     export let isHost: boolean | undefined = false
@@ -58,10 +56,6 @@
         'A': 'Ace',
     }
 
-    const turnNotification = (username: string) => {
-        toasts.info({ placement: 'top-right', description: `${username}, lost this round!` })
-    }
-
     onDestroy(() => {
         socket.removeAllListeners(SocketEventsCommon.hit)
         socket.removeAllListeners(SocketEventsCommon.checkToServer)
@@ -79,6 +73,7 @@
         socket.on(SocketEventsCommon.hit, (data: hitPayload) => {
             countdown = 60
             showButtons = false
+            showModal = false
             if (isHost) {
                 stopRoundTimer()
                 sleep(2000).then(() => {
@@ -94,7 +89,7 @@
                     }
                 })
             }
-            //console.log('is gameCLosed: ', game.gameClosed);
+
             if (!game.gameClosed) {
                 game.hit(data.move)
                 carouselNextPlayer()
@@ -102,6 +97,10 @@
                 // showButtons = false; // This is necessary to avoid spamming check // so why is it commented out? // i dont remember maybe it wasnt necessary later on?
             } else {
                 stopRoundTimer()
+            }
+
+            if (game.currentPlayer === thisPlayerId) {
+                toasts.info('Your turn!')
             }
         })
 
@@ -150,7 +149,7 @@
                     startRoundTimer()
                 }
 
-                turnNotification(game.playerThatLost?.username ?? 'no one lost? WHAT IS GOING ON!?!')
+                toasts.info(`${game.playerThatLost?.username} lost this round`)
                 carouselSetup(game.currentPlayerIndx)
             })
         } else {
@@ -171,7 +170,7 @@
                     dispatch('gameFinished', game.players[0])
                 }
 
-                turnNotification(game.playerThatLost?.username ?? 'no one lost? WHAT IS GOING ON!?!')
+                toasts.info(`${game.playerThatLost?.username} lost this round`)
                 carouselSetup(game.currentPlayerIndx)
             })
 
@@ -335,12 +334,14 @@
 <div class="game-container main">
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     {#if gameId}
-        <h2 id="gamecode">#{gameId}</h2>
+        <h2 class="gamecode">#{gameId}</h2>
     {/if}
     <div class="main view">
-        <GameClock currentTime="{countdown}" />
-        <span class="group default-area-background p20">
-            <h2 class="header-underline bet-header">Current Bet</h2>
+        <span class="group default-area-background p20 bet-container">
+            <h2 class="header-underline flat-container bet-header">
+                Current Bet
+                <GameClock currentTime="{countdown}" />
+            </h2>
             <h3 class="bet">
                 {#if game.previousBet}
                     {betName}
@@ -350,23 +351,8 @@
             </h3>
         </span>
 
-        <PlayerCarousel users="{game.players}" bind:next="{carouselNextPlayer}" bind:setup="{carouselSetup}" />
-        <div>
-            {#if !eliminated}
-                <div class="cards-container">
-                    {#if previousCards}
-                        <div class="prev-cards-width group">
-                            <p style="font-size: 15px">Cards from previous round:</p>
-                            <div class="prev-cards-container">
-                                {#each readyPreviousCards as card}
-                                    <img src="{cardImageHandler.getCardImage(card)}" alt="uh" />
-                                    <br />
-                                {/each}
-                            </div>
-                        </div>
-                    {/if}
-                </div>
-            {/if}
+        <div class="carousel-container">
+            <PlayerCarousel users="{game.players}" bind:next="{carouselNextPlayer}" bind:setup="{carouselSetup}" />
         </div>
 
         {#if game.currentPlayer === thisPlayerId && showButtons}
@@ -386,7 +372,7 @@
     {/if}
 </div>
 
-<style>
+<style lang="scss">
     .view {
         height: 100%;
         display: flex;
@@ -413,15 +399,22 @@
         align-items: center;
     }
 
-    #gamecode {
+    .gamecode {
         position: absolute;
         top: 1%;
         left: 10px;
         margin: 10px;
+
+        @media (max-width: 800px) {
+            display: none;
+        }
     }
 
     .bet-header {
         font-size: 4rem;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
     }
     .bet {
         margin-bottom: 1rem;
@@ -437,38 +430,14 @@
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
-        position: fixed;
-        bottom: 20rem;
-    }
-
-    .cardsPlaceHolder {
-        height: 150px;
-        position: relative;
-        bottom: 0px;
-        background-color: RED;
-    }
-
-    .cards-container {
-        width: 100%;
-        display: flex;
-        margin-bottom: 20px;
-    }
-    .prev-cards-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 3px;
         justify-content: center;
         align-items: center;
-        position: relative;
-        right: 5%;
-    }
-    .prev-cards-container img {
-        width: 80px;
     }
 
-    @media (max-width: 800px) {
-        .prev-cards-container img {
-            width: 45px;
-        }
+    .carousel-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 30vh;
     }
 </style>

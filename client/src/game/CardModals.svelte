@@ -1,84 +1,90 @@
 <script lang="ts">
-    import { createEventDispatcher } from 'svelte';
-    import { compareRankingAGreaterThanB } from './Comparators';
-    import CardImageHandler from './CardImageHandler';
-    import SelectionModal from './SelectionModal.svelte';
+    import { createEventDispatcher } from 'svelte'
+    import { toasts } from 'svelte-toasts'
+    import CardImageHandler from './CardImageHandler'
+    import { compareRankingAGreaterThanB } from './Comparators'
+    import SelectionModal from './SelectionModal.svelte'
 
-    // @ts-ignore
-    export let previousBet;
+    export let previousBet
 
-    const cardImageHandler = new CardImageHandler();
-    const dispatch = createEventDispatcher();
+    const cardImageHandler = new CardImageHandler()
+    const dispatch = createEventDispatcher()
     const handRankings = [
-        { name: 'One', imageUrl: cardImageHandler.getCardImage('one') },
-        { name: 'Pair', imageUrl: cardImageHandler.getCardImage('pair') },
-        { name: 'Double', imageUrl: cardImageHandler.getCardImage('double') },
-        { name: 'Three', imageUrl: cardImageHandler.getCardImage('three') },
-        { name: 'Color', imageUrl: cardImageHandler.getCardImage('color') },
-        { name: 'Street', imageUrl: cardImageHandler.getCardImage('street') },
-        { name: 'Full', imageUrl: cardImageHandler.getCardImage('full') },
-        { name: 'Four', imageUrl: cardImageHandler.getCardImage('four') },
-        { name: 'Flush', imageUrl: cardImageHandler.getCardImage('flush') },
-        { name: 'Royal', imageUrl: cardImageHandler.getCardImage('royal') },
-    ];
-    const cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-    const colors = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
+        { name: 'One', imageUrl: cardImageHandler.getCardImage('one'), description: '1 Card of any type' },
+        { name: 'Pair', imageUrl: cardImageHandler.getCardImage('pair'), description: '2 Same cards of any type' },
+        { name: 'Double', imageUrl: cardImageHandler.getCardImage('double'), description: '2 Pairs of same cards' },
+        { name: 'Three', imageUrl: cardImageHandler.getCardImage('three'), description: '3 Same cards of any type' },
+        { name: 'Color', imageUrl: cardImageHandler.getCardImage('color'), description: '5 Cards of the same color' },
+        { name: 'Street', imageUrl: cardImageHandler.getCardImage('street'), description: '5 Cards in strictly ascending order' },
+        { name: 'Full', imageUrl: cardImageHandler.getCardImage('full'), description: '3 Same cards and 2 same cards' },
+        { name: 'Four', imageUrl: cardImageHandler.getCardImage('four'), description: '4 Same cards of any type' },
+        { name: 'Flush', imageUrl: cardImageHandler.getCardImage('flush'), description: 'Combination of Color and Street' },
+        { name: 'Royal', imageUrl: cardImageHandler.getCardImage('royal'), description: 'Flush but starting from 10' },
+    ]
+    const cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+    const colors = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
 
-    let selectedRanking: string = '';
-    let primaryCard: string = '';
-    let secondaryCard: string = '';
-    let selectedColor: string = '';
-    let startingCard: string = '';
+    let selectedRanking: string = ''
+    let primaryCard: string = ''
+    let secondaryCard: string = ''
+    let selectedColor: string = ''
+    let startingCard: string = ''
+    let showModal: boolean = false
 
-    let showModal: boolean = false;
-    let onSelect = (selectedValues: { primaryCardModal: string; secondaryCardModal: string; selectedColorModal: string; startingCardModal: string }) => {
-        const { primaryCardModal, secondaryCardModal, selectedColorModal, startingCardModal } = selectedValues;
-        selectedColor = selectedColorModal;
-        primaryCard = primaryCardModal;
-        secondaryCard = secondaryCardModal;
-        startingCard = startingCardModal;
-    };
+    const onSelect = (selectedValues: { primaryCardModal: string; secondaryCardModal: string; selectedColorModal: string; startingCardModal: string }) => {
+        const { primaryCardModal, secondaryCardModal, selectedColorModal, startingCardModal } = selectedValues
+        selectedColor = selectedColorModal
+        primaryCard = primaryCardModal
+        secondaryCard = secondaryCardModal
+        startingCard = startingCardModal
 
-    function closeModal() {
-        dispatch('close');
+        confirmSelection()
     }
 
-    function confirmSelection() {
+    const closeModal = () => {
+        dispatch('close')
+    }
+
+    const openModal = () => {
+        showModal = true
+    }
+
+    const confirmSelection = () => {
         if (!selectedRanking) {
-            alert('Please select a hand ranking.');
-            return;
+            alert('Please select a hand ranking.')
+            return
         }
 
         if (['Flush', 'Royal', 'Color'].includes(selectedRanking) && !selectedColor) {
-            alert('Please select a color ranking.');
-            return;
+            alert('Please select a color ranking.')
+            return
         }
 
         if (['Full', 'Double', 'Pair', 'One', 'Three', 'Four'].includes(selectedRanking) && !primaryCard) {
-            alert('Please select primary card.');
-            return;
+            alert('Please select primary card.')
+            return
         }
 
         if (['Full', 'Double'].includes(selectedRanking) && (!secondaryCard || !primaryCard || secondaryCard === primaryCard)) {
-            alert('Please select secondary card.');
-            return;
+            alert('Please select secondary card.')
+            return
         }
 
         if (['Flush'].includes(selectedRanking) && (!startingCard || ['10', 'J', 'Q', 'K', 'A'].includes(startingCard))) {
-            alert('Please select starting card and make sure it is not larger than 9.');
-            return;
+            alert('Please select starting card and make sure it is not larger than 9.')
+            return
         }
 
         if (['Street'].includes(selectedRanking) && (!startingCard || [, 'J', 'Q', 'K', 'A'].includes(startingCard))) {
-            alert('Please select starting card and make sure it is not larger than 10.');
-            return;
+            alert('Please select starting card and make sure it is not larger than 10.')
+            return
         }
 
-        selectedRanking = selectedRanking.toLowerCase();
-        primaryCard = primaryCard.toLowerCase();
-        secondaryCard = secondaryCard.toLowerCase();
-        selectedColor = selectedColor.toLowerCase().slice(0, -1);
-        startingCard = startingCard.toLowerCase();
+        selectedRanking = selectedRanking.toLowerCase()
+        primaryCard = primaryCard.toLowerCase()
+        secondaryCard = secondaryCard.toLowerCase()
+        selectedColor = selectedColor.toLowerCase().slice(0, -1)
+        startingCard = startingCard.toLowerCase()
 
         let newBet = {
             selectedRanking,
@@ -86,73 +92,61 @@
             secondaryCard,
             selectedColor,
             startingCard,
-        };
+        }
 
-
-        // @ts-ignore
         if (previousBet) {
             if (compareRankingAGreaterThanB(previousBet, newBet)) {
-                alert('New ranking must be higher than previous one');
-                return;
+                toasts.warning('New ranking must be higher than previous one')
+                return
             }
         }
 
-        dispatch('select', newBet);
-        closeModal();
+        dispatch('select', newBet)
+        closeModal()
     }
 
     $: options =
         ['Royal', 'Color'].includes(selectedRanking) ? colors
         : ['Street', 'Full', 'Double', 'Pair', 'One', 'Three', 'Four'].includes(selectedRanking) ? cards
         : ['Flush'].includes(selectedRanking) ? colors.concat(cards)
-        : [];
+        : []
 
     $: if (options.length > 1) {
-        openModal();
-    }
-
-    function openModal(): void {
-        showModal = true;
+        openModal()
     }
 </script>
 
 <SelectionModal bind:showModal {options} {selectedRanking} {onSelect} />
 
-<div class="modal">
-    <div class="modal-content">
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <span class="close" on:click={closeModal}>&times;</span>
-        <h2 style="font-size: 55px">Select Hand Ranking</h2>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div class="modal-background" on:click="{closeModal}">
+    <div class="modal-content" on:click="{(event) => event.stopPropagation()}">
+        <h2 class="header-underline hand-ranking-header" style="font-size: 55px">Select Hand Ranking</h2>
         <div class="hands-container">
-            {#each handRankings as { name, imageUrl }}
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <!-- svelte-ignore a11y-no-static-element-interactions -->
+            {#each handRankings as { name, imageUrl, description }}
                 <div
-                    on:click={() => {
-                        selectedRanking = name;
-                        openModal();
-                    }}
+                    on:click="{() => {
+                        selectedRanking = name
+                        openModal()
+                    }}"
                     class="hand-ranking-image {selectedRanking === name ? 'selected' : ''}"
                 >
                     <h3 style="margin: 10px;">{name == 'Royal' ? 'Royal Flush' : name}</h3>
-                    <!-- svelte-ignore a11y-missing-attribute -->
-                    <img src={imageUrl} class="auto-scale-image" />
+                    <img src="{imageUrl}" class="auto-scale-image" alt="{name}" />
+                    <p class="hover-details">{description}</p>
                 </div>
             {/each}
-        </div>
-        <div class="modal-footer">
-            <button on:click={closeModal}>Cancel</button>
-            <button on:click={confirmSelection}>Confirm</button>
         </div>
     </div>
 </div>
 
-<style>
-    .modal {
-        display: block;
-        position: fixed;
-        z-index: 4;
+<style lang="scss">
+    .modal-background {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         left: 0;
         top: 0;
         width: 100%;
@@ -161,57 +155,102 @@
         background-color: rgb(0, 0, 0);
         background-color: rgba(0, 0, 0, 0.4);
     }
+
     .modal-content {
-        background-color: #3a3636;
-        border-radius: 10px;
-        margin: 5% auto;
-        padding: 20px;
-        width: 95%;
-        box-shadow: 10px 10px 5px 12px rgb(18, 18, 19);
+        height: calc(100vh - 320px);
+        display: flex;
+        margin: 0 1rem;
+        align-items: center;
+        justify-content: space-around;
+        flex-direction: column;
+        position: fixed;
+        z-index: 4;
+        top: 2rem;
+        opacity: 1;
+        background: rgb(42, 41, 42);
+        background: linear-gradient(90deg, rgba(42, 41, 42, 1) 20%, rgba(28, 33, 38, 1) 69%);
+        border-radius: 30px;
+        border-width: 5px;
+        box-shadow: 5px 5px 10px black;
+        animation: slideIn 0.6s linear;
     }
+
     .close {
         color: #aaa;
         float: right;
         font-size: 28px;
         font-weight: bold;
+
+        &:hover,
+        &:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
     }
-    .close:hover,
-    .close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-    }
-    .modal-footer {
-        margin-top: 20px;
-        text-align: right;
-    }
+
     button {
         margin-left: 10px;
         padding: 5px 15px;
         color: aliceblue;
         font-size: 45px;
     }
-    .hand-ranking-image {
-        cursor: pointer;
-        padding: 10px;
-        transition: transform 0.2s;
+
+    .hand-ranking-header {
+        padding: 0.5rem 3rem;
     }
-    .hand-ranking-image:hover,
-    .hand-ranking-image.selected {
-        background-color: #1d1a1a;
-        border-radius: 10px;
-        transform: scale(1.05);
-    }
+
     .hands-container {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
+        padding: 0.5rem 3rem;
+        height: 80%;
     }
+
+    .hands-container {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        grid-gap: 20px;
+        margin: 20px 0;
+
+        h3 {
+            white-space: nowrap;
+            font-size: 2rem;
+        }
+    }
+
+    .hand-ranking-image:hover .hover-details {
+        display: block;
+    }
+
+    .hover-details {
+        max-width: calc(100% - 2rem);
+        font-size: 1.5rem;
+        display: none;
+        position: fixed;
+        padding: 0 1rem;
+        bottom: 0;
+        left: 0;
+    }
+
+    .hand-ranking-image {
+        min-width: 12rem;
+        cursor: pointer;
+        padding: 10px;
+        transition: transform 0.2s;
+        text-align: center;
+
+        &:hover,
+        &:focus {
+            background-color: #1d1a1a;
+            border-radius: 10px;
+            transform: scale(1.05);
+        }
+    }
+
     .auto-scale-image {
-        width: 6rem;
+        max-width: 100%;
         height: 3rem;
-    }
-    h3 {
-        font-size: 16px;
     }
 </style>

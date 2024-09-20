@@ -78,7 +78,6 @@
     }
 
     .carousel {
-        margin: 2rem auto;
     }
 
     .container {

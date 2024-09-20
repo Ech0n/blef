@@ -12,7 +12,7 @@
     const truncateUsername = (username: string) => (username.length > 8 ? `${username.slice(0, 8)}...` : username)
 </script>
 
-<div class="container group default-area-background p20">
+<div class="container group default-area-background p20 player-list">
     <h2 class="header-underline">Players{' '}</h2>
     {#each players as player}
         <div class="player-item">
@@ -48,6 +48,10 @@
             transform: scale(1.2);
             filter: brightness(1.5);
         }
+    }
+
+    .player-list {
+        margin-bottom: 3rem;
     }
 
     .player-item {
