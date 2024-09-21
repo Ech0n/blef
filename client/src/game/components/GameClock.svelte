@@ -48,8 +48,8 @@
     .countdown {
         display: grid;
         margin: 0.5rem 2rem;
-        width: $d;
-        height: $d;
+        min-width: $d;
+        min-height: $d;
         position: relative;
 
         .time-display {
@@ -82,6 +82,19 @@
             stroke-dasharray: 1;
             stroke-dashoffset: calc(1 - var(--k));
             transition: stroke-dashoffset 1s linear;
+        }
+    }
+
+    @media (max-width: 600px) {
+        $d: 6.5rem;
+
+        .countdown {
+            min-width: $d;
+            min-height: $d;
+
+            .time-display {
+                font-size: 1.5rem;
+            }
         }
     }
 </style>

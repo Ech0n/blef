@@ -13,8 +13,17 @@
     let startingCardModal: string = ''
     let colors: string[] = []
     let cards: string[] = []
+    let helperText: string = ''
+    let selectionCounter: number = 0
+    let selectionRequirement: number = 0
+    let showPopup = false
 
-    function handleSelect() {
+    const handleSelect = () => {
+        selectionCounter++
+        if (selectionCounter !== selectionRequirement) {
+            return
+        }
+
         onSelect({
             primaryCardModal,
             secondaryCardModal,
@@ -46,15 +55,15 @@
         resetHelperText()
     }
 
-    let helperText = ''
-    let showPopup = false
-
     const resetHelperText = () => {
         helperText = ''
+        selectionRequirement = 0
+        selectionCounter = 0
     }
 
     const appendToHelperText = (newText: string) => {
         helperText += `${helperText ? ' and ' : ''}${newText}`
+        selectionRequirement++
     }
 </script>
 
@@ -71,7 +80,7 @@
             <h3 class="header-underline select-hand-header">{selectedRanking}</h3>
             {#if ['Royal', 'Color', 'Flush'].includes(selectedRanking)}
                 {appendToHelperText('Pick a card to choose color') ?? ''}
-                <div class="options-container">
+                <div class="color-options-container">
                     {#each colors as color}
                         <div
                             on:click="{() => {
@@ -80,8 +89,8 @@
                             }}"
                             class="color-option-container {selectedColorModal === color ? 'selected' : ''}"
                         >
-                            <h3>{color}</h3>
-                            <img src="{cardImageHandler.getCardImage(color)}" class="auto-scale-image" alt="{color}" />
+                            <h3 class="color-name">{color}</h3>
+                            <img src="{cardImageHandler.getCardImage(color)}" class="color-scale-image" alt="{color}" />
                         </div>
                     {/each}
                 </div>
@@ -122,9 +131,9 @@
             {/if}
 
             {#if ['Street', 'Flush'].includes(selectedRanking)}
-                {appendToHelperText('Pick starting') ?? ''}
+                {appendToHelperText('Pick a starting card') ?? ''}
                 <div class="options-container">
-                    {#each cards as card}
+                    {#each cards.slice(0, 8) as card}
                         <div
                             on:click="{() => {
                                 startingCardModal = card
@@ -151,6 +160,7 @@
         width: 100%;
         height: 100%;
         overflow-y: auto;
+        overflow-x: hidden;
         background-color: rgba(0, 0, 0, 0.5);
         display: flex;
         justify-content: center;
@@ -197,8 +207,8 @@
 
     .popup {
         position: absolute;
-        top: 0;
-        right: -12rem;
+        top: -1rem;
+        right: -10rem;
         transform: translateX(-50%);
         background-color: #333;
         padding: 8px;
@@ -209,13 +219,15 @@
     }
 
     .options-container {
-        widows: 100%;
+        margin-top: 2rem;
+        width: 100%;
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: space-around;
         align-items: center;
     }
+
     button {
         margin-left: 10px;
         margin-top: 20px;
@@ -224,22 +236,44 @@
         background-color: rgb(20, 20, 20);
         font-size: 45px;
     }
+
     .card-option-container {
         max-width: 7%;
         cursor: pointer;
         transition: transform 0.2s;
     }
+    .color-options-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin: 0 -2rem;
+    }
+
     .color-option-container {
-        width: 24%;
+        width: fit-content;
+        padding: 0 2rem;
         cursor: pointer;
         transition: transform 0.2s;
+        box-sizing: border-box;
+        flex: 0 1 calc(25% - 4rem);
     }
+
     .color-option-container:hover,
     .color-option-container.selected {
         background-color: #0a0909;
         border-radius: 10px;
         transform: scale(1.05);
     }
+
+    .color-scale-image {
+        height: 14rem;
+    }
+
+    .color-name {
+        width: 100%;
+        font-size: 2rem;
+    }
+
     .card-option-container:hover,
     .card-option-container.selected {
         background-color: none;
@@ -256,12 +290,39 @@
         margin-bottom: 0px 10px 20px 10px;
     }
 
+    @keyframes slideIn {
+        0% {
+            transform: translateY(-600px);
+            animation-timing-function: ease-out;
+        }
+        60% {
+            transform: translateY(30px);
+            animation-timing-function: ease-in;
+        }
+        80% {
+            transform: translateY(-10px);
+            animation-timing-function: ease-out;
+        }
+        100% {
+            transform: translateY(0px);
+            animation-timing-function: ease-in;
+        }
+    }
+
     @media (max-width: 1000px) {
         .card-option-container {
             max-width: 13%;
         }
         .color-option-container {
             width: 45%;
+        }
+
+        .select-hand-header {
+            font-size: 4.5rem;
+        }
+
+        .helper-symbol {
+            display: none;
         }
     }
 </style>

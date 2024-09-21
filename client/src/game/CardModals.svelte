@@ -15,7 +15,7 @@
         { name: 'Double', imageUrl: cardImageHandler.getCardImage('double'), description: '2 Pairs of same cards' },
         { name: 'Three', imageUrl: cardImageHandler.getCardImage('three'), description: '3 Same cards of any type' },
         { name: 'Color', imageUrl: cardImageHandler.getCardImage('color'), description: '5 Cards of the same color' },
-        { name: 'Street', imageUrl: cardImageHandler.getCardImage('street'), description: '5 Cards in strictly ascending order' },
+        { name: 'Street', imageUrl: cardImageHandler.getCardImage('street'), description: '5 Cards in ascending order' },
         { name: 'Full', imageUrl: cardImageHandler.getCardImage('full'), description: '3 Same cards and 2 same cards' },
         { name: 'Four', imageUrl: cardImageHandler.getCardImage('four'), description: '4 Same cards of any type' },
         { name: 'Flush', imageUrl: cardImageHandler.getCardImage('flush'), description: 'Combination of Color and Street' },
@@ -51,32 +51,33 @@
 
     const confirmSelection = () => {
         if (!selectedRanking) {
-            alert('Please select a hand ranking.')
+            toasts.warning('Please select a hand ranking.')
             return
         }
 
         if (['Flush', 'Royal', 'Color'].includes(selectedRanking) && !selectedColor) {
-            alert('Please select a color ranking.')
+            toasts.warning('Please select a color ranking.')
             return
         }
 
         if (['Full', 'Double', 'Pair', 'One', 'Three', 'Four'].includes(selectedRanking) && !primaryCard) {
-            alert('Please select primary card.')
+            toasts.warning('Please select primary card.')
             return
         }
 
         if (['Full', 'Double'].includes(selectedRanking) && (!secondaryCard || !primaryCard || secondaryCard === primaryCard)) {
-            alert('Please select secondary card.')
+            let message = secondaryCard === primaryCard ? 'Please select different primary and secondary card.' : 'Please select secondary card.'
+            toasts.warning(message)
             return
         }
 
         if (['Flush'].includes(selectedRanking) && (!startingCard || ['10', 'J', 'Q', 'K', 'A'].includes(startingCard))) {
-            alert('Please select starting card and make sure it is not larger than 9.')
+            toasts.warning('Please select starting card and make sure it is not larger than 9.')
             return
         }
 
         if (['Street'].includes(selectedRanking) && (!startingCard || [, 'J', 'Q', 'K', 'A'].includes(startingCard))) {
-            alert('Please select starting card and make sure it is not larger than 10.')
+            toasts.warning('Please select starting card and make sure it is not larger than 10.')
             return
         }
 
@@ -116,7 +117,9 @@
     }
 </script>
 
-<SelectionModal bind:showModal {options} {selectedRanking} {onSelect} />
+{#if showModal}
+    <SelectionModal bind:showModal {options} {selectedRanking} {onSelect} />
+{/if}
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -175,20 +178,6 @@
         animation: slideIn 0.6s linear;
     }
 
-    .close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-
-        &:hover,
-        &:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-    }
-
     button {
         margin-left: 10px;
         padding: 5px 15px;
@@ -201,18 +190,11 @@
     }
 
     .hands-container {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        padding: 0.5rem 3rem;
-        height: 80%;
-    }
-
-    .hands-container {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
         grid-gap: 20px;
         margin: 20px 0;
+        height: 80%;
 
         h3 {
             white-space: nowrap;
@@ -252,5 +234,91 @@
     .auto-scale-image {
         max-width: 100%;
         height: 3rem;
+    }
+
+    @keyframes slideIn {
+        0% {
+            transform: translateY(-600px);
+            animation-timing-function: ease-out;
+        }
+        60% {
+            transform: translateY(30px);
+            animation-timing-function: ease-in;
+        }
+        80% {
+            transform: translateY(-10px);
+            animation-timing-function: ease-out;
+        }
+        100% {
+            transform: translateY(0px);
+            animation-timing-function: ease-in;
+        }
+    }
+
+    @media (max-width: 1000px) {
+        .modal-content {
+            width: fit-content;
+        }
+
+        .hands-container {
+            grid-gap: 0;
+            min-width: 500px;
+        }
+
+        .hand-ranking-header {
+            font-size: 3.5rem !important;
+        }
+
+        .hand-ranking-image {
+            min-width: 8rem;
+            padding: 0;
+            height: 13.5rem;
+
+            &:hover,
+            &:focus {
+                background-color: #1d1a1a;
+                border-radius: 10px;
+                transform: scale(1.02);
+            }
+
+            h3 {
+                font-size: 1.5rem;
+            }
+        }
+        .auto-scale-image {
+            height: 2.5rem;
+        }
+
+        .hover-details {
+            font-size: 1.25rem;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .hand-ranking-header {
+            font-size: 2rem !important;
+        }
+
+        .hands-container {
+            min-width: 400px;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: auto auto auto;
+
+            > div:nth-child(9),
+            > div:nth-child(10) {
+                grid-column: span 2;
+            }
+        }
+
+        .hand-ranking-image {
+            min-width: 8rem;
+            h3 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .auto-scale-image {
+            height: 2.25rem;
+        }
     }
 </style>

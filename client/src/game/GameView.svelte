@@ -6,7 +6,6 @@
     import type { checkToPlayersPayload, hitPayload } from '../../../common/payloads'
     import { config } from '../../../config'
     import { SocketEventsCommon, SocketEventsFromHost } from '../../../src/types/socketEvents'
-    import HelpModal from '../HelpModal.svelte'
     import { cardCountTableToIterableArray, cardToRankTranslation, type CardCountTable } from '../model/Card'
     import CardImageHandler from './CardImageHandler'
     import CardModal from './CardModals.svelte'
@@ -328,11 +327,11 @@
     }
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- -------------------------------------------- -->
 <!-- |             HTML SVELTE CODE             | -->
 <!-- -------------------------------------------- -->
 <div class="game-container main">
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
     {#if gameId}
         <h2 class="gamecode">#{gameId}</h2>
     {/if}
@@ -366,9 +365,6 @@
 
     {#if showModal}
         <CardModal on:close="{() => (showModal = false)}" on:select="{handleBetSelection}" previousBet="{game.previousBet}" />
-    {/if}
-    {#if showHelpModal}
-        <HelpModal on:close="{() => (showHelpModal = false)}" />
     {/if}
 </div>
 
@@ -404,10 +400,6 @@
         top: 1%;
         left: 10px;
         margin: 10px;
-
-        @media (max-width: 800px) {
-            display: none;
-        }
     }
 
     .bet-header {
@@ -420,6 +412,11 @@
         margin-bottom: 1rem;
     }
 
+    .bet-container {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+
     .start-close {
         margin: 10px 15px;
         color: aliceblue;
@@ -429,7 +426,6 @@
     .above-cards-in-hand {
         display: flex;
         flex-direction: row;
-        flex-wrap: wrap;
         justify-content: center;
         align-items: center;
     }
@@ -439,5 +435,34 @@
         align-items: center;
         justify-content: center;
         min-height: 30vh;
+    }
+
+    @media (max-width: 1000px) {
+        .gamecode {
+            display: none;
+        }
+
+        .bet-header {
+            font-size: 3.5rem;
+        }
+
+        .bet {
+            font-size: 2.5rem;
+        }
+
+        .carousel-container {
+            min-height: 25vh;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .bet-header {
+            font-size: 3rem;
+            padding: 0.5rem 1.5rem;
+        }
+
+        .bet {
+            font-size: 2rem;
+        }
     }
 </style>

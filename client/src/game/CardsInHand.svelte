@@ -25,7 +25,7 @@
         position: absolute;
         width: 16rem;
         box-shadow: -1px 1px 12px black;
-        left: calc(50% - 7.5rem);
+        left: calc(50% - 5rem);
         bottom: -0.5rem;
     }
     #card0 {
