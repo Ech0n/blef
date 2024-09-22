@@ -320,7 +320,6 @@
         .select-hand-header {
             font-size: 4.5rem;
         }
-
         .helper-symbol {
             display: none;
         }
