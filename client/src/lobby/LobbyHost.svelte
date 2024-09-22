@@ -1,11 +1,13 @@
 <script lang="ts">
     import { Socket } from 'socket.io-client'
     import { createEventDispatcher, onMount } from 'svelte'
+    import { toasts } from 'svelte-toasts'
     import type { gameInfo, gameStartPayload, joinGameResponsePayload, joinRequest, reconnectRequestPayload, reconnectResponsePayload } from '../../../common/payloads'
     import { Player } from '../../../common/player'
     import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost } from '../../../src/types/socketEvents'
     import { GameServer } from '../game/GameServer'
     import { initalizeCountTable, initalizeGame, type CardCountTable } from '../model/Card'
+    import LobbyCodeContainer from './LobbyCodeContainer.svelte'
     import LobbyPlayerList from './LobbyPlayerList.svelte'
     import WinnerModal from './WinnerModal.svelte'
 
@@ -42,7 +44,7 @@
             newPlayer.isOnline = data.isOnline
 
             players = [...players, newPlayer]
-
+            toasts.info({ placement: 'top-right', description: `${data.username} just joined!` })
         })
         socket.on(SocketEventsFromClient.joinRequest, (data: joinRequest) => {
             let response: joinGameResponsePayload = {
@@ -70,9 +72,7 @@
                 newPlayer.isOnline = true
                 playersList = [...players, newPlayer]
             } else {
-                //Its not udnefined
-                //@ts-ignore
-                response.request.requesterUid = wasPlayerFound.uid
+                response.request!.requesterUid = wasPlayerFound.uid
                 if (!gameView || wasPlayerFound.isOnline) {
                     socket.emit(SocketEventsFromHost.joinResponse, response)
                     return
@@ -139,19 +139,12 @@
             if (!data) {
                 return
             }
-
             handlePlayerLeaving(data.uid)
         })
 
-        socket.on(SocketEventsCommon.playerLeftGame, (data: { uid: string }) => {
-            if (!data) {
-                return;
-            }
-            handlePlayerLeaving(data.uid)
-        })
         socket.on(SocketEventsCommon.kickPlayer, (data: { uid: string }) => {
             if (!data) {
-                return;
+                return
             }
             handlePlayerLeaving(data.uid)
         })
@@ -174,39 +167,40 @@
         })
     })
 
-    function handlePlayerLeaving(playerId: string):void{
-        //if game is started
+    function handlePlayerLeaving(playerId: string): void {
         if (gameView) {
-                let playerThatLeft = players.find((pl) => pl.uid === data.uid)
-                if (playerThatLeft) {
-                    playerThatLeft.isOnline = false
+            // let playerThatLeft = players.find((pl) => pl.uid === data.uid) // Why is data undefined now
+            // if (playerThatLeft) {
+            //     playerThatLeft.isOnline = false
+            // }
+            players = players
+        } else {
+            let wasInLobby: boolean = false
+            for (let player of players) {
+                if (player.uid === playerId) {
+                    wasInLobby = true
+                    break
                 }
-                players = players
-            } else {
-                let wasInLobby: boolean = false
-                for (let player of players) {
-                    if (player.uid === playerId) {
-                        wasInLobby = true
-                        break
-                    }
-                }
-
-                players = players.filter((pl) => {
-                    return pl.uid !== playerId
-                })
-                players = players
-
-                if (wasInLobby) readyPlayers--
             }
+
+            players = players.filter((pl) => {
+                return pl.uid !== playerId
+            })
+            players = players
+
+            if (wasInLobby) readyPlayers--
+        }
     }
 
     function startGame(): void {
-        if (players.length >= 2 && players.length <= 5 && readyPlayers == players.length) {
+        if (players.length >= 2 && players.length <= 5 && readyPlayers === players.length) {
             let initializationData = initalizeGame(players)
             cardCounts = initializationData.cardCounts
             let startPayload = initializationData.payload
             socket.emit(SocketEventsCommon.gameStarted, startPayload)
+            toasts.info({ placement: 'top-right', description: 'Game has started' })
         } else {
+            toasts.warning({ placement: 'top-right', description: 'Invalid amount of players to start the game or not everyone is ready' })
             throw 'Invalid amount of players to start the game or not everyone is ready'
         }
     }
@@ -216,8 +210,9 @@
 
         gameView = undefined
         players = []
-    }
 
+        toasts.info({ placement: 'top-right', description: 'Game closed' })
+    }
 
     function kickPlayer(uid: string) {
         socket.emit(SocketEventsFromHost.kickPlayer, uid)
@@ -240,22 +235,14 @@
 <div class="container view">
     {#if gameView}
         {#await gameView then { default: GameView }}
-            <GameView on:leave="{closeGame}" on:gameFinished="{showWinner}" {gameId} {socket} {thisPlayerId} isHost {kickPlayer} {game} {closeGame} />
+            <GameView on:leave="{closeGame}" on:gameFinished="{showWinner}" {gameId} {socket} {thisPlayerId} isHost {game} />
         {/await}
     {:else}
-        <div class="container group kod">
-            {#if gameId}
-                <div>game code:</div>
-                <div>
-                    {gameId}
-                </div>
-            {/if}
-        </div>
-        <br />
-        <LobbyPlayerList {players} {thisPlayerId} isHost={true} handlePlayerKick={kickPlayer} />
+        <LobbyCodeContainer {gameId} />
+        <LobbyPlayerList {players} {thisPlayerId} isHost="{true}" handlePlayerKick="{kickPlayer}" />
         <div class="responsive">
-            <button on:click="{closeGame}">Close Game</button>
-            <button on:click="{startGame}">Start Game</button>
+            <button class="default-button" on:click="{closeGame}">Close Game</button>
+            <button class="default-button" on:click="{startGame}">Start Game</button>
         </div>
     {/if}
 </div>
@@ -268,8 +255,5 @@
     }}"
 />
 
-<style>
-    .kod {
-        width: 300px;
-    }
+<style lang="scss">
 </style>

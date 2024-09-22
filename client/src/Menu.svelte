@@ -1,6 +1,6 @@
 <script lang="ts">
-    import Modal from './Modal.svelte'
     import { createEventDispatcher } from 'svelte'
+    import Modal from './Modal.svelte'
 
     const dispatch = createEventDispatcher()
 
@@ -22,25 +22,31 @@
 
 <div class="container">
     <button
-        class="button"
+        class="default-button menu-button"
         on:click="{() => {
             showModal = true
             mode = 'join'
-        }}">Join Game</button
+        }}"
     >
+        Join Game
+    </button>
     <button
-        class="button"
+        class="default-button menu-button"
         on:click="{() => {
             showModal = true
             mode = 'create'
-        }}">Create Game</button
+        }}"
     >
+        Create Game
+    </button>
     <button
-        class="button"
+        class="default-button menu-button"
         on:click="{() => {
             window.alert('not implemented!')
-        }}">How to play?</button
+        }}"
     >
+        How to play?
+    </button>
     <Modal {showModal} {mode} on:close="{() => (showModal = false)}" on:joinGame="{joinGame}" on:createGame="{createGame}" />
 </div>
 
@@ -50,8 +56,13 @@
         row-gap: 15px;
         flex-direction: column;
     }
-    .button {
+    .menu-button {
+        min-width: 14rem;
         color: aliceblue;
         margin-bottom: 10px;
+        font-size: 22px;
+    }
+    .menu-button:focus {
+        outline: none;
     }
 </style>

@@ -197,6 +197,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
                     roundStartingPlayerId: payload.roundStartingPlayerId,
                     eliminatedPlayers: payload.eliminatedPlayers,
                     checkSuccesful: payload.checkSuccesful,
+                    playerThatLost: payload.playerThatLost,
                 }
                 //console.log('SEnding check to polayers L: ', newPayload);
                 playerSocket.emit(SocketEventsCommon.checkToPlayers, newPayload)
@@ -275,6 +276,6 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
     })
 
     clientSocket.on(SocketEventsFromHost.kickPlayer, (playerId: string) => {
-        blefServer.passToClientAndHost(SocketEventsCommon.kickPlayer, {uid:playerId}, clientSocket)
+        blefServer.passToClientAndHost(SocketEventsCommon.kickPlayer, { uid: playerId }, clientSocket)
     })
 }
