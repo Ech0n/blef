@@ -1,14 +1,20 @@
 <script lang="ts">
-    import type { Player } from '../../../common/player';
+    import { playersStore } from '../game/stores'
+    import type { Player } from '../../../common/player'
 
-    export let players: Player[];
-    export let thisPlayerId: string;
-    export let isHost : boolean = false;
-    export let handlePlayerKick: (playerId:string) => null = (_)=>{return null};
+    let players: Player[]
+    export let thisPlayerId: string
+    export let isHost: boolean = false
+    export let handlePlayerKick: (playerId: string) => null = (_) => {
+        return null
+    }
 
+    playersStore.subscribe((value) => {
+        players = value
+    })
 
     // Function to truncate usernames
-    const truncateUsername = (username: string) => (username.length > 6 ? `${username.slice(0, 6)}...` : username);
+    const truncateUsername = (username: string) => (username.length > 6 ? `${username.slice(0, 6)}...` : username)
 </script>
 
 <div class="playerList container group">
@@ -22,22 +28,22 @@
                 🔴
             {/if} -->
             {#if isHost && player.uid != thisPlayerId}
-                <button class="kick-button" on:click={handlePlayerKick(player.uid)}>x</button>
+                <button class="kick-button" on:click="{handlePlayerKick(player.uid)}">x</button>
             {/if}
         </div>
     {/each}
 </div>
 
 <style>
-    .kick-button{
+    .kick-button {
         min-width: 1rem;
-        color:red;
+        color: red;
     }
     .playerList {
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 10px 0px 10px 0px;
+        padding: 10px 0px 5px 0px;
     }
 
     .playerItem {
@@ -47,8 +53,8 @@
         border-style: solid;
         border-width: 1px;
         min-width: 200px;
-        padding: 10px 0px 10px 0px;
-        margin: 10px 0 10px 0;
+        padding: 10px 0px 5px 0px;
+        margin: 0px;
         white-space: nowrap;
         position: relative;
     }

@@ -1,4 +1,4 @@
-import { SessionData } from 'express-session'
+    import { SessionData } from 'express-session'
 import http from 'http'
 import { Socket } from 'socket.io'
 import { CardCountTable } from '../client/src/model/Card'
@@ -9,6 +9,7 @@ import {
     hitPayload,
     joinGameResponsePayload,
     joinRequest,
+    playerJoinedPayload,
     reconnectRequestPayload,
     reconnectResponsePayload,
 } from '../common/payloads'
@@ -38,7 +39,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
     let rooms = blefServer.rooms
     let roomHosts = blefServer.roomHosts
 
-    clientSocket.on('disconnect', () => {
+    clientSocket.on('disconnect', () =>         {
         blefServer.disconnectPlayer(clientSocket)
     })
 
@@ -102,7 +103,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
     })
 
     clientSocket.on(SocketEventsFromHost.joinResponse, (data: joinGameResponsePayload) => {
-        if (!data || !data.request || !data.request.requesterSocketId || !data.request.requesterUid || !data.gameInfo) {
+        if (!data || !data.request || !data.request.requesterSocketId || !data.request.requesterUid || !data.gameState) {
             const responsePayload: joinGameResponsePayload = {
                 didJoin: false,
             }
@@ -125,14 +126,23 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
 
         requesterSocket.emit(SocketEventsFromHost.joinResponse, data)
 
-        let newPlayerPayload = {
+        let newPlayerPayload : playerJoinedPayload = {
             username: data.request.requesterUsername,
-            uid: data.gameInfo.thisPlayerId,
+            uid: data.gameState.thisPlayerId,
             isOnline: true,
+            isBot: false
         }
-        //console.log(newPlayerPayload, data.request.requesterUsername, data.request);
 
         requesterSocket.to(data.request.gameId).emit(SocketEventsCommon.newPlayerJoined, newPlayerPayload)
+    })
+
+    clientSocket.on(SocketEventsFromHost.addBot, (data: playerJoinedPayload) => {
+        if(!data)
+        {
+            throw "payload is empty in SocketEventsFromHost.addBot!"
+        }
+
+        blefServer.passToClientAndHost(SocketEventsCommon.newPlayerJoined, data, clientSocket)
     })
 
     clientSocket.on(SocketEventsFromClient.leaveGame, () => {

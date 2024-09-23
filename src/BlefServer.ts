@@ -137,9 +137,9 @@ export class BlefServer {
 
         clientSocket.gameId = responsePayload.reconnectRequest.gameId
         clientSocket.uid = responsePayload.reconnectRequest.requesterUid
-        if (responsePayload.gameInfo) {
+        if (responsePayload.gameState) {
             clientSocket.player = {
-                username: responsePayload.gameInfo.thisPlayerName,
+                username: responsePayload.gameState.thisPlayerName,
                 uid: responsePayload.reconnectRequest.requesterUid,
                 isOnline: true,
                 isHost: false,

@@ -25,5 +25,6 @@ export class Player implements IPlayer {
         this.username = username;
         this.loses = 0;
         this.isBot = false
+        this.isOnline = true;
     }
 }

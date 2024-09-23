@@ -33,6 +33,7 @@ export enum SocketEventsFromHost {
     cardListToPlayers = 'cardListToPlayers',
     reconnectToGame = 'reconnectToGameResponseFromHost',
     joinResponse = 'joinResponse',
+    addBot = 'addBot',
 }
 
 export enum SocketEventsFromClient {

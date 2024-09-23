@@ -29,7 +29,7 @@ export interface hitPayload extends Payload{
     move: HandInfo;
 }
 
-export interface gameInfo extends Payload{
+export interface GameState extends Payload{
     players: Player[];
     thisPlayerId: string;
     thisPlayerName: string;
@@ -48,9 +48,13 @@ export interface joinRequest extends Payload{
     gameId: string;
 }
 
+export interface hostGameRequest extends Payload{
+    username: string;
+}
+
 export interface joinGameResponsePayload extends Payload{
     didJoin: boolean;
-    gameInfo?: gameInfo;
+    gameState?: GameState;
     request?: joinRequest;
 }
 
@@ -63,5 +67,12 @@ export interface reconnectRequestPayload extends Payload{
 export interface reconnectResponsePayload extends Payload{
     reconnectRequest: reconnectRequestPayload;
     didReconnect: boolean;
-    gameInfo?: gameInfo;
+    gameState?: GameState;
+}
+
+export interface playerJoinedPayload extends Payload{
+    username: string,
+    uid: string,
+    isOnline: boolean,
+    isBot: boolean,
 }

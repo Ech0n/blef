@@ -1,9 +1,10 @@
 import type { Card, CardCountTable } from '../model/Card';
 import { Player } from '../../../common/player';
-import type { checkToServerPayload, checkToPlayersPayload, gameStartPayload } from '../../../common/payloads';
+import type { checkToServerPayload, checkToPlayersPayload, gameStartPayload, hitPayload } from '../../../common/payloads';
 import type { HandInfo } from './HandRankings';
 
 type Maybe<T> = NonNullable<T> | undefined;
+export type Decision = hitPayload | checkToPlayersPayload
 
 export class Game {
     playerCount: number;

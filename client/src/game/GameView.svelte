@@ -21,6 +21,7 @@
     export let thisPlayerId: string
     export let isHost: boolean | undefined = false
     export let game: Game
+    // export let aiEngine : AiEngine
 
     const dispatch = createEventDispatcher()
     const serverUrl: string = config.BACKEND_SERVER_ADDRESS
@@ -148,7 +149,7 @@
             // ********************************************
             //console.log('non host');
             socket.on(SocketEventsCommon.checkToPlayers, (data: checkToPlayersPayload) => {
-                game.check(data)
+                let nextMove = game.check(data)
                 game = game
                 game.eliminatedPlayers.forEach((pl) => {
                     if (pl.uid == thisPlayerId) {

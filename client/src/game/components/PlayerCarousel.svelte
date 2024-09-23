@@ -42,7 +42,7 @@
 
             slots.shift();
 
-            //FIXME Change the queue works so that ignore is not needed here
+            //FIXME Change the way queue works so that ignore is not needed here
             //@ts-ignore
             slots = [...slots, { username: users[newUser].username, turn: turn }];
             lock = true;
