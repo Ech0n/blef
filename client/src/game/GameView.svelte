@@ -105,6 +105,7 @@
 
             if (game.currentPlayer === thisPlayerId) {
                 toasts.info('Your turn!')
+            }
             if (isHost) {
                 aiEngine.passHitInfo(data.move)
                 console.log('hand info passed to ai engine')

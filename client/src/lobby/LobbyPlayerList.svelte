@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { Popover } from 'flowbite-svelte'
     import { playersStore } from '../game/stores'
     import type { Player } from '../../../common/player'
 
@@ -30,9 +29,6 @@
             {/if} -->
             {#if isHost && player.uid != thisPlayerId}
                 <button class="kick-button" id="kick-button" on:click="{handlePlayerKick(player.uid)}" aria-label="{`Kick player: ${player.username}`}"></button>
-                <Popover triggeredBy="#kick-button">
-                    <div class="popover shadow">Click to kick this player</div>
-                </Popover>
             {/if}
         </div>
     {/each}
