@@ -4,10 +4,12 @@ import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, Socke
 import {
     gameStartPayload,
     GameState,
+    hitPayload,
     hostGameRequest,
     joinGameResponsePayload,
     joinRequest,
     Payload,
+    playerJoinedPayload,
     reconnectRequestPayload,
     reconnectResponsePayload,
 } from '../../common/payloads'
@@ -17,6 +19,7 @@ import { Game } from './game/Game'
 import { readyPlayersCounter, waitingPlayersCounter } from './game/stores'
 import { GameServer } from './game/GameServer'
 import { playersStore } from './game/stores'
+import { HandInfo } from '@game/HandRankings'
 
 const serverUrl: string = config.BACKEND_SERVER_ADDRESS
 export class ConnectionHandler {
@@ -124,6 +127,21 @@ export class ConnectionHandler {
     setupLobbyListeners(game: Game, onGameStarted: (data: gameStartPayload) => void, onGameClosed: () => void) {
         this.connection?.setupLobbyListeners(game, onGameStarted, onGameClosed)
     }
+
+    // FIXME: PASSING GAME HERE SHOULDNT BE NECCESARY since game is already passed above
+    setupGame(game: Game) {
+        if (this.connection) this.connection.game = game
+    }
+
+    sendHitEvent(cards: HandInfo) {
+        // TODO: error handling
+        if (this.connection) this.connection.sendHitEvent(cards)
+    }
+
+    sendCheckEvent() {
+        // TODO: error handling
+        if (this.connection) this.connection.sendCheckEvent()
+    }
 }
 class BaseConnection {
     socket: Socket
@@ -134,6 +152,19 @@ class BaseConnection {
         this.appState = state
     }
 
+    sendHitEvent(cards: HandInfo) {
+        // TODO: error handling
+        if (this.game) {
+            this.socket.emit(SocketEventsCommon.hit, { move: cards })
+            console.log('hit sent ', cards)
+        } else {
+            console.log('game not initalized')
+        }
+    }
+    sendCheckEvent() {
+        // TODO: error handling
+        if (this.game) this.socket.emit(SocketEventsCommon.checkToServer)
+    }
     joinOrHostRoom(req: Payload) {}
     setupConnectoinHandlingListeners(appState: AppState) {
         this.socket.on(SocketEventsFromServer.playerReconnected, (data: { uid: string }) => {
@@ -224,7 +255,7 @@ class HostConnection extends BaseConnection {
     setupLobbyListeners(game: GameServer, onGameStarted: (data: gameStartPayload) => void, onGameClosed: () => void) {
         this.game = game
         //FIXME: code repetition
-        this.socket.on(SocketEventsCommon.newPlayerJoined, (data: { username: string; uid: string; isOnline: boolean }) => {
+        this.socket.on(SocketEventsCommon.newPlayerJoined, (data: playerJoinedPayload) => {
             console.log('recvd new player joined')
             if (!this.appState.gameState) {
                 return
@@ -243,6 +274,7 @@ class HostConnection extends BaseConnection {
             }
             let newPlayer: Player = new Player(data.uid, data.username)
             newPlayer.isOnline = data.isOnline
+            newPlayer.isBot = data.isBot
 
             this.appState.gameState.players = [...this.appState.gameState.players, newPlayer]
             playersStore.set(this.appState.gameState.players)

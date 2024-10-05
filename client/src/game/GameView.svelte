@@ -12,9 +12,14 @@
     import HelpModal from '../HelpModal.svelte'
     import CardsInHand from './CardsInHand.svelte'
     import PlayerCarousel from './components/PlayerCarousel.svelte'
+    import { AiEngine } from './AiEngine'
+    import { ConnectionHandler } from 'src/ConnectoinHandler'
+    import { HandInfo } from './HandRankings'
+    import { GameServer } from './GameServer'
 
     export let gameId: string
     export let socket: Socket
+    export let connectionHandler: ConnectionHandler
     export let kickPlayer: (uid: string) => void | undefined
     export let closeGame: () => void | undefined
 
@@ -28,7 +33,7 @@
     let eliminated = false
     let showModal: boolean = false
     let betName: string = ''
-    let selectedHand
+    let selectedHand: HandInfo
     let countdown: number = 45
     let roundTimer: ReturnType<typeof setInterval> | undefined
     let showButtons: boolean = true
@@ -37,6 +42,8 @@
     let showHelpModal: boolean = false
     let carouselNextPlayer: () => Promise<void>
     let carouselSetup: (arg0: number) => Promise<void>
+
+    let aiEngine: AiEngine = new AiEngine(connectionHandler)
 
     //TODO : When game ends tehere should be a cleanup of socket listeners
 
@@ -68,9 +75,7 @@
     })
 
     onMount(() => {
-        if (!socket) {
-            socket = io(serverUrl)
-        }
+        connectionHandler.setupGame(game)
 
         socket.on(SocketEventsCommon.hit, (data: hitPayload) => {
             countdown = 45
@@ -82,6 +87,8 @@
                     }
                 })
             }
+            console.log('recieved hit', data)
+
             //console.log('is gameCLosed: ', game.gameClosed);
             if (!game.gameClosed) {
                 game.hit(data.move)
@@ -92,6 +99,20 @@
                 showButtons = true
             } else {
                 stopRoundTimer()
+            }
+            if (isHost) {
+                aiEngine.passHitInfo(data.move)
+                console.log('hand info passed to ai engine')
+                if (game.players[game.currentPlayerIndx].isBot) {
+                    console.log('current player is a bot')
+                    let botsDeck = (game as GameServer).hands.get(game.currentPlayer)
+                    if (botsDeck) {
+                        aiEngine.decide(botsDeck)
+                        console.log('got bot to decide on move')
+                    }
+                } else {
+                    console.log(game.players[game.currentPlayerIndx])
+                }
             }
         })
 
@@ -142,6 +163,11 @@
                     startRoundTimer()
                 }
                 carouselSetup(game.currentPlayerIndx)
+                aiEngine.check()
+                if (game.players[game.currentPlayerIndx].isBot) {
+                    let botsDeck = (game as GameServer).hands.get(game.currentPlayer)
+                    if (botsDeck) aiEngine.decide(botsDeck)
+                }
             })
         } else {
             // ********************************************
@@ -149,6 +175,7 @@
             // ********************************************
             //console.log('non host');
             socket.on(SocketEventsCommon.checkToPlayers, (data: checkToPlayersPayload) => {
+                console.log('recieved CHeck')
                 let nextMove = game.check(data)
                 game = game
                 game.eliminatedPlayers.forEach((pl) => {
@@ -205,13 +232,14 @@
         }
     }
 
-    // TODO: On finished game when new game is tarted players are not initalized properly
+    // TODO: On finished game when new game is started players are not initalized properly
     // This function is called when the modal is closed and we have selected a bet
     function handleBetSelection(event: CustomEvent) {
         if (countdown > 0) {
             const { detail } = event
             selectedHand = detail
-            socket.emit(SocketEventsCommon.hit, { move: selectedHand })
+            console.log('send hit ', selectedHand)
+            connectionHandler.sendHitEvent(selectedHand)
         }
         showModal = false
     }

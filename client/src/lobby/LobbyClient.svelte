@@ -96,6 +96,7 @@
                 kickPlayer="{() => {}}"
                 {game}
                 closeGame="{() => {}}"
+                {connectionHandler}
             />
         {/await}
     {:else}
