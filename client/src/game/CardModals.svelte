@@ -4,7 +4,9 @@
     import CardImageHandler from './CardImageHandler'
     import { compareRankingAGreaterThanB } from './Comparators'
     import SelectionModal from './SelectionModal.svelte'
+    import { HandInfo } from './HandRankings'
 
+    // @ts-ignore
     export let previousBet
 
     const cardImageHandler = new CardImageHandler()
@@ -87,7 +89,7 @@
         selectedColor = selectedColor.toLowerCase().slice(0, -1)
         startingCard = startingCard.toLowerCase()
 
-        let newBet = {
+        let newBet: HandInfo = {
             selectedRanking,
             primaryCard,
             secondaryCard,

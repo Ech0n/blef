@@ -23,6 +23,7 @@ export class GameServer extends Game {
     deck: Card[]
     isFinished: boolean = false
     cardCounts: CardCountTable
+    //TODO: initalize aiEngine only if bots exist
     constructor(players: Player[], gameStartData: gameStartPayload, thisPlayerId: string, initialCardCounts: CardCountTable) {
         super(players, gameStartData, thisPlayerId)
         this.hands = new Map(Object.entries(gameStartData.newHands))
@@ -123,3 +124,5 @@ export class GameServer extends Game {
         return this.cardCounts
     }
 }
+
+interface checkResult {}

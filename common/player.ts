@@ -18,10 +18,13 @@ export class Player implements IPlayer {
     isOnline!: boolean;
     loses: number;
     isHost: boolean = false;
+    isBot: boolean;
 
     constructor(id: string, username: string) {
         this.uid = id;
         this.username = username;
         this.loses = 0;
+        this.isBot = false
+        this.isOnline = true;
     }
 }

@@ -1,22 +1,23 @@
 <script lang="ts">
-    import { type Socket } from 'socket.io-client'
+    import { onMount, onDestroy } from 'svelte'
+    import { io, type Socket } from 'socket.io-client'
     import { createEventDispatcher, onDestroy, onMount } from 'svelte'
-    import { toasts } from 'svelte-toasts'
-    import type { gameInfo, gameStartPayload } from '../../../common/payloads'
-    import { Player } from '../../../common/player'
-    import { SocketEventsCommon, SocketEventsFromClient } from '../../../src/types/socketEvents'
-    import { Game } from '../game/Game'
     import { playerStore } from '../game/stores'
+    import { SocketEventsCommon, SocketEventsFromClient } from '../../../src/types/socketEvents'
+    import { Player } from '../../../common/player'
+    import type { GameState, gameStartPayload } from '../../../common/payloads'
     import type { Card } from '../model/Card'
-    import LobbyCodeContainer from './LobbyCodeContainer.svelte'
     import LobbyPlayerList from './LobbyPlayerList.svelte'
     import WinnerModal from './WinnerModal.svelte'
+    import { Game } from '../game/Game'
+    import { ConnectionHandler } from 'src/ConnectoinHandler'
+    import { AppState } from 'src/StateTypes'
+    import { toasts } from 'svelte-toasts'
+    import LobbyCodeContainer from './LobbyCodeContainer.svelte'
 
-    export let gameId: string
-    export let socket: Socket
-    export let players: Player[] = []
-    export let thisPlayerId: string
-    export let startedGameInfo: gameInfo['startedGameInfo']
+    export let connectionHandler: ConnectionHandler
+    export let appState: AppState
+    export let gameState: GameState
 
     const dispatch = createEventDispatcher()
 
@@ -26,6 +27,7 @@
     let gameStartData: gameStartPayload
     let showModal: boolean = false
     let winnerUsername: string = ''
+    let gameId: string
 
     const unsubscribe = playerStore.subscribe((value) => {
         currentPlayer = value!
@@ -37,82 +39,37 @@
 
     onMount(() => {
         toasts.success({ description: 'Joined a Game!', placement: 'top-right' })
-
-        if (startedGameInfo) {
+        if (gameState.startedGameInfo) {
             let hands: { [key: string]: Card[] } = {}
-            hands[thisPlayerId] = startedGameInfo.newHand
+            hands[gameState.thisPlayerId] = gameState.startedGameInfo.newHand
             gameStartData = {
-                startingPlayerId: startedGameInfo.currentPlayer,
+                startingPlayerId: gameState.startedGameInfo.currentPlayer,
                 newHands: hands,
             }
-            game = new Game(players, gameStartData, thisPlayerId)
-            game.previousBet = startedGameInfo.currentBet
+            game = new Game(gameState.players, gameStartData, gameState.thisPlayerId)
+            game.previousBet = gameState.startedGameInfo.currentBet
             gameView = import('../game/GameView.svelte')
         }
-
-        socket.on(SocketEventsCommon.newPlayerJoined, (data: { username: string; uid: string }) => {
-            toasts.info({ placement: 'top-right', description: `${data.username} just joined!` })
-            let newPlayer = new Player(data.uid, data.username)
-            newPlayer.isOnline = true
-            players = [...players, newPlayer]
-        })
-
-        socket.on(SocketEventsCommon.gameStarted, (data: gameStartPayload) => {
-            toasts.info({ placement: 'top-right', description: 'Game started!' })
-            if (data && data.startingPlayerId) {
-                gameStartData = data
-                game = new Game(players, gameStartData, thisPlayerId)
+        if (appState.gameId) gameId = appState.gameId
+        connectionHandler.setupLobbyListeners(
+            game,
+            (data: gameStartPayload) => {
+                game = new Game(gameState.players, data, gameState.thisPlayerId)
                 game.gameClosed = false
-
                 gameView = import('../game/GameView.svelte')
+            },
+            () => {
+                dispatch('gameClosed')
             }
-        })
-
-        socket.on(SocketEventsCommon.gameClosed, () => {
-            dispatch('gameClosed')
-        })
-
-        socket.on(SocketEventsCommon.playerLeftGame, (data: { uid: string }) => {
-            if (!data) {
-                return
-            }
-            handlePlayerLeaving(data.uid)
-        })
-        socket.on(SocketEventsCommon.kickPlayer, (data: { uid: string }) => {
-            if (!data) {
-                return
-            }
-            handlePlayerLeaving(data.uid)
-        })
+        )
     })
 
-    function handlePlayerLeaving(playerId: string) {
-        console.log(playerId, thisPlayerId)
-        if (playerId === thisPlayerId) {
-            cleanUpGame()
-            return
-        }
-
-        if (gameView) {
-            let playerThatLeft = players.find((pl) => pl.uid === playerId)
-            if (playerThatLeft) {
-                playerThatLeft.isOnline = false
-            }
-        } else {
-            // Tag the disconnected player as not connected
-            players = players.filter((pl) => {
-                return pl.uid !== playerId
-            })
-            players = players
-        }
-    }
-
     function leaveGame(): void {
-        socket.emit(SocketEventsFromClient.leaveGame)
+        connectionHandler.connection?.socket.emit(SocketEventsFromClient.leaveGame)
     }
 
     function cleanUpGame(): void {
-        players = []
+        gameState.players = []
         dispatch('gameClosed') // To parent
     }
 
@@ -125,28 +82,27 @@
     }
 
     function notifyHostThatPlayerReady() {
-        socket.emit(SocketEventsFromClient.playerReady, thisPlayerId)
+        connectionHandler.connection?.socket.emit(SocketEventsFromClient.playerReady, gameState.thisPlayerId)
     }
 </script>
 
 <div class="container">
-    {#if gameView}
+    {#if gameView && connectionHandler.connection}
         {#await gameView then { default: GameClient }}
             <GameClient
                 on:leave="{leaveGame}"
                 on:gameFinished="{showWinner}"
                 {gameId}
-                {socket}
-                {thisPlayerId}
+                socket="{connectionHandler.connection.socket}"
+                thisPlayerId="{gameState.thisPlayerId}"
                 isHost="{false}"
-                kickPlayer="{(_) => null}"
                 {game}
-                closeGame="{() => {}}"
+                {connectionHandler}
             />
         {/await}
     {:else}
-        <LobbyCodeContainer {gameId} />
-        <LobbyPlayerList {players} {thisPlayerId} />
+        <LobbyCodeContainer gameId="{appState.gameId}" />
+        <LobbyPlayerList thisPlayerId="{gameState.thisPlayerId}" />
         <button class="default-button" on:click="{leaveGame}">Leave</button>
     {/if}
 </div>

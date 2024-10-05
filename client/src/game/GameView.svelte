@@ -12,21 +12,27 @@
     import CardsInHand from './CardsInHand.svelte'
     import GameClock from './components/GameClock.svelte'
     import PlayerCarousel from './components/PlayerCarousel.svelte'
+    import { AiEngine } from './AiEngine'
+    import { ConnectionHandler } from 'src/ConnectoinHandler'
+    import { HandInfo } from './HandRankings'
+    import { GameServer } from './GameServer'
     import { Game } from './Game'
 
     export let gameId: string
     export let socket: Socket
+    export let connectionHandler: ConnectionHandler
 
     export let thisPlayerId: string
     export let isHost: boolean | undefined = false
     export let game: Game
+    // export let aiEngine : AiEngine
 
     const dispatch = createEventDispatcher()
     const serverUrl: string = config.BACKEND_SERVER_ADDRESS
     let eliminated = false
     let showModal: boolean = false
     let betName: string = ''
-    let selectedHand
+    let selectedHand: HandInfo
     let countdown: number = 60
     let roundTimer: ReturnType<typeof setInterval> | undefined
     let showButtons: boolean = true
@@ -35,6 +41,8 @@
     let showHelpModal: boolean = false
     let carouselNextPlayer: () => Promise<void>
     let carouselSetup: (arg?: number) => void
+
+    let aiEngine: AiEngine = new AiEngine(connectionHandler)
 
     //TODO : When game ends tehere should be a cleanup of socket listeners
 
@@ -65,9 +73,7 @@
     })
 
     onMount(() => {
-        if (!socket) {
-            socket = io(serverUrl)
-        }
+        connectionHandler.setupGame(game)
 
         socket.on(SocketEventsCommon.hit, (data: hitPayload) => {
             countdown = 60
@@ -88,7 +94,6 @@
                     }
                 })
             }
-
             if (!game.gameClosed) {
                 game.hit(data.move)
                 carouselNextPlayer()
@@ -100,6 +105,19 @@
 
             if (game.currentPlayer === thisPlayerId) {
                 toasts.info('Your turn!')
+            if (isHost) {
+                aiEngine.passHitInfo(data.move)
+                console.log('hand info passed to ai engine')
+                if (game.players[game.currentPlayerIndx].isBot) {
+                    console.log('current player is a bot')
+                    let botsDeck = (game as GameServer).hands.get(game.currentPlayer)
+                    if (botsDeck) {
+                        aiEngine.decide(botsDeck)
+                        console.log('got bot to decide on move')
+                    }
+                } else {
+                    console.log(game.players[game.currentPlayerIndx])
+                }
             }
         })
 
@@ -150,13 +168,19 @@
 
                 toasts.info(`${game.playerThatLost?.username} lost this round`)
                 carouselSetup(game.currentPlayerIndx)
+                aiEngine.check()
+                if (game.players[game.currentPlayerIndx].isBot) {
+                    let botsDeck = (game as GameServer).hands.get(game.currentPlayer)
+                    if (botsDeck) aiEngine.decide(botsDeck)
+                }
             })
         } else {
             // ********************************************
             // |      NON-HOST SOCKET FUNCTIONALITY       |
             // ********************************************
             socket.on(SocketEventsCommon.checkToPlayers, (data: checkToPlayersPayload) => {
-                game.check(data)
+                console.log('recieved CHeck')
+                let nextMove = game.check(data)
                 game = game
                 //console.log(game)
                 game.eliminatedPlayers.forEach((pl) => {
@@ -213,13 +237,14 @@
         }
     }
 
-    // TODO: On finished game when new game is tarted players are not initalized properly
+    // TODO: On finished game when new game is started players are not initalized properly
     // This function is called when the modal is closed and we have selected a bet
     function handleBetSelection(event: CustomEvent) {
         if (countdown > 0) {
             const { detail } = event
             selectedHand = detail
-            socket.emit(SocketEventsCommon.hit, { move: selectedHand })
+            console.log('send hit ', selectedHand)
+            connectionHandler.sendHitEvent(selectedHand)
         }
         showModal = false
     }

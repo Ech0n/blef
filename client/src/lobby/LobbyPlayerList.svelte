@@ -1,15 +1,21 @@
 <script lang="ts">
     import { Popover } from 'flowbite-svelte'
+    import { playersStore } from '../game/stores'
     import type { Player } from '../../../common/player'
 
-    export let players: Player[]
+    let players: Player[]
     export let thisPlayerId: string
     export let isHost: boolean = false
     export let handlePlayerKick: (playerId: string) => null = (_) => {
         return null
     }
 
-    const truncateUsername = (username: string) => (username.length > 8 ? `${username.slice(0, 8)}...` : username)
+    playersStore.subscribe((value) => {
+        players = value
+    })
+
+    // Function to truncate usernames
+    const truncateUsername = (username: string) => (username.length > 6 ? `${username.slice(0, 6)}...` : username)
 </script>
 
 <div class="container group default-area-background p20 player-list">
@@ -57,8 +63,8 @@
     .player-item {
         background-color: #2424242c;
         min-width: 200px;
-        padding: 10px 0px 10px 0px;
-        margin: 10px 0 10px 0;
+        padding: 10px 0px 5px 0px;
+        margin: 0px;
         white-space: nowrap;
         position: relative;
     }

@@ -3,7 +3,7 @@
     import { onMount } from 'svelte'
     import { FlatToast, ToastContainer, toasts } from 'svelte-toasts'
     import { ToastProps } from 'svelte-toasts/types/common'
-    import type { gameInfo, joinGameResponsePayload, joinRequest, reconnectRequestPayload, reconnectResponsePayload } from '../../common/payloads'
+    import type { GameState, joinGameResponsePayload, joinRequest, reconnectRequestPayload, reconnectResponsePayload } from '../../common/payloads'
     import { Player } from '../../common/player'
     import { config } from '../../config'
     import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from '../../src/types/socketEvents'
@@ -11,18 +11,15 @@
     import { playerStore } from './game/stores'
     import Home from './Home.svelte'
     import Menu from './Menu.svelte'
+    import { ConnectionHandler } from './ConnectoinHandler'
+    import { AppState } from './StateTypes'
+    import { connect } from 'http2'
 
     let gameView: Promise<any> | undefined
     let activeView: string = 'menu'
-    let gameId: string | null = null
-    let player: Player | null = null
-    let username = ''
     const serverUrl: string = config.BACKEND_SERVER_ADDRESS
-    let socket: Socket
-    let players: Player[] = []
-    let thisPlayerId: string
-    let startedGameInfo: gameInfo['startedGameInfo']
-
+    let connectoinHandler: ConnectionHandler = new ConnectionHandler()
+    let appState: AppState = new AppState()
     let theme = {
         'primary-color': '#05580c',
         'secondary-color': '#01420d',
@@ -32,102 +29,36 @@
         .map(([key, value]) => `--${key}:${value}`)
         .join(';')
 
-    function commonListeners(socket: Socket) {
-        socket.on(SocketEventsFromServer.playerReconnected, (data: { uid: string }) => {
-            let player = players.find((pl) => {
-                return pl.uid === data.uid
-            })
-            if (!player) {
-                return
-            }
-
-            player.isOnline = true
-        })
-    }
-
-    function loadClientGameView(gameInfo: gameInfo) {
-        if (gameInfo.players) {
-            players = gameInfo.players.map((el) => {
-                let newPlayer: Player = new Player(el.uid, el.username)
-                newPlayer.isOnline = el.isOnline
-                return newPlayer
-            })
-        }
-        thisPlayerId = gameInfo.thisPlayerId
+    function loadClientGameView() {
         gameView = import('./lobby/LobbyClient.svelte')
     }
 
     function joinGame(event: CustomEvent): void {
-        gameId = event.detail.gameId
-        username = event.detail.username
+        appState.username = event.detail.username
+        appState.gameId = event.detail.gameId
 
-        if (!gameId) {
-            return //TODO ensure that gameId is not undefined
-        }
-        if (!username) {
+        if (!appState.gameId) {
             return
         }
-        socket = io(serverUrl)
-
-        // Listen for messages from the server
-        socket.on(SocketEventsFromHost.joinResponse, (data: joinGameResponsePayload) => {
-            if (!data || !data.didJoin || !data.gameInfo) {
-                //TODO: Some kind of toast saying "Could not connect to game" and possibly information why
-                return
-            }
-
-            if (gameId) {
-                sessionStorage.setItem('gameId', gameId)
-            }
-            sessionStorage.setItem('uid', data.gameInfo.thisPlayerId)
-            playerStore.set(player)
-
-            thisPlayerId = data.gameInfo.thisPlayerId
-            username = data.gameInfo.thisPlayerName
-
-            player = new Player(thisPlayerId, username)
-            player.isOnline = true
-
-            commonListeners(socket)
-            startedGameInfo = data.gameInfo.startedGameInfo
-            loadClientGameView(data.gameInfo)
-        })
-
-        let requestPayload: joinRequest = {
-            gameId: gameId,
-            requesterUsername: username,
+        if (!appState.username) {
+            return
         }
 
-        socket.emit(SocketEventsFromClient.joinRequest, requestPayload)
+        connectoinHandler.join(appState, loadClientGameView)
     }
 
     function hostGame(event: CustomEvent): void {
-        if (!player) {
-            const newId = Date.now().toString() // Placeholder ID generation TODO
-            username = event.detail.username
-            player = new Player(newId, event.detail.username)
-            player.isOnline = true // Set the player as online upon game creation
-        }
-        socket = io(serverUrl)
-        socket.emit(SocketEventsCommon.createGame, { username: username })
-        commonListeners(socket)
+        appState.username = event.detail.username
 
-        socket.on(SocketEventsCommon.createGame, (data: { gameId: string; hostId: string }) => {
-            gameId = data.gameId
-            let host = new Player(data.hostId, username)
-            host.isOnline = true
-            players = [host]
-            thisPlayerId = data.hostId
+        connectoinHandler.host(appState, () => {
+            gameView = import('./lobby/LobbyHost.svelte')
         })
-        playerStore.set(player)
-        gameView = import('./lobby/LobbyHost.svelte')
     }
 
     function leaveGame(): void {
         gameView = undefined
-        gameId = null
-        player = null // Reset player status or keep for reconnection purposes
-        playerStore.set(null)
+        appState.gameId = null
+        appState.player = null // Reset player status or keep for reconnection purposes
     }
 
     function checkForReconnect() {
@@ -137,20 +68,9 @@
             return
         }
 
-        socket = io(serverUrl)
-        const request: reconnectRequestPayload = {
-            requesterUid: sessionUid,
-            gameId: sessionGameId,
-        }
-        socket.emit(SocketEventsFromClient.reconnectToGame, request)
-        socket.on(SocketEventsFromHost.reconnectToGame, (response: reconnectResponsePayload) => {
-            if (!response.didReconnect || !response.gameInfo) {
-                socket.disconnect()
-                return
-            }
-            startedGameInfo = response.gameInfo.startedGameInfo
-            loadClientGameView(response.gameInfo)
-        })
+        appState.gameId = sessionGameId
+
+        connectoinHandler.reconnect(appState, sessionUid, loadClientGameView)
     }
 
     onMount(() => {
@@ -173,9 +93,9 @@
     </ToastContainer>
     <div class="main-content">
         <h1 class="glowing title">BLEF</h1>
-        {#if gameView}
+        {#if gameView && connectoinHandler.connection && appState.gameState}
             {#await gameView then { default: LobbyView }}
-                <LobbyView {gameId} usernameInput="{username}" on:gameClosed="{leaveGame}" {socket} {thisPlayerId} {players} {startedGameInfo} />
+                <LobbyView usernameInput="{appState.username}" on:gameClosed="{leaveGame}" gameState="{appState.gameState}" {appState} connectionHandler="{connectoinHandler}" />
             {/await}
         {:else if activeView === 'menu'}
             <Menu on:joinGame="{joinGame}" on:createGame="{hostGame}" />
