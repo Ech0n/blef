@@ -25,7 +25,6 @@
     export let thisPlayerId: string
     export let isHost: boolean | undefined = false
     export let game: Game
-    // export let aiEngine : AiEngine
 
     const dispatch = createEventDispatcher()
     const serverUrl: string = config.BACKEND_SERVER_ADDRESS

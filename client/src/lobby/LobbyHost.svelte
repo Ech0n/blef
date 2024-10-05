@@ -96,7 +96,9 @@
     })
 
     function startGame(): void {
-        if (gameState.players.length >= 2 && gameState.players.length <= 5 && readyPlayers == gameState.players.length) {
+        // FIXME: we should check if all players all ready but currently readyPlayersCounting is broken
+        // if (gameState.players.length >= 2 && gameState.players.length <= 5 && readyPlayers == gameState.players.length) {
+        if (gameState.players.length >= 2 && gameState.players.length <= 5) {
             let initializationData = initalizeGame(gameState.players)
             cardCounts = initializationData.cardCounts
             let startPayload = initializationData.payload
