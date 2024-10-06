@@ -4,11 +4,13 @@ const default_back_port = 5678
 const default_front_port = 5173
 const default_hostname = 'localhost'
 
+const url_prefix = process.env.IS_SECURE === 'true' ? 'https://' : 'http://'
+
 const back_port: number = Number(process.env.BLEF_BACKEND_PORT) || default_back_port
 const front_port: number = Number(process.env.BLEF_FRONTEND_PORT) || default_front_port
 
 const hostname = process.env.BLEF_HOSTNAME || default_hostname
-const address = 'http://' + hostname
+const address = url_prefix + hostname
 
 export const config = {
     mode: process.env.NODE_ENV || 'dev',
