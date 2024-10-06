@@ -1,3 +1,5 @@
+// THIS IS SERVER CONFIG
+// IF YOU NEED TO CONFIG CLIENT VISIT .env file
 const default_back_port = 5678
 const default_front_port = 5173
 const default_hostname = 'localhost'
@@ -16,4 +18,5 @@ export const config = {
     ADDRES: address,
     BACKEND_SERVER_ADDRESS: address + ':' + back_port,
     FRONTEND_SERVER_ADDRESS: address + ':' + front_port,
+    BLEF_SERVER_ADRESS_FOR_CLIENT: process.env.BLEF_SERVER_ADRESS_FOR_CLIENT,
 }

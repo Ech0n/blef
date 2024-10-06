@@ -1,9 +1,9 @@
-import { defineConfig } from 'vite';
-import { svelte } from '@sveltejs/vite-plugin-svelte';
-import preprocess from 'svelte-preprocess';
+import { defineConfig } from 'vite'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
+import preprocess from 'svelte-preprocess'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
     return {
         plugins: [
             svelte({
@@ -14,5 +14,5 @@ export default defineConfig(({ mode }) => {
         build: {
             outDir: '../public',
         },
-    };
-});
+    }
+})

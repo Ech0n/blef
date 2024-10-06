@@ -21,7 +21,7 @@ import { GameServer } from './game/GameServer'
 import { playersStore } from './game/stores'
 import { HandInfo } from '@game/HandRankings'
 
-const serverUrl: string = import.meta.env.BLEF_HOSTNAME + import.meta.env.BLEF_BACKEND_PORT || 'localhost:5678'
+const serverUrl: string = import.meta.env.VITE_API_URL || 'localhost:5678'
 export class ConnectionHandler {
     connection?: BaseConnection
 
