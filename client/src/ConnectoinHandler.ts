@@ -1,5 +1,4 @@
 import { io, type Socket } from 'socket.io-client'
-import { config } from '../../config'
 import { toasts } from 'svelte-toasts'
 import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from '../../src/types/socketEvents'
 import {
@@ -22,7 +21,7 @@ import { GameServer } from './game/GameServer'
 import { playersStore } from './game/stores'
 import { HandInfo } from '@game/HandRankings'
 
-const serverUrl: string = config.BACKEND_SERVER_ADDRESS
+const serverUrl: string = import.meta.env.BLEF_HOSTNAME + import.meta.env.BLEF_BACKEND_PORT || 'localhost:5678'
 export class ConnectionHandler {
     connection?: BaseConnection
 

@@ -6,7 +6,7 @@ import { Payload, reconnectRequestPayload, reconnectResponsePayload } from '../c
 import { Player, createPlayerFromIPlayer } from '../common/player'
 import { config } from '../config'
 import { SessionSocket, socketEventsListeners } from './socketEventListeners'
-import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer    } from './types/socketEvents'
+import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from './types/socketEvents'
 
 declare module 'http' {
     interface IncomingMessage {
@@ -23,9 +23,8 @@ export class BlefServer {
     constructor(server: http.Server) {
         this.io = new Server(server, {
             cors: {
-                origin: ['http://localhost:5173', 'http://localhost:5174', config.FRONTEND_SERVER_ADDRESS],
+                origin: [config.ADDRES, config.FRONTEND_SERVER_ADDRESS],
                 methods: ['GET', 'POST'],
-                allowedHeaders: ['my-custom-header'],
                 credentials: true,
             },
         })
@@ -50,20 +49,12 @@ export class BlefServer {
     // f.e. we listen to event ExapmleEvent and than we can use either of bellow three functions to decide who should we pass payload to
     // All of those functions should have callback as paramater (or be a promise) and than call that callback when client emits ExapleEvent
     // So doing it this way we can alawys expect client to emit a callback with same event (or not if smthng went wrong)
-    passToEveryoneExceptSender(
-        event: SocketEventsCommon,
-        payload: Payload, 
-        socket: Socket
-    ) {
+    passToEveryoneExceptSender(event: SocketEventsCommon, payload: Payload, socket: Socket) {
         let gameId = this.getRoomId(socket)
         socket.to(gameId).emit(event, payload)
     }
 
-    passToHost(
-        event: SocketEventsCommon,
-        payload: Payload,
-        socket: Socket
-    ) {
+    passToHost(event: SocketEventsCommon, payload: Payload, socket: Socket) {
         let gameId = this.getRoomId(socket)
         let roomHostSocketId = this.roomHosts.get(gameId)
         let roomHostSocket
@@ -73,11 +64,7 @@ export class BlefServer {
         }
     }
 
-    passToClientAndHost(
-        event: SocketEventsCommon,
-        payload: Payload,
-        socket: Socket
-    ) {
+    passToClientAndHost(event: SocketEventsCommon, payload: Payload, socket: Socket) {
         let gameId = this.getRoomId(socket)
 
         this.io.in(gameId).emit(event, payload)

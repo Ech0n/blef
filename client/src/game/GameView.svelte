@@ -4,7 +4,6 @@
     import { createEventDispatcher, onDestroy, onMount } from 'svelte'
     import { toasts } from 'svelte-toasts'
     import type { checkToPlayersPayload, hitPayload } from '../../../common/payloads'
-    import { config } from '../../../config'
     import { SocketEventsCommon, SocketEventsFromHost } from '../../../src/types/socketEvents'
     import { cardCountTableToIterableArray, cardToRankTranslation, type CardCountTable } from '../model/Card'
     import CardImageHandler from './CardImageHandler'
@@ -27,7 +26,6 @@
     export let game: Game
 
     const dispatch = createEventDispatcher()
-    const serverUrl: string = config.BACKEND_SERVER_ADDRESS
     let eliminated = false
     let showModal: boolean = false
     let betName: string = ''
@@ -42,8 +40,6 @@
     let carouselSetup: (arg?: number) => void
 
     let aiEngine: AiEngine = new AiEngine(connectionHandler)
-
-    //TODO : When game ends tehere should be a cleanup of socket listeners
 
     const cardImageHandler = new CardImageHandler()
     const cardFullNames: { [key: string]: string } = {

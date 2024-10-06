@@ -39,7 +39,6 @@
     let cardCounts: CardCountTable = initalizeCountTable()
     const dispatch = createEventDispatcher()
 
-    // NOTE: is this necessary?
     readyPlayersCounter.subscribe((val) => (readyPlayers = val))
 
     onMount(() => {

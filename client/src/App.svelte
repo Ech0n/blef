@@ -5,7 +5,6 @@
     import { ToastProps } from 'svelte-toasts/types/common'
     import type { GameState, joinGameResponsePayload, joinRequest, reconnectRequestPayload, reconnectResponsePayload } from '../../common/payloads'
     import { Player } from '../../common/player'
-    import { config } from '../../config'
     import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from '../../src/types/socketEvents'
     import Account from './Account.svelte'
     import { playerStore } from './game/stores'
@@ -17,7 +16,6 @@
 
     let gameView: Promise<any> | undefined
     let activeView: string = 'menu'
-    const serverUrl: string = config.BACKEND_SERVER_ADDRESS
     let connectoinHandler: ConnectionHandler = new ConnectionHandler()
     let appState: AppState = new AppState()
     let theme = {

@@ -1,11 +1,19 @@
-const back_port = 5678;
-const front_port = 5173;
+const default_back_port = 5678
+const default_front_port = 5173
+const default_hostname = 'localhost'
 
-// TODO: maybe we should use json for config
+const back_port: number = Number(process.env.BLEF_BACKEND_PORT) || default_back_port
+const front_port: number = Number(process.env.BLEF_FRONTEND_PORT) || default_front_port
+
+const hostname = process.env.BLEF_HOSTNAME || default_hostname
+const address = 'http://' + hostname
+
 export const config = {
-    BACKENDSERVERPORT: 5678,
-    FRONTENDSERVERPORT: 5173,
-    HOSTNAME: 'localhost',
-    BACKEND_SERVER_ADDRESS: 'http://localhost:' + back_port,
-    FRONTEND_SERVER_ADDRESS: 'http://localhost:' + front_port,
-};
+    mode: process.env.NODE_ENV || 'dev',
+    BACKENDSERVERPORT: back_port,
+    FRONTENDSERVERPORT: front_port,
+    HOSTNAME: hostname,
+    ADDRES: address,
+    BACKEND_SERVER_ADDRESS: address + ':' + back_port,
+    FRONTEND_SERVER_ADDRESS: address + ':' + front_port,
+}
