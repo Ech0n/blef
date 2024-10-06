@@ -1,27 +1,16 @@
 <script lang="ts">
-    import { Socket } from 'socket.io-client'
+    import { ConnectionHandler } from 'src/ConnectoinHandler'
+    import { AppState } from 'src/StateTypes'
     import { createEventDispatcher, onMount } from 'svelte'
     import { toasts } from 'svelte-toasts'
-    import type {
-        GameState,
-        gameStartPayload,
-        joinGameResponsePayload,
-        joinRequest,
-        playerJoinedPayload,
-        reconnectRequestPayload,
-        reconnectResponsePayload,
-    } from '../../../common/payloads'
-    import { Player } from '../../../common/player'
-    import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost } from '../../../src/types/socketEvents'
+    import type { GameState, gameStartPayload, playerJoinedPayload } from '../../../common/payloads'
+    import { SocketEventsCommon, SocketEventsFromHost } from '../../../src/types/socketEvents'
     import { GameServer } from '../game/GameServer'
+    import { playersStore, readyPlayersCounter } from '../game/stores'
     import { initalizeCountTable, initalizeGame, type CardCountTable } from '../model/Card'
     import LobbyCodeContainer from './LobbyCodeContainer.svelte'
     import LobbyPlayerList from './LobbyPlayerList.svelte'
     import WinnerModal from './WinnerModal.svelte'
-    import { AppState } from 'src/StateTypes'
-    import { ConnectionHandler } from 'src/ConnectoinHandler'
-    import { isGeneratorFunction } from 'util/types'
-    import { playersStore, readyPlayersCounter } from '../game/stores'
 
     export let connectionHandler: ConnectionHandler
     export let appState: AppState
@@ -95,9 +84,7 @@
     })
 
     function startGame(): void {
-        // FIXME: we should check if all players all ready but currently readyPlayersCounting is broken
-        // if (gameState.players.length >= 2 && gameState.players.length <= 5 && readyPlayers == gameState.players.length) {
-        if (gameState.players.length >= 2 && gameState.players.length <= 5) {
+        if (gameState.players.length >= 2 && gameState.players.length <= 5 && readyPlayers == gameState.players.length) {
             let initializationData = initalizeGame(gameState.players)
             cardCounts = initializationData.cardCounts
             let startPayload = initializationData.payload

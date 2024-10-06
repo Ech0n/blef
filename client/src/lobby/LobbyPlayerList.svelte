@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { playersStore } from '../game/stores'
     import type { Player } from '../../../common/player'
+    import { playersStore } from '../game/stores'
 
     let players: Player[]
     export let thisPlayerId: string
@@ -27,9 +27,9 @@
             {:else}
                 🔴
             {/if} -->
-            {#if isHost && player.uid != thisPlayerId}
+            <!-- {#if isHost && player.uid != thisPlayerId}
                 <button class="kick-button" id="kick-button" on:click="{handlePlayerKick(player.uid)}" aria-label="{`Kick player: ${player.username}`}"></button>
-            {/if}
+            {/if} -->
         </div>
     {/each}
 </div>
