@@ -2,7 +2,7 @@
 // IF YOU NEED TO CONFIG CLIENT VISIT .env file
 const default_back_port = 5678
 const default_front_port = 5173
-const default_hostname = 'localhost'
+const default_hostname = '0.0.0.0'
 
 const url_prefix = process.env.IS_SECURE === 'true' ? 'https://' : 'http://'
 
