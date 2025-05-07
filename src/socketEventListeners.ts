@@ -216,7 +216,7 @@ export function socketEventsListeners(blefServer: BlefServer, clientSocket: Sess
     })
 
     clientSocket.on(SocketEventsCommon.gameClosed, () => {
-        //console.log('Trying to close room');
+        console.log('Room is closing');
 
         if (roomHosts.get(blefServer.getRoomId(clientSocket)) != clientSocket.id) {
             clientSocket.emit(SocketEventsCommon.gameClosed, false)

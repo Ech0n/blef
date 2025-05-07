@@ -14,5 +14,6 @@ export default defineConfig(({ mode, command }) => {
         build: {
             outDir: '../public',
         },
+
     }
 })

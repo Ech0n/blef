@@ -156,7 +156,7 @@
         <div class="responsive">
             <button class="default-button" on:click="{closeGame}">Close Game</button>
             <button class="default-button" on:click="{startGame}">Start Game</button>
-            <button class="default-button" on:click="{addBot}">Add Ai opponent</button>
+            <button class="default-button" on:click="{addBot}" name="addAiButton">Add Ai opponent</button>
         </div>
     {/if}
 </div>

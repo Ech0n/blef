@@ -76,15 +76,14 @@ function fullChecker(cards: CardCountTable, handInfo: HandInfo) {
         return false;
     }
 
-    let count: number[] = [0, 0];
-    for (let cardIndex of [primCard, secCard]) {
-        for (let colorIndex: number = 1; colorIndex <= 4; colorIndex++) {
-            let currentCard = cardIndex === primCard ? 0 : 1;
-            count[currentCard] += cards[cardIndex][colorIndex];
-        }
+    let countA = 0;
+    let countB = 0;
+    for (let colorIndex: number = 0; colorIndex < 4; colorIndex++) {
+        console.log(cards[primCard][colorIndex])
+        countA += cards[primCard][colorIndex];
+        countB += cards[secCard][colorIndex];
     }
-
-    return count[0] >= 3 && count[1] >= 2;
+    return (countA >= 3 && countB >= 2);
 }
 
 function streetChecker(cards: CardCountTable, handInfo: HandInfo) {

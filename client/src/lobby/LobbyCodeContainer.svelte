@@ -21,7 +21,7 @@
     {#if gameId}
         <span class="header-underline game-code-header">Game Code</span>
         <button on:click="{copyCodeToClipboard}" aria-label="Copy game ID" id="copy-button">
-            <span class="glowing">{gameId}</span>
+            <span id="code-container" name="gameCode" class="glowing">{gameId}</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
                 <path
                     fill="currentColor"

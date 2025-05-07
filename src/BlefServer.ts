@@ -23,7 +23,7 @@ export class BlefServer {
     constructor(server: http.Server) {
         this.io = new Server(server, {
             cors: {
-                origin: [config.ADDRES, config.FRONTEND_SERVER_ADDRESS],
+                origin: [config.ADDRES, config.FRONTEND_SERVER_ADDRESS,"http://localhost:5173"],
                 methods: ['GET', 'POST'],
                 credentials: true,
             },

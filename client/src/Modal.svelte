@@ -49,11 +49,11 @@
             <div class="container">
                 <span class="header-underline"> {`${mode === 'join' ? 'Join' : 'Create your'} game`} </span>
                 {#if mode === 'join'}
-                    <input type="text" placeholder="Enter Game ID" bind:value="{gameId}" maxlength="10" />
+                    <input type="text" name="gameIdInput" placeholder="Enter Game ID" bind:value="{gameId}" maxlength="10" />
                 {/if}
-                <input type="text" placeholder="Enter Your Name" bind:value="{username}" maxlength="14" />
+                <input type="text" name="usernameInput" placeholder="Enter Your Name" bind:value="{username}" maxlength="14" />
 
-                <button class="default-button start-close" on:click="{gameAction}">
+                <button name="JoinOrCreateButton" class="default-button start-close" on:click="{gameAction}">
                     <span class="{`${mode === 'join' ? 'join' : 'create'}`}">{mode === 'join' ? 'Join Game' : 'Create Game'}</span>
                 </button>
                 <button class="default-button start-close" on:click="{closeModal}">
