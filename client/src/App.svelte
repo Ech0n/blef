@@ -5,7 +5,7 @@
     import { ToastProps } from 'svelte-toasts/types/common'
     import type { GameState, joinGameResponsePayload, joinRequest, reconnectRequestPayload, reconnectResponsePayload } from '../../common/payloads'
     import { Player } from '../../common/player'
-    import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from '../../src/types/socketEvents'
+    import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from '../../common/socketEvents'
     import Account from './Account.svelte'
     import { playerStore } from './game/stores'
     import Home from './Home.svelte'

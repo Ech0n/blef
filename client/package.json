@@ -16,12 +16,14 @@
         "@vitest/spy": "^3.1.3",
         "cypress": "^14.3.3",
         "cypress-vite": "^1.6.0",
-        "svelte": "^3.52.0",
+        "svelte": "^3.59.2",
         "typescript": "^5.8.3",
         "vite": "^3.2.3",
         "vitest": "^3.1.3"
     },
     "dependencies": {
-        "siema": "^1.5.1"
+        "sass": "^1.89.2",
+        "svelte-preprocess": "^5.1.4",
+        "svelte-toasts": "^1.1.2"
     }
 }
