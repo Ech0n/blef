@@ -60,6 +60,6 @@ jobs:
           password: ${{ secrets.SMTP_PASSWORD }}
           subject: Deployment Completed Successfully
           to: ${{ secrets.SUBSCRIBER_MAIL }}
-          from: ${{ secrets.SENDER_MAIL }
+          from: ${{ secrets.SENDER_MAIL }}
           body: |
             The deployment of blef-game to Azure Web Apps has finished successfully.
