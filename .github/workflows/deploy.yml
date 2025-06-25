@@ -33,21 +33,16 @@ jobs:
         docker build -t blefacr-ajc0eha4cua2e6dk.azurecr.io/blef-client:latest --build-arg API_URL=blef-server-c9c5bkhrdpb7gtbg.polandcentral-01.azurewebsites.net -f client/Dockerfile .
         docker push blefacr-ajc0eha4cua2e6dk.azurecr.io/blef-client:latest
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
+    - name: Deploy backend to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ secrets.AZURE_BACKEND_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_BACKEND_WEBAPP_PUBLISH_PROFILE }}
+        images: blefacr-ajc0eha4cua2e6dk.azurecr.io/blef-server:latest
 
-    steps:
-    - name: Deploy backend app to Azure Container Apps
-      run: |
-        az containerapp update \
-          --name blef-server \
-          --resource-group blef \
-          --image blefacr-ajc0eha4cua2e6dk.azurecr.io/blef-server:latest \
-
-    - name: Deploy frontend app to Azure Container Apps
-      run: |
-        az containerapp update \
-          --name blef-client \
-          --resource-group <resource-group-name> \
-          --image blefacr-ajc0eha4cua2e6dk.azurecr.io/blef-client:latest \
+    - name: Deploy frontend to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ secrets.AZURE_FRONTEND_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_FRONTEND_WEBAPP_PUBLISH_PROFILE }}
+        images: blefacr-ajc0eha4cua2e6dk.azurecr.io/blef-client:latest
