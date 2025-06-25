@@ -10,8 +10,8 @@ const server = http.createServer(app).listen(port, hostname, 0, () => {
     console.log(`Server is up at port ${hostname}:${port}`)
     console.log(`with config:
         mode: ${config.mode}
-        frontend address: ${config.mode === 'production' ? config.BACKEND_SERVER_ADDRESS : config.FRONTEND_SERVER_ADDRESS}
         backend adress: ${config.BACKEND_SERVER_ADDRESS}
+        frontend adress: ${config.FRONTEND_SERVER_ADDRESS}
         adress: ${config.ADDRES}
         hostname: ${config.HOSTNAME} `)
 })

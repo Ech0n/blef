@@ -17,7 +17,7 @@ if (config.mode === 'production') {
 app.use(
     cors({
         origin: [ config.ADDRES, config.FRONTEND_SERVER_ADDRESS,"http://localhost:5173"],
-        methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'], // Specify the allowed HTTP methods
+        methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
         credentials: false,
     })
 )
