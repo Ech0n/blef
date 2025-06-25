@@ -3,6 +3,7 @@ FROM node:18-alpine AS builder
 
 ARG CLIENT_URL
 ENV FRONTEND_URL=$CLIENT_URL
+ENV PORT=80
 
 WORKDIR /app/server
 
@@ -28,6 +29,6 @@ COPY server/package.json ./
 
 RUN npm install --omit=dev
 
-EXPOSE 5678
+EXPOSE 80
 
 CMD ["node", "dist/server/src/index.js"]
