@@ -1,7 +1,7 @@
 node_modules
 .vscode
 
-config.ts
+# config.ts
 dist
 public/*
 server/dist
