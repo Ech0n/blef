@@ -1,8 +1,7 @@
 import type { gameStartPayload } from '../../../common/payloads';
 import type { IPlayer } from '../../../common/player';
+import type { Card, CardCountTable } from '../../../common/cardTypes';
 
-export type Card = [string, string];
-export type CardCountTable = { [cardKey: number]: { [colorKey: number]: number } };
 
 export function initalizeCountTable(): CardCountTable {
     let table: { [key: number]: { [key: number]: number } } = {};

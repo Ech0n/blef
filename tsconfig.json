@@ -1,11 +1,14 @@
 {
     "compilerOptions": {
-        "target": "es2016",
-        "module": "commonjs",
-        "outDir": "./dist",
-        "esModuleInterop": true,
-        "strict": true,
-        "skipLibCheck": true
-    },
-    "include": ["src/**/*", "common/**/*"]
-}
+      "target": "ESNext",
+      "module": "ESNext",
+      "moduleResolution": "Node",
+      "baseUrl": ".",
+      "paths": {
+        "@common/*": ["common/src/*"]
+      },
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "strict": true
+    }
+  }

@@ -5,6 +5,7 @@ import { BlefServer } from './BlefServer'
 const port = config.BACKENDSERVERPORT || 5678
 const hostname = config.HOSTNAME
 
+
 const server = http.createServer(app).listen(port, hostname, 0, () => {
     console.log(`Server is up at port ${hostname}:${port}`)
     console.log(`with config:
