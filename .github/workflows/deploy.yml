@@ -25,12 +25,12 @@ jobs:
 
     - name: Build and push backend Docker image
       run: |
-        docker build -t blefacr-ajc0eha4cua2e6dk.azurecr.io/blef-server:latest --build-arg CLIENT_URL=https://blef-client.thankfulwater-59edc31b.polandcentral.azurecontainerapps.io -f ./server/Dockerfile .
+        docker build -t blefacr-ajc0eha4cua2e6dk.azurecr.io/blef-server:latest --build-arg CLIENT_URL=https://blef-client.thankfulwater-59edc31b.polandcentral.azurecontainerapps.io -f server/Dockerfile .
         docker push blefacr-ajc0eha4cua2e6dk.azurecr.io/blef-server:latest
 
     - name: Build and push frontend Docker image
       run: |
-        docker build -t blefacr-ajc0eha4cua2e6dk.azurecr.io/blef-client:latest --build-arg API_URL=https://blef-server.thankfulwater-59edc31b.polandcentral.azurecontainerapps.io -f ./client/Dockerfile .
+        docker build -t blefacr-ajc0eha4cua2e6dk.azurecr.io/blef-client:latest --build-arg API_URL=https://blef-server.thankfulwater-59edc31b.polandcentral.azurecontainerapps.io -f client/Dockerfile .
         docker push blefacr-ajc0eha4cua2e6dk.azurecr.io/blef-client:latest
 
   deploy:
