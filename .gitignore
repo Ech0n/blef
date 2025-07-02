@@ -9,3 +9,6 @@ public
 
 .env
 *.env
+
+**__pycache__
+**.venv

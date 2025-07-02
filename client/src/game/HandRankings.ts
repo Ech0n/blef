@@ -79,7 +79,7 @@ function fullChecker(cards: CardCountTable, handInfo: HandInfo) {
     let countA = 0;
     let countB = 0;
     for (let colorIndex: number = 0; colorIndex < 4; colorIndex++) {
-        console.log(cards[primCard][colorIndex])
+        // console.log(cards[primCard][colorIndex])
         countA += cards[primCard][colorIndex];
         countB += cards[secCard][colorIndex];
     }

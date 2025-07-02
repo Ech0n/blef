@@ -38,6 +38,10 @@ npm run build # Or skip this part if you want to run development build
 npm run start # Use 'npm run dev' for a development build
 ```
 
+# Run tests
+npm run start # Use 'npm run dev' for a development build
+```
+
 ## Implementation and Views
 
 Game has been implemented using Broker Server, meaning server only handles establishing and mantaining connections between player instances though the use of sockets.
