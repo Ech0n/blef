@@ -43,7 +43,7 @@ npm run tests
 
 # Run functional tests
 docker compose up
-## in another session run:
+# in another session run:
 cd client
 npx cypress open
 ```
