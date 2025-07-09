@@ -4,7 +4,7 @@
     import { createEventDispatcher, onMount } from 'svelte'
     import { toasts } from 'svelte-toasts'
     import type { GameState, gameStartPayload, playerJoinedPayload } from '../../../common/payloads'
-    import { SocketEventsCommon, SocketEventsFromHost } from '../../../src/types/socketEvents'
+    import { SocketEventsCommon, SocketEventsFromHost } from '../../../common/socketEvents'
     import { GameServer } from '../game/GameServer'
     import { playersStore, readyPlayersCounter } from '../game/stores'
     import { initalizeCountTable, initalizeGame, type CardCountTable } from '../model/Card'

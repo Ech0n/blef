@@ -4,7 +4,7 @@
 
     let players: Player[]
     export let thisPlayerId: string
-    export let isHost: boolean = false
+    export const isHost: boolean = false
     export let handlePlayerKick: (playerId: string) => null = (_) => {
         return null
     }
@@ -22,35 +22,13 @@
     {#each players as player}
         <div class="player-item">
             {truncateUsername(player.username)}
-            <!-- {#if player.isOnline || player.uid !== thisPlayerId}
-                🟢
-            {:else}
-                🔴
-            {/if} -->
-            <!-- {#if isHost && player.uid != thisPlayerId}
-                <button class="kick-button" id="kick-button" on:click="{handlePlayerKick(player.uid)}" aria-label="{`Kick player: ${player.username}`}"></button>
-            {/if} -->
+
         </div>
     {/each}
 </div>
 
 <style lang="scss">
-    .kick-button {
-        all: unset;
-        cursor: pointer;
-        &:after {
-            display: inline-block;
-            width: 1em;
-            height: 1em;
-            vertical-align: -0.125em;
-            content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ff0000' d='M3 16.74L7.76 12L3 7.26L7.26 3L12 7.76L16.74 3L21 7.26L16.24 12L21 16.74L16.74 21L12 16.24L7.26 21zm9-3.33l4.74 4.75l1.42-1.42L13.41 12l4.75-4.74l-1.42-1.42L12 10.59L7.26 5.84L5.84 7.26L10.59 12l-4.75 4.74l1.42 1.42z'/%3E%3C/svg%3E");
-        }
-
-        &:hover:after {
-            transform: scale(1.2);
-            filter: brightness(1.5);
-        }
-    }
+    
 
     .player-list {
         margin-bottom: 3rem;

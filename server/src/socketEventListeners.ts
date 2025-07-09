@@ -1,9 +1,11 @@
     import { SessionData } from 'express-session'
 import http from 'http'
 import { Socket } from 'socket.io'
-import { CardCountTable } from '../client/src/model/Card'
+//TODO: Change this to cardListToPlayersPayload
+import { CardCountTable } from '../../common/cardTypes'
 import {
     checkToPlayersPayload,
+    cardListToPlayersPayload,
     checkToServerPayload,
     gameStartPayload,
     hitPayload,
@@ -12,10 +14,10 @@ import {
     playerJoinedPayload,
     reconnectRequestPayload,
     reconnectResponsePayload,
-} from '../common/payloads'
-import { IPlayer, Player } from '../common/player'
+} from '../../common/payloads'
+import { IPlayer, Player } from '../../common/player'
 import { BlefServer } from './BlefServer'
-import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost } from './types/socketEvents'
+import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost } from '../../common/socketEvents'
 
 declare module 'socket.io' {
     interface Socket {

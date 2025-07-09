@@ -4,7 +4,7 @@
     import { createEventDispatcher, onDestroy, onMount } from 'svelte'
     import { toasts } from 'svelte-toasts'
     import type { checkToPlayersPayload, hitPayload } from '../../../common/payloads'
-    import { SocketEventsCommon, SocketEventsFromHost } from '../../../src/types/socketEvents'
+    import { SocketEventsCommon, SocketEventsFromHost } from '../../../common/socketEvents'
     import { cardCountTableToIterableArray, cardToRankTranslation, type CardCountTable } from '../model/Card'
     import CardImageHandler from './CardImageHandler'
     import CardModal from './CardModals.svelte'

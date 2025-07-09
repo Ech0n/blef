@@ -3,7 +3,7 @@
     import { io, type Socket } from 'socket.io-client'
     import { createEventDispatcher, onDestroy, onMount } from 'svelte'
     import { playerStore } from '../game/stores'
-    import { SocketEventsCommon, SocketEventsFromClient } from '../../../src/types/socketEvents'
+    import { SocketEventsCommon, SocketEventsFromClient } from '../../../common/socketEvents'
     import { Player } from '../../../common/player'
     import type { GameState, gameStartPayload } from '../../../common/payloads'
     import type { Card } from '../model/Card'

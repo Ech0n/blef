@@ -1,6 +1,7 @@
-import { HandInfo } from '../client/src/game/HandRankings'
-import type { Card } from '../client/src/model/Card'
+import { HandInfo, Card } from './cardTypes'
 import type { Player } from './player'
+
+
 
 export interface Payload {}
 
@@ -77,4 +78,8 @@ export interface playerJoinedPayload extends Payload {
     uid: string
     isOnline: boolean
     isBot: boolean
+}
+
+export interface cardListToPlayersPayload extends Payload {
+    cardList: { [cardKey: number]: { [colorKey: number]: number } }
 }

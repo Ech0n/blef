@@ -1,16 +1,11 @@
 import { cardToRankTranslation, type CardCountTable, ColorToIndex } from '../model/Card';
+import { HandInfo} from '../../common/cardTypes'
 
 export interface IChecker {
     check(cards: CardCountTable): boolean;
 }
 
-export interface HandInfo {
-    selectedRanking: string;
-    primaryCard: string;
-    secondaryCard: string;
-    selectedColor: string;
-    startingCard: string;
-}
+
 
 function royalFlushChecker(cards: CardCountTable, handInfo: HandInfo) {
     const selectedColor = handInfo.selectedColor;

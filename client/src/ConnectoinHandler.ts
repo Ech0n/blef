@@ -1,6 +1,6 @@
 import { io, type Socket } from 'socket.io-client'
 import { toasts } from 'svelte-toasts'
-import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from '../../src/types/socketEvents'
+import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from '../../common/socketEvents'
 import {
     gameStartPayload,
     GameState,

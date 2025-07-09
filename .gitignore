@@ -1,10 +1,10 @@
 node_modules
 .vscode
 
-config.ts
+# config.ts
 dist
 public/*
-dist
+server/dist
 public
 
 .env

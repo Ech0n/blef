@@ -2,17 +2,18 @@ import { SessionData } from 'express-session'
 import http, { IncomingMessage } from 'http'
 import { Server, Socket } from 'socket.io'
 import { v4 as uuidv4 } from 'uuid'
-import { Payload, reconnectRequestPayload, reconnectResponsePayload } from '../common/payloads'
-import { Player, createPlayerFromIPlayer } from '../common/player'
+import { Payload, reconnectRequestPayload, reconnectResponsePayload } from '../../common/payloads'
+import { Player, createPlayerFromIPlayer } from '../../common/player'
 import { config } from '../config'
 import { SessionSocket, socketEventsListeners } from './socketEventListeners'
-import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from './types/socketEvents'
+import { SocketEventsCommon, SocketEventsFromClient, SocketEventsFromHost, SocketEventsFromServer } from '../../common/socketEvents'
 
 declare module 'http' {
     interface IncomingMessage {
         session: SessionData
     }
 }
+
 
 export class BlefServer {
     io: Server
@@ -23,7 +24,7 @@ export class BlefServer {
     constructor(server: http.Server) {
         this.io = new Server(server, {
             cors: {
-                origin: [config.ADDRES, config.FRONTEND_SERVER_ADDRESS,"http://localhost:5173"],
+                origin: [ config.ADDRES, config.FRONTEND_SERVER_ADDRESS,"http://localhost:5173"],
                 methods: ['GET', 'POST'],
                 credentials: true,
             },
