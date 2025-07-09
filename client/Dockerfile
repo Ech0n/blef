@@ -18,7 +18,6 @@ RUN npm install
 
 RUN npm run build
 
-
 FROM nginx:stable-alpine
 
 RUN rm -rf /usr/share/nginx/html/*

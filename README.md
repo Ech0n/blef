@@ -36,6 +36,16 @@ npm run build # Or skip this part if you want to run development build
 
 # Run the client & server with concurrently
 npm run start # Use 'npm run dev' for a development build
+
+# Run unit tests
+cd client
+npm run tests
+
+# Run functional tests
+docker compose up
+## in another session run:
+cd client
+npx cypress open
 ```
 
 # Run tests

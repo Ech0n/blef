@@ -1,18 +1,20 @@
-version: '3.8'
-
 services:
   blef-client:
     build:
       context: .
-      dockerfile: server/Dockerfile
-    image: blef-client
+      dockerfile: client/Dockerfile
+      args:
+        API_URL: "http://localhost:5678" 
+    image: matid90/ebiznesdocker:blefclient
     ports:
-      - "5678:5678"
+      - "80:80"
 
   blef-server:
     build:
       context: .
       dockerfile: server/Dockerfile
-    image: blef-server
+      args:
+        CLIENT_URL: "http://localhost" 
+    image: matid90/ebiznesdocker:blefserver
     ports:
-      - "5173:5173"
+      - "5678:5678"
